@@ -331,16 +331,51 @@ html, body {
 
 @media (max-width: 768px) {
   #cursor { display: none; }
-  body { cursor: crosshair; }
-  #mag-display { bottom: 20px; left: 16px; }
-  #mag-value { font-size: 28px; }
-  #scale-bar { bottom: 20px; right: 16px; }
-  #specimen-label { top: 16px; right: 16px; font-size: 9px; }
+  body { cursor: default; -webkit-tap-highlight-color: transparent; }
+  #mag-display { bottom: 16px; left: 12px; }
+  #mag-value { font-size: 24px; }
+  #mag-bar { width: 80px; }
+  #scale-bar { bottom: 16px; right: 12px; font-size: 10px; }
+  #scale-line { width: 50px; }
+  #specimen-label { top: 12px; right: 12px; font-size: 8px; line-height: 1.4; }
   #illumination { display: none; }
   #focus-knob { display: none; }
-  #zoom-steps { bottom: 20px; }
-  #nav-hint { bottom: 56px; font-size: 10px; }
-  #detail-panel { width: 100%; right: -100%; }
+  #zoom-steps { bottom: 16px; gap: 8px; }
+  .zoom-dot { width: 10px; height: 10px; }
+  .zoom-connector { width: 12px; }
+  #nav-hint { bottom: 52px; font-size: 9px; }
+  #detail-panel {
+    width: 100%; right: -100%;
+    padding: 48px 20px 20px;
+    border-left: none;
+    border-top: 1px solid var(--cyan-dim);
+  }
+  #detail-panel.open { right: 0; }
+  #detail-title { font-size: 20px; }
+  #detail-subtitle { font-size: 10px; }
+  #detail-body { font-size: 13px; }
+  #detail-body .tag { font-size: 10px; padding: 2px 8px; }
+}
+
+@media (max-width: 480px) {
+  #mag-display { bottom: 12px; left: 8px; }
+  #mag-value { font-size: 20px; }
+  #scale-bar { bottom: 12px; right: 8px; font-size: 9px; }
+  #specimen-label { top: 8px; right: 8px; font-size: 7px; }
+  #zoom-steps { bottom: 12px; gap: 6px; }
+  .zoom-dot { width: 12px; height: 12px; }
+  #nav-hint { bottom: 48px; font-size: 8px; }
+  #detail-panel { padding: 40px 16px 16px; }
+  #detail-title { font-size: 18px; }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  #mag-display { bottom: 8px; left: 8px; }
+  #mag-value { font-size: 18px; }
+  #scale-bar { bottom: 8px; right: 8px; }
+  #specimen-label { display: none; }
+  #zoom-steps { bottom: 8px; }
+  #nav-hint { bottom: 36px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -460,6 +495,10 @@ const SCROLL_THRESHOLD = 120;
 let mouseX = -999, mouseY = -999;
 let illumination = 100;
 let time = 0;
+var isMobileDevice = false;
+function checkMobile() { isMobileDevice = window.innerWidth <= 768; }
+checkMobile();
+window.addEventListener('resize', checkMobile);
 
 // ─── CURSOR ───────────────────────────────────────────────────
 const cursorEl = document.getElementById('cursor');
@@ -502,9 +541,10 @@ function updateUI() {
   zoomDots.forEach(function(dot, i) {
     dot.classList.toggle('active', i === currentLevel);
   });
-  if (currentLevel === 0) navHint.textContent = 'SCROLL TO ZOOM IN';
-  else if (currentLevel === 4) navHint.textContent = 'SCROLL TO ZOOM OUT';
-  else navHint.textContent = 'SCROLL TO CHANGE MAGNIFICATION';
+  var isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  if (currentLevel === 0) navHint.textContent = isMobile ? 'SWIPE UP TO ZOOM IN' : 'SCROLL TO ZOOM IN';
+  else if (currentLevel === 4) navHint.textContent = isMobile ? 'SWIPE DOWN TO ZOOM OUT' : 'SCROLL TO ZOOM OUT';
+  else navHint.textContent = isMobile ? 'SWIPE TO CHANGE MAGNIFICATION' : 'SCROLL TO CHANGE MAGNIFICATION';
 }
 
 window.addEventListener('wheel', function(e) {
@@ -519,10 +559,41 @@ window.addEventListener('wheel', function(e) {
 }, { passive: false });
 
 let touchStartY = 0;
-window.addEventListener('touchstart', function(e) { touchStartY = e.touches[0].clientY; }, { passive: true });
+let touchStartX = 0;
+let touchStartTime = 0;
+window.addEventListener('touchstart', function(e) {
+  touchStartY = e.touches[0].clientY;
+  touchStartX = e.touches[0].clientX;
+  touchStartTime = Date.now();
+  // Update mouse position for hover effects on mobile
+  mouseX = e.touches[0].clientX;
+  mouseY = e.touches[0].clientY;
+}, { passive: true });
+window.addEventListener('touchmove', function(e) {
+  // Update mouse position during drag for hover effects
+  mouseX = e.touches[0].clientX;
+  mouseY = e.touches[0].clientY;
+}, { passive: true });
 window.addEventListener('touchend', function(e) {
   var dy = touchStartY - e.changedTouches[0].clientY;
-  if (Math.abs(dy) > 50) {
+  var dx = touchStartX - e.changedTouches[0].clientX;
+  var dt = Date.now() - touchStartTime;
+  // Tap detection (short duration, small movement)
+  if (dt < 300 && Math.abs(dy) < 15 && Math.abs(dx) < 15) {
+    // Simulate click for detail panels
+    mouseX = e.changedTouches[0].clientX;
+    mouseY = e.changedTouches[0].clientY;
+    if (currentLevel === 1 && hoveredOrganelle) {
+      openDetailPanel(hoveredOrganelle.detail);
+    } else if (currentLevel === 3 && hoveredAtom) {
+      openDetailPanel(hoveredAtom.detail);
+    } else if (currentLevel === 4 && hoveredContact && hoveredContact.href) {
+      window.open(hoveredContact.href, '_blank');
+    }
+    return;
+  }
+  // Swipe detection (vertical swipe to zoom)
+  if (Math.abs(dy) > 40 && Math.abs(dy) > Math.abs(dx)) {
     if (dy > 0 && currentLevel < 4) setZoomLevel(currentLevel + 1);
     else if (dy < 0 && currentLevel > 0) setZoomLevel(currentLevel - 1);
   }
