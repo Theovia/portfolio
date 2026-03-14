@@ -921,11 +921,12 @@ function rand(mn,mx) { return mn+Math.random()*(mx-mn); }
 
 // Illumination-aware color
 function illumColor(r,g,b,a) {
+  // Light mode: use colors directly, no adjustment needed
+  // illum slider lightens/darkens the whole scene evenly
   var f = illumination / 100;
-  // For light mode, increasing illumination lightens more (transmitted light)
-  var rf = Math.min(255, Math.round(r + (255-r) * (f-1) * 0.3));
-  var gf = Math.min(255, Math.round(g + (255-g) * (f-1) * 0.3));
-  var bf = Math.min(255, Math.round(b + (255-b) * (f-1) * 0.3));
+  var rf = Math.round(r * f);
+  var gf = Math.round(g * f);
+  var bf = Math.round(b * f);
   return 'rgba('+rf+','+gf+','+bf+','+a+')';
 }
 
@@ -1041,9 +1042,9 @@ function drawLevel0(alpha) {
   ctx.closePath();
 
   var cellGrad = ctx.createRadialGradient(cx2 - r*0.2, cy2 - r*0.2, 0, cx2, cy2, r * 1.1);
-  cellGrad.addColorStop(0,   heColor(HE_CYTO_L[0], HE_CYTO_L[1], HE_CYTO_L[2], 0.55));
-  cellGrad.addColorStop(0.5, heColor(HE_CYTO[0],   HE_CYTO[1],   HE_CYTO[2],   0.30));
-  cellGrad.addColorStop(1,   heColor(HE_CYTO[0]-20, HE_CYTO[1]-20, HE_CYTO[2], 0.15));
+  cellGrad.addColorStop(0,   heColor(HE_CYTO_L[0], HE_CYTO_L[1], HE_CYTO_L[2], 0.75));
+  cellGrad.addColorStop(0.5, heColor(HE_CYTO[0],   HE_CYTO[1],   HE_CYTO[2],   0.50));
+  cellGrad.addColorStop(1,   heColor(HE_CYTO[0]-20, HE_CYTO[1]-20, HE_CYTO[2], 0.25));
   ctx.fillStyle = cellGrad;
   ctx.fill();
   // Membrane — dark teal stroke
