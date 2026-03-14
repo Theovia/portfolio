@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raul Zhou — AI Architect &amp; Founder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f2ed;
+  --gold:#9a7420;
+  --gold-lt:#c4a44a;
+  --orange:#c44d2a;
+  --text:#4a453e;
+  --text-muted:#8a8078;
+  --glass:rgba(250,247,242,0.88);
+  --glass-border:rgba(154,116,32,0.18);
+  --shadow:rgba(74,69,62,0.08);
+  --panel-w:340px;
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;cursor:none}
+/* ── CANVAS ── */
+#canvas-bg{position:fixed;inset:0;z-index:0}
+/* ── CURSOR ── */
+#cur-dot{position:fixed;width:5px;height:5px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .08s}
+#cur-ring{position:fixed;width:34px;height:34px;border:1.5px solid var(--gold);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s,border-color .2s;opacity:.7}
+/* ── WATERMARK ── */
+#wm{position:fixed;font-family:'Syne',sans-serif;font-size:clamp(160px,26vw,360px);font-weight:800;color:var(--gold);opacity:.035;pointer-events:none;z-index:1;left:50%;top:50%;transform:translate(-50%,-50%);user-select:none;will-change:transform;letter-spacing:-.02em}
+/* ── NAVBAR ── */
+#nav{position:fixed;top:0;left:0;right:0;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;z-index:100;background:rgba(245,242,237,.75);backdrop-filter:blur(18px);border-bottom:1px solid var(--glass-border)}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--gold);letter-spacing:.04em}
+.nav-links{display:flex;gap:8px}
+.nav-btn{background:none;border:1px solid var(--glass-border);color:var(--text-muted);font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:6px 14px;border-radius:4px;cursor:none;transition:all .2s;letter-spacing:.08em;text-transform:uppercase}
+.nav-btn:hover,.nav-btn.on{border-color:var(--gold);color:var(--gold);background:rgba(154,116,32,.07)}
+.nav-right{display:flex;align-items:center;gap:16px}
+#clock{font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text-muted);letter-spacing:.05em;min-width:72px;text-align:right}
+#lang-btn{background:none;border:1px solid var(--gold);color:var(--gold);font-family:'JetBrains Mono',monospace;font-size:.7rem;padding:5px 11px;border-radius:4px;cursor:none;transition:all .2s;letter-spacing:.1em}
+#lang-btn:hover{background:var(--gold);color:#fff}
+/* ── CAROUSEL ── */
+#car-area{position:fixed;inset:0;z-index:10;pointer-events:none}
+#car-track{position:absolute;pointer-events:none;transition:transform .6s cubic-bezier(.4,0,.2,1);will-change:transform}
+.c-dot{position:absolute;width:0;height:0;pointer-events:none;transition:opacity .45s,transform .5s cubic-bezier(.4,0,.2,1)}
+.c-dot-inner{position:absolute;top:0;left:0;transform:translate(-50%,-50%);border-radius:50%;background:var(--gold);transition:width .4s,height .4s,background .3s;pointer-events:all;cursor:none;box-shadow:0 0 0 0 rgba(154,116,32,.4)}
+.c-dot.active .c-dot-inner{background:var(--gold);box-shadow:0 0 16px rgba(154,116,32,.35)}
+.c-dot-label{position:absolute;top:0;left:0;transform:translate(-50%,calc(-50% - 22px));font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--gold);white-space:nowrap;opacity:0;transition:opacity .25s;letter-spacing:.06em;pointer-events:none}
+.c-dot:hover .c-dot-label{opacity:1}
+.c-dot.active .c-dot-label{opacity:.7}
+/* Ripple */
+.rpl{position:absolute;top:0;left:0;border-radius:50%;border:1.5px solid var(--gold);pointer-events:none;opacity:0}
+.c-dot.active .rpl:nth-child(1){animation:rpl 2.4s ease-out infinite}
+.c-dot.active .rpl:nth-child(2){animation:rpl 2.4s ease-out .8s infinite}
+.c-dot.active .rpl:nth-child(3){animation:rpl 2.4s ease-out 1.6s infinite}
+@keyframes rpl{
+  0%{transform:translate(-50%,-50%) scale(.4);opacity:.75}
+  100%{transform:translate(-50%,-50%) scale(3.2);opacity:0}
+}
+/* ── HEX BUTTONS ── */
+.hex-btn{position:fixed;width:46px;height:52px;background:rgba(245,242,237,.92);border:none;color:var(--gold);font-size:1.1rem;cursor:none;z-index:20;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);display:flex;align-items:center;justify-content:center;transition:all .2s;filter:drop-shadow(0 1px 3px rgba(154,116,32,.25))}
+.hex-btn:hover{background:rgba(154,116,32,.12);filter:drop-shadow(0 2px 8px rgba(154,116,32,.4))}
+#btn-prv{bottom:94px;left:calc(38vw - 78px)}
+#btn-nxt{bottom:94px;left:calc(38vw + 32px)}
+/* ── PIPS ── */
+#pips{position:fixed;bottom:32px;left:0;width:50vw;display:flex;justify-content:center;align-items:center;gap:8px;z-index:20}
+.pip{width:6px;height:6px;border-radius:50%;background:rgba(154,116,32,.25);transition:all .3s;cursor:none}
+.pip.on{background:var(--gold);width:22px;border-radius:3px}
+/* ── INFO PANEL ── */
+#info-panel{position:fixed;right:36px;top:50%;transform:translateY(-50%);width:var(--panel-w);background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:blur(22px);border-radius:18px;padding:32px 30px;z-index:30;box-shadow:0 8px 48px var(--shadow)}
+.p-tag{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--orange);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+.p-title{font-family:'Syne',sans-serif;font-size:1.45rem;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:8px}
+.p-company{font-family:'JetBrains Mono',monospace;font-size:.76rem;color:var(--gold);margin-bottom:4px}
+.p-date{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--text-muted);margin-bottom:16px}
+.p-desc{font-size:.86rem;line-height:1.65;color:var(--text);margin-bottom:18px}
+.p-tech{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:22px}
+.t-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--gold);border:1px solid rgba(154,116,32,.28);padding:3px 8px;border-radius:3px;background:rgba(154,116,32,.06)}
+#btn-det{width:100%;background:var(--gold);border:none;color:#fff;font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.13em;padding:12px 16px;border-radius:9px;cursor:none;transition:all .2s;text-transform:uppercase}
+#btn-det:hover{background:#b08828;transform:translateY(-1px);box-shadow:0 6px 24px rgba(154,116,32,.3)}
+/* Entry number indicator */
+.p-idx{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--text-muted);margin-bottom:20px;letter-spacing:.08em}
+/* ── SIDE PANELS ── */
+.side-panel{position:fixed;top:60px;bottom:0;width:360px;background:var(--glass);backdrop-filter:blur(26px);z-index:80;padding:36px 30px 40px;overflow-y:auto;transition:transform .4s cubic-bezier(.4,0,.2,1)}
+#about-p{left:0;border-right:1px solid var(--glass-border);transform:translateX(-100%)}
+#about-p.open{transform:translateX(0)}
+#contact-p{right:0;border-left:1px solid var(--glass-border);transform:translateX(100%)}
+#contact-p.open{transform:translateX(0)}
+.side-panel h2{font-family:'Syne',sans-serif;font-size:1.7rem;font-weight:800;color:var(--text);margin-bottom:22px}
+.sp-close{position:absolute;top:18px;right:18px;background:none;border:1px solid var(--glass-border);color:var(--text-muted);font-size:.9rem;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:none;transition:all .2s}
+.sp-close:hover{border-color:var(--orange);color:var(--orange)}
+.sp-intro{font-size:.87rem;line-height:1.7;color:var(--text);margin-bottom:22px}
+.sp-details{list-style:none;margin-bottom:26px}
+.sp-details li{padding:9px 0;border-bottom:1px solid var(--glass-border);font-size:.83rem;color:var(--text-muted)}
+.sp-details li::before{content:'▸ ';color:var(--gold)}
+.sk-cat{margin-bottom:18px}
+.sk-cat-lbl{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px}
+.sk-tags{display:flex;flex-wrap:wrap;gap:5px}
+.sk-tag{font-family:'JetBrains Mono',monospace;font-size:.63rem;color:var(--text);border:1px solid var(--glass-border);padding:4px 9px;border-radius:4px;background:rgba(245,242,237,.65)}
+.ct-item{padding:11px 0;border-bottom:1px solid var(--glass-border)}
+.ct-lbl{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px}
+.ct-val{font-size:.87rem;color:var(--text)}
+.ct-val a{color:var(--text);text-decoration:none}
+.ct-val a:hover{color:var(--gold)}
+.ct-note{margin-top:22px;font-size:.83rem;line-height:1.65;color:var(--text-muted)}
+/* ── MODAL ── */
+#modal-ov{position:fixed;inset:0;background:rgba(74,69,62,.38);backdrop-filter:blur(10px);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+#modal-ov.open{opacity:1;pointer-events:all}
+#modal-box{background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;padding:44px 44px 44px;max-width:580px;width:92vw;max-height:82vh;overflow-y:auto;position:relative;box-shadow:0 24px 80px rgba(74,69,62,.14);transform:translateY(16px);transition:transform .3s;scroll-behavior:smooth}
+#modal-ov.open #modal-box{transform:translateY(0)}
+#m-close{position:absolute;top:18px;right:18px;background:none;border:1px solid var(--glass-border);color:var(--text-muted);font-size:.9rem;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:none;transition:all .2s}
+#m-close:hover{border-color:var(--orange);color:var(--orange)}
+.m-tag{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--orange);letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px}
+.m-title{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:700;color:var(--text);line-height:1.15;margin-bottom:8px}
+.m-co{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--gold);margin-bottom:28px}
+.m-ul{list-style:none}
+.m-ul li{position:relative;padding-left:18px;margin-bottom:13px;font-size:.88rem;line-height:1.65;color:var(--text)}
+.m-ul li::before{content:'▸';position:absolute;left:0;color:var(--gold)}
+/* ── OVERLAY ── */
+#pov{position:fixed;inset:0;z-index:75;display:none}
+#pov.on{display:block}
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .35s ease both}
+/* ── MOBILE ── */
+@media(max-width:768px){
+  :root{--panel-w:calc(100vw - 32px)}
+  #info-panel{right:16px;left:16px;top:auto;bottom:16px;transform:none;width:auto}
+  #btn-prv{bottom:208px;left:calc(38vw - 58px)}
+  #btn-nxt{bottom:208px;left:calc(38vw + 14px)}
+  #pips{bottom:168px}
+  .side-panel{width:100vw}
+}
+/* ── REDUCED MOTION ── */
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--glass-border);border-radius:2px}
+</style>
+</head>
+<body>
+
+<canvas id="canvas-bg"></canvas>
+<div id="wm">周</div>
+
+<!-- Cursor -->
+<div id="cur-dot"></div>
+<div id="cur-ring"></div>
+
+<!-- Navbar -->
+<nav id="nav">
+  <div class="nav-logo">RZ_周</div>
+  <div class="nav-links">
+    <button class="nav-btn" id="btn-about">About</button>
+    <button class="nav-btn" id="btn-contact">Contact</button>
+  </div>
+  <div class="nav-right">
+    <div id="clock">00:00:00</div>
+    <button id="lang-btn">ES</button>
+  </div>
+</nav>
+
+<!-- Carousel -->
+<div id="car-area">
+  <div id="car-track"></div>
+</div>
+
+<!-- Hex nav -->
+<button class="hex-btn" id="btn-prv">&#8592;</button>
+<button class="hex-btn" id="btn-nxt">&#8594;</button>
+
+<!-- Pips -->
+<div id="pips"></div>
+
+<!-- Info Panel -->
+<div id="info-panel">
+  <div class="p-idx" id="p-idx"></div>
+  <div class="p-tag" id="p-tag"></div>
+  <div class="p-title" id="p-title"></div>
+  <div class="p-company" id="p-co"></div>
+  <div class="p-date" id="p-date"></div>
+  <div class="p-desc" id="p-desc"></div>
+  <div class="p-tech" id="p-tech"></div>
+  <button id="btn-det">Full Details ↗</button>
+</div>
+
+<!-- Panel overlay -->
+<div id="pov"></div>
+
+<!-- About Panel -->
+<div class="side-panel" id="about-p">
+  <button class="sp-close" id="about-close">✕</button>
+  <h2 id="about-h">About</h2>
+  <div id="about-body"></div>
+</div>
+
+<!-- Contact Panel -->
+<div class="side-panel" id="contact-p">
+  <button class="sp-close" id="contact-close">✕</button>
+  <h2 id="contact-h">Contact</h2>
+  <div id="contact-body"></div>
+</div>
+
+<!-- Modal -->
+<div id="modal-ov">
+  <div id="modal-box">
+    <button id="m-close">✕</button>
+    <div class="m-tag" id="m-tag"></div>
+    <div class="m-title" id="m-title"></div>
+    <div class="m-co" id="m-co"></div>
+    <ul class="m-ul" id="m-ul"></ul>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════
+// DATA
+// ════════════════════════════════════════
+const DATA = {
+  entries:[
+    {
+      tag:{en:'Education',es:'Educación'},
+      title:{en:'B.S. Biotechnology Engineering',es:'Ing. Biotecnología'},
+      company:'Tec de Monterrey',
+      date:{en:'Aug 2015 – Dec 2019',es:'Ago 2015 – Dic 2019'},
+      desc:{
+        en:'Built the scientific foundation — computational biology, bioinformatics, and systems thinking — that would later bridge seamlessly into AI architecture.',
+        es:'Construí la base científica — biología computacional, bioinformática y pensamiento sistémico — que después conectaría directamente con la arquitectura IA.'
+      },
+      bullets:{
+        en:[
+          'Specialized in computational biology and advanced bioinformatics',
+          'Applied mathematical modeling to complex biological systems',
+          'Research in protein structure prediction (pre-AlphaFold era)',
+          'Graduated with honors — top 5% of cohort, 95/100 GPA',
+          'First exposure to ML via statistical genomics and BLAST pipelines',
+          'Built early automation tools for lab data pipelines in Python',
+        ],
+        es:[
+          'Especialización en biología computacional y bioinformática avanzada',
+          'Modelado matemático aplicado a sistemas biológicos complejos',
+          'Investigación en predicción de estructura proteica (era pre-AlphaFold)',
+          'Graduado con honores — top 5% de la generación, promedio 95/100',
+          'Primera exposición a ML vía genómica estadística y pipelines BLAST',
+          'Herramientas de automatización tempranas para pipelines de datos de laboratorio en Python',
+        ]
+      },
+      tech:['Python','MATLAB','R','BioPython','NumPy','BLAST','Linux']
+    },
+    {
+      tag:{en:'Education',es:'Educación'},
+      title:{en:'M.S. Applied Artificial Intelligence',es:'Maestría en IA Aplicada'},
+      company:'Tec de Monterrey',
+      date:{en:'Jan 2020 – Dec 2021',es:'Ene 2020 – Dic 2021'},
+      desc:{
+        en:'Deep mastery in modern AI — transformers, NLP, computer vision, and production-grade ML systems. Thesis on medical image segmentation that bridged both degrees.',
+        es:'Dominio profundo de IA moderna — transformers, NLP, visión computacional y sistemas ML en producción. Tesis en segmentación de imágenes médicas que unió ambas carreras.'
+      },
+      bullets:{
+        en:[
+          'Thesis: Medical image segmentation using Vision Transformer architectures',
+          'Specializations: NLP, computer vision, reinforcement learning, MLOps',
+          'Built end-to-end ML pipelines: training → serving → monitoring',
+          'Research internship at CINVESTAV — deep learning lab',
+          'Conference proceedings in biomedical AI (MICCAI adjacent tracks)',
+          'Deployed first production model: diagnostic support tool for radiology',
+        ],
+        es:[
+          'Tesis: Segmentación de imágenes médicas con arquitecturas Vision Transformer',
+          'Especializaciones: NLP, visión computacional, aprendizaje por refuerzo, MLOps',
+          'Pipelines ML end-to-end: entrenamiento → serving → monitoreo',
+          'Estancia de investigación en CINVESTAV — laboratorio de deep learning',
+          'Actas de conferencia en IA biomédica (tracks adyacentes a MICCAI)',
+          'Primer modelo en producción: herramienta de apoyo diagnóstico para radiología',
+        ]
+      },
+      tech:['PyTorch','TensorFlow','Transformers','CUDA','Docker','FastAPI','MLflow']
+    },
+    {
+      tag:{en:'Consulting',es:'Consultoría'},
+      title:{en:'Medical AI Consulting',es:'Consultoría IA Médica'},
+      company:'Independent Practice',
+      date:{en:'Mar 2022 – May 2023',es:'Mar 2022 – May 2023'},
+      desc:{
+        en:'Deployed voice AI agents and intelligent chatbots across clinics and hospital networks in Mexico — turning patient intake from a bottleneck into a competitive advantage.',
+        es:'Despliegue de agentes de voz IA y chatbots inteligentes en clínicas y redes hospitalarias en México — transformando el ingreso de pacientes de cuello de botella a ventaja competitiva.'
+      },
+      bullets:{
+        en:[
+          'Built HIPAA-conscious voice AI agents for appointment scheduling (zero missed calls)',
+          'Deployed NLP chatbots handling 500+ patient queries per day',
+          'Integrated with clinic EHR systems using HL7 FHIR standards',
+          'Reduced average patient wait times by 40% through AI-powered triage',
+          'Clients: 12 private clinics across Guadalajara, CDMX, Monterrey',
+          'Stack: Retell AI, OpenAI Whisper, GPT-4, Twilio, FastAPI, PostgreSQL',
+        ],
+        es:[
+          'Agentes de voz IA con conciencia HIPAA para agendamiento (cero llamadas perdidas)',
+          'Chatbots NLP manejando 500+ consultas de pacientes por día',
+          'Integración con sistemas EHR usando estándares HL7 FHIR',
+          'Reducción del 40% en tiempos de espera mediante triaje IA',
+          'Clientes: 12 clínicas privadas en Guadalajara, CDMX y Monterrey',
+          'Stack: Retell AI, OpenAI Whisper, GPT-4, Twilio, FastAPI, PostgreSQL',
+        ]
+      },
+      tech:['Retell AI','OpenAI API','Python','Twilio','FastAPI','PostgreSQL','n8n']
+    },
+    {
+      tag:{en:'Enterprise',es:'Empresa'},
+      title:{en:'Enterprise AI Automation',es:'Automatización IA Empresarial'},
+      company:'Senior AI Consultant · $1K/hr',
+      date:{en:'Jun 2023 – Present',es:'Jun 2023 – Presente'},
+      desc:{
+        en:'$1,000/hr engagement rate. Architecting AI-driven ERP migrations, multi-agent orchestration, and LLM integrations for companies with $50M–$500M in revenue.',
+        es:'Rate de $1,000/hr. Arquitectura de migraciones ERP con IA, orquestación multi-agente e integraciones LLM para empresas con $50M–$500M en ingresos.'
+      },
+      bullets:{
+        en:[
+          'Rate: $1,000 USD/hour — top 0.1% global consultant bracket',
+          'Led AI-powered SAP → Cloud ERP migration for a $200M revenue manufacturing company',
+          'Built multi-agent orchestration systems with n8n + Claude + GPT-4',
+          'Deployed RAG pipelines over 500K+ enterprise documents with sub-2s retrieval',
+          'Automated 80% of manual finance reconciliation workflows for 3 enterprise clients',
+          'ROI delivered: avg $1.8M/yr savings per engagement within 6 months',
+        ],
+        es:[
+          'Rate: $1,000 USD/hora — bracket top 0.1% consultores globales',
+          'Lideré migración SAP → Cloud ERP con IA para fabricante con $200M ingresos',
+          'Sistemas multi-agente con n8n + Claude + GPT-4',
+          'Pipelines RAG sobre 500K+ documentos empresariales con recuperación <2s',
+          'Automatización del 80% de flujos de reconciliación financiera para 3 clientes enterprise',
+          'ROI entregado: avg $1.8M/año en ahorro por engagement en los primeros 6 meses',
+        ]
+      },
+      tech:['n8n','Anthropic API','OpenAI API','RAG','LangChain','BigQuery','Python','TypeScript']
+    },
+    {
+      tag:{en:'Founder',es:'Fundador'},
+      title:{en:'Eigen Atlas',es:'Eigen Atlas'},
+      company:'Founder & CEO',
+      date:{en:'Jan 2024 – Present',es:'Ene 2024 – Presente'},
+      desc:{
+        en:'Founded Eigen Atlas — an AI SaaS platform building the intelligence infrastructure for the next generation of AI-native businesses. From 0 to paying customers in 6 months, bootstrapped.',
+        es:'Fundé Eigen Atlas — plataforma AI SaaS construyendo la infraestructura de inteligencia para la próxima generación de negocios nativos en IA. De 0 a clientes de pago en 6 meses, bootstrapped.'
+      },
+      bullets:{
+        en:[
+          'Bootstrapped AI SaaS: 0 → paying customers in 6 months, no VC',
+          'Platform core: multi-tenant AI orchestration with intelligent LLM routing',
+          'Key product: autonomous AI agents that learn and adapt to business context',
+          'Architecture: OpenClaw + n8n + custom inference infrastructure on Linux',
+          'Target: SMBs spending $50K+/yr on manual, automatable processes',
+          'Roadmap: predictive business analytics + autonomous agent marketplace',
+        ],
+        es:[
+          'SaaS IA bootstrapped: 0 → clientes de pago en 6 meses, sin VC',
+          'Core plataforma: orquestación IA multi-tenant con routing LLM inteligente',
+          'Producto clave: agentes IA autónomos que aprenden y se adaptan al contexto empresarial',
+          'Arquitectura: OpenClaw + n8n + infraestructura de inferencia personalizada en Linux',
+          'Target: PyMEs con $50K+/año en procesos manuales automatizables',
+          'Roadmap: analítica empresarial predictiva + marketplace de agentes autónomos',
+        ]
+      },
+      tech:['OpenClaw','n8n','React','Node.js','TypeScript','OpenAI','Anthropic','Docker','Linux']
+    },
+    {
+      tag:{en:'Enterprise',es:'Empresa'},
+      title:{en:'John Deere AI Keynote',es:'Keynote IA John Deere'},
+      company:'John Deere',
+      date:{en:'Mar 2026',es:'Mar 2026'},
+      desc:{
+        en:'Presented an enterprise AI transformation roadmap to John Deere leadership — positioning autonomous AI agents as the future of precision agricultural operations at scale.',
+        es:'Presenté hoja de ruta de transformación IA empresarial a la dirección de John Deere — posicionando agentes IA autónomos como el futuro de la agricultura de precisión a escala.'
+      },
+      bullets:{
+        en:[
+          'Presented to C-suite and senior leadership (50+ attendees across 3 divisions)',
+          'Proposed autonomous AI agents for real-time precision farming decisions',
+          'ROI model demonstrated: $4.2M/yr potential savings per agricultural region',
+          'Integration blueprint: John Deere Operations Center + AI orchestration layer',
+          'Pilot proposal: 3 farm districts, 6-month proof of concept with KPIs',
+          'Outcome: signed NDA, scheduled technical deep-dive engagement for Q2 2026',
+        ],
+        es:[
+          'Presentación a C-suite y dirección senior (50+ asistentes de 3 divisiones)',
+          'Propuesta de agentes IA autónomos para decisiones de agricultura de precisión en tiempo real',
+          'Modelo ROI demostrado: $4.2M/año en ahorro potencial por región agrícola',
+          'Plano de integración: John Deere Operations Center + capa de orquestación IA',
+          'Propuesta piloto: 3 distritos agrícolas, prueba de concepto 6 meses con KPIs',
+          'Resultado: NDA firmado, deep-dive técnico programado para Q2 2026',
+        ]
+      },
+      tech:['AI Agents','Computer Vision','Python','Azure','n8n','Precision Farming','LLMs']
+    }
+  ],
+
+  about:{
+    en:{
+      intro:'Chinese-Mexican AI architect based in Zapopan, Guadalajara. Canton × Mexico — two lineages, one obsession with building intelligent systems that matter.',
+      details:[
+        '28 years old · Born March 26, 1997',
+        'Zapopan, Guadalajara, Jalisco, Mexico',
+        'B.S. Biotech Engineering + M.S. Applied AI — Tec de Monterrey',
+        'AI Consultant at $1,000/hr · Top 0.1% bracket globally',
+        'Founder of Eigen Atlas — AI SaaS for next-gen businesses',
+        'Chinese-Mexican heritage: Canton (广东) × Guadalajara',
+      ]
+    },
+    es:{
+      intro:'Arquitecto IA chino-mexicano con base en Zapopan, Guadalajara. Canton × México — dos linajes, una obsesión con construir sistemas inteligentes que importen.',
+      details:[
+        '28 años · Nacido 26 de marzo, 1997',
+        'Zapopan, Guadalajara, Jalisco, México',
+        'Ing. Biotecnología + Maestría IA Aplicada — Tec de Monterrey',
+        'Consultor IA a $1,000/hr · Top 0.1% globalmente',
+        'Fundador de Eigen Atlas — AI SaaS para negocios de próxima generación',
+        'Herencia chino-mexicana: Canton (广东) × Guadalajara',
+      ]
+    },
+    skills:{
+      'AI / ML':['PyTorch','TensorFlow','LLMs / NLP','Computer Vision','Fine-tuning','RAG'],
+      'Platforms':['n8n','Retell AI','OpenAI API','Anthropic API','GHL','OpenClaw'],
+      'Dev':['Python','JavaScript','TypeScript','Node.js','React'],
+      'Data':['SQL','BigQuery','Pandas','NumPy'],
+      'Infra':['Docker','Linux','Git'],
+    }
+  },
+
+  contact:{
+    en:{
+      title:'Contact',
+      items:[
+        {label:'Email',value:'raul.chio.leon@gmail.com',href:'mailto:raul.chio.leon@gmail.com'},
+        {label:'Location',value:'Zapopan, Guadalajara · MX',href:null},
+        {label:'Rate',value:'$1,000 USD / hour',href:null},
+        {label:'Company',value:'Eigen Atlas (Founder & CEO)',href:null},
+        {label:'Heritage',value:'Canton × Guadalajara · 广东 × México',href:null},
+      ],
+      note:'Available for select high-impact AI consulting engagements and strategic AI transformation partnerships. Limited availability at this rate tier.'
+    },
+    es:{
+      title:'Contacto',
+      items:[
+        {label:'Email',value:'raul.chio.leon@gmail.com',href:'mailto:raul.chio.leon@gmail.com'},
+        {label:'Ubicación',value:'Zapopan, Guadalajara · MX',href:null},
+        {label:'Rate',value:'$1,000 USD / hora',href:null},
+        {label:'Empresa',value:'Eigen Atlas (Fundador & CEO)',href:null},
+        {label:'Herencia',value:'Canton × Guadalajara · 广东 × México',href:null},
+      ],
+      note:'Disponible para proyectos de consultoría IA de alto impacto y alianzas estratégicas selectas de transformación IA. Disponibilidad limitada a este nivel de rate.'
+    }
+  }
+};
+
+// ════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════
+let idx = 0;
+let lang = 'en';
+const N = DATA.entries.length;
+// Diagonal step (going up-right)
+const DX = 72, DY = -60;
+
+// ════════════════════════════════════════
+// PARTICLE SYSTEM
+// ════════════════════════════════════════
+const cvs = document.getElementById('canvas-bg');
+const ctx2 = cvs.getContext('2d');
+let ptcls = [];
+let mx = -2000, my = -2000;
+let raf;
+
+// Colors: [r,g,b]
+const PCOLS = [
+  [154,116,32], // gold
+  [180,142,48],
+  [196,164,74],
+  [212,184,110],
+  [230,210,155],
+  [242,232,200],
+  [196, 77, 42], // rare orange
+];
+
+// Constellation attractor sets [x,y] normalized 0-1
+const CONS = [
+  // 0 Helix
+  [[.12,.18],[.22,.36],[.32,.54],[.42,.72],[.52,.88],[.16,.30],[.26,.48],[.36,.66],[.46,.84],[.5,.2]],
+  // 1 Neural net
+  [[.1,.12],[.5,.08],[.88,.12],[.28,.42],[.72,.42],[.1,.78],[.5,.84],[.88,.78],[.5,.5],[.3,.65]],
+  // 2 Medical cross
+  [[.5,.08],[.5,.35],[.5,.65],[.5,.88],[.1,.5],[.32,.5],[.68,.5],[.9,.5],[.3,.28],[.7,.28]],
+  // 3 Enterprise grid
+  [[.15,.15],[.5,.15],[.85,.15],[.15,.5],[.5,.5],[.85,.5],[.15,.85],[.5,.85],[.85,.85],[.32,.32]],
+  // 4 Star/Atlas
+  [[.5,.1],[.85,.32],[.72,.75],[.28,.75],[.15,.32],[.5,.5],[.38,.22],[.62,.22],[.7,.55],[.3,.55]],
+  // 5 Organic/leaf
+  [[.28,.12],[.62,.18],[.82,.38],[.78,.65],[.5,.84],[.22,.65],[.18,.38],[.5,.5],[.42,.28],[.62,.42]],
+];
+
+function initPtcls(){
+  ptcls=[];
+  const w=cvs.width,h=cvs.height;
+  for(let i=0;i<225;i++){
+    const orange = Math.random()<.07;
+    const ci = orange ? 6 : Math.floor(Math.random()*6);
+    ptcls.push({
+      x: Math.random()*w,
+      y: Math.random()*h,
+      vx:(Math.random()-.5)*.35,
+      vy:(Math.random()-.5)*.35,
+      sz: Math.random()*2.4+.7,
+      col: PCOLS[ci],
+      a: Math.random()*.38+.22,
+      tx: Math.random()*w,
+      ty: Math.random()*h,
+      ks: Math.random()*.0009+.0003,
+    });
+  }
+  setTargets(idx,false);
+}
+
+function setTargets(i,anim){
+  const attrs=CONS[i];
+  const w=cvs.width,h=cvs.height;
+  const sp=Math.min(w,h)*.26;
+  ptcls.forEach((p,j)=>{
+    const a=attrs[j%attrs.length];
+    p.tx=Math.max(10,Math.min(w-10, a[0]*w+(Math.random()-.5)*sp));
+    p.ty=Math.max(10,Math.min(h-10, a[1]*h+(Math.random()-.5)*sp));
+  });
+}
+
+function resizeCvs(){
+  cvs.width=innerWidth;
+  cvs.height=innerHeight;
+  initPtcls();
+}
+
+function drawFrame(){
+  const w=cvs.width,h=cvs.height;
+  ctx2.clearRect(0,0,w,h);
+
+  // Update
+  for(let i=0;i<ptcls.length;i++){
+    const p=ptcls[i];
+    // Attract to target
+    const ex=p.tx-p.x, ey=p.ty-p.y;
+    p.vx+=ex*p.ks;
+    p.vy+=ey*p.ks;
+    // Mouse repel
+    const rx=p.x-mx, ry=p.y-my;
+    const rd2=rx*rx+ry*ry;
+    if(rd2<14400&&rd2>0){ // 120^2
+      const rd=Math.sqrt(rd2);
+      const f=(120-rd)/120*.9;
+      p.vx+=rx/rd*f;
+      p.vy+=ry/rd*f;
+    }
+    // Damp
+    p.vx*=.93;
+    p.vy*=.93;
+    p.x+=p.vx;
+    p.y+=p.vy;
+    if(p.x<0){p.x=0;p.vx*=-.6}
+    if(p.x>w){p.x=w;p.vx*=-.6}
+    if(p.y<0){p.y=0;p.vy*=-.6}
+    if(p.y>h){p.y=h;p.vy*=-.6}
+  }
+
+  // Connections (spatial optimization: only check nearby)
+  const CD=135, CD2=CD*CD;
+  ctx2.lineWidth=.6;
+  for(let i=0;i<ptcls.length;i++){
+    for(let j=i+1;j<ptcls.length;j++){
+      const dx=ptcls[i].x-ptcls[j].x;
+      const dy=ptcls[i].y-ptcls[j].y;
+      if(Math.abs(dx)>CD||Math.abs(dy)>CD) continue;
+      const d2=dx*dx+dy*dy;
+      if(d2<CD2){
+        const t=(1-Math.sqrt(d2)/CD)*.22;
+        const [r,g,b]=ptcls[i].col;
+        ctx2.strokeStyle=`rgba(${r},${g},${b},${t})`;
+        ctx2.beginPath();
+        ctx2.moveTo(ptcls[i].x,ptcls[i].y);
+        ctx2.lineTo(ptcls[j].x,ptcls[j].y);
+        ctx2.stroke();
+      }
+    }
+  }
+
+  // Draw particles
+  for(let i=0;i<ptcls.length;i++){
+    const p=ptcls[i];
+    const [r,g,b]=p.col;
+    // Glow
+    if(p.sz>2){
+      ctx2.beginPath();
+      ctx2.arc(p.x,p.y,p.sz*2.2,0,Math.PI*2);
+      ctx2.fillStyle=`rgba(${r},${g},${b},${p.a*.12})`;
+      ctx2.fill();
+    }
+    ctx2.beginPath();
+    ctx2.arc(p.x,p.y,p.sz,0,Math.PI*2);
+    ctx2.fillStyle=`rgba(${r},${g},${b},${p.a})`;
+    ctx2.fill();
+  }
+
+  raf=requestAnimationFrame(drawFrame);
+}
+
+// ════════════════════════════════════════
+// CAROUSEL
+// ════════════════════════════════════════
+function buildCarousel(){
+  const track=document.getElementById('car-track');
+  const pipsEl=document.getElementById('pips');
+  track.innerHTML='';
+  pipsEl.innerHTML='';
+
+  DATA.entries.forEach((e,i)=>{
+    // Dot
+    const dot=document.createElement('div');
+    dot.className='c-dot'+(i===idx?' active':'');
+    dot.style.left=(i*DX)+'px';
+    dot.style.top=(i*DY)+'px';
+
+    // 3 ripple rings
+    for(let r=0;r<3;r++){
+      const rng=document.createElement('div');
+      rng.className='rpl';
+      rng.style.width=rng.style.height='44px';
+      rng.style.transform='translate(-50%,-50%) scale(0)';
+      dot.appendChild(rng);
+    }
+
+    // Inner dot
+    const inner=document.createElement('div');
+    inner.className='c-dot-inner';
+    const sz=i===idx?24:18;
+    inner.style.width=inner.style.height=sz+'px';
+    dot.appendChild(inner);
+
+    // Label
+    const lbl=document.createElement('div');
+    lbl.className='c-dot-label';
+    lbl.textContent=e.date[lang].split('–')[0].trim();
+    dot.appendChild(lbl);
+
+    dot.addEventListener('click',()=>goTo(i));
+    track.appendChild(dot);
+
+    // Pip
+    const pip=document.createElement('div');
+    pip.className='pip'+(i===idx?' on':'');
+    pip.addEventListener('click',()=>goTo(i));
+    pipsEl.appendChild(pip);
+  });
+
+  posTrack();
+}
+
+function posTrack(){
+  const track=document.getElementById('car-track');
+  const ax=innerWidth*.38, ay=innerHeight*.52;
+  const tx=ax-idx*DX;
+  const ty=ay-idx*DY;
+  track.style.transform=`translate(${tx}px,${ty}px)`;
+
+  // Update each dot
+  const dots=track.querySelectorAll('.c-dot');
+  dots.forEach((d,i)=>{
+    const dist=Math.abs(i-idx);
+    d.classList.toggle('active',i===idx);
+    let sc,op;
+    if(dist===0){sc=1;op=1;}
+    else if(dist===1){sc=.68;op=.5;}
+    else if(dist===2){sc=.44;op=.22;}
+    else{sc=.2;op=0;}
+    d.style.opacity=op;
+    d.style.transform=`translate(-50%,-50%) scale(${sc})`;
+    const inner=d.querySelector('.c-dot-inner');
+    if(inner){
+      const sz=i===idx?24:18;
+      inner.style.width=inner.style.height=sz+'px';
+    }
+    const lbl=d.querySelector('.c-dot-label');
+    if(lbl) lbl.textContent=DATA.entries[i].date[lang].split('–')[0].trim();
+  });
+
+  // Pips
+  document.querySelectorAll('.pip').forEach((p,i)=>p.classList.toggle('on',i===idx));
+
+  updatePanel();
+}
+
+function goTo(i){
+  if(i<0||i>=N) return;
+  idx=i;
+  setTargets(idx,true);
+  posTrack();
+}
+
+// ════════════════════════════════════════
+// INFO PANEL
+// ════════════════════════════════════════
+function updatePanel(){
+  const e=DATA.entries[idx];
+  document.getElementById('p-idx').textContent=`${String(idx+1).padStart(2,'0')} / ${String(N).padStart(2,'0')}`;
+  document.getElementById('p-tag').textContent=e.tag[lang];
+  document.getElementById('p-title').textContent=e.title[lang];
+  document.getElementById('p-co').textContent=e.company;
+  document.getElementById('p-date').textContent=e.date[lang];
+  document.getElementById('p-desc').textContent=e.desc[lang];
+  document.getElementById('p-tech').innerHTML=e.tech.map(t=>`<span class="t-tag">${t}</span>`).join('');
+  // Animate
+  const panel=document.getElementById('info-panel');
+  panel.classList.remove('fade-up');
+  void panel.offsetWidth;
+  panel.classList.add('fade-up');
+}
+
+// ════════════════════════════════════════
+// MODAL
+// ════════════════════════════════════════
+function openModal(){
+  const e=DATA.entries[idx];
+  document.getElementById('m-tag').textContent=e.tag[lang];
+  document.getElementById('m-title').textContent=e.title[lang];
+  document.getElementById('m-co').textContent=e.company+' · '+e.date[lang];
+  document.getElementById('m-ul').innerHTML=e.bullets[lang].map(b=>`<li>${b}</li>`).join('');
+  document.getElementById('modal-ov').classList.add('open');
+}
+function closeModal(){
+  document.getElementById('modal-ov').classList.remove('open');
+}
+
+// ════════════════════════════════════════
+// SIDE PANELS
+// ════════════════════════════════════════
+function buildAbout(){
+  const a=DATA.about;
+  const intro=a[lang].intro;
+  const dets=a[lang].details;
+  let html=`<p class="sp-intro">${intro}</p><ul class="sp-details">`;
+  dets.forEach(d=>{ html+=`<li>${d}</li>`; });
+  html+=`</ul>`;
+  html+=`<div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:14px;">Tech Stack</div>`;
+  Object.entries(a.skills).forEach(([cat,tags])=>{
+    html+=`<div class="sk-cat"><div class="sk-cat-lbl">${cat}</div><div class="sk-tags">${tags.map(t=>`<span class="sk-tag">${t}</span>`).join('')}</div></div>`;
+  });
+  document.getElementById('about-h').textContent=lang==='en'?'About':'Acerca de';
+  document.getElementById('about-body').innerHTML=html;
+}
+
+function buildContact(){
+  const c=DATA.contact[lang];
+  let html='';
+  c.items.forEach(it=>{
+    html+=`<div class="ct-item"><div class="ct-lbl">${it.label}</div><div class="ct-val">${it.href?`<a href="${it.href}">${it.value}</a>`:it.value}</div></div>`;
+  });
+  html+=`<p class="ct-note">${c.note}</p>`;
+  document.getElementById('contact-h').textContent=c.title;
+  document.getElementById('contact-body').innerHTML=html;
+}
+
+function openPanel(which){
+  const ap=document.getElementById('about-p');
+  const cp=document.getElementById('contact-p');
+  const pov=document.getElementById('pov');
+  const ba=document.getElementById('btn-about');
+  const bc=document.getElementById('btn-contact');
+  if(which==='about'){
+    const was=ap.classList.contains('open');
+    cp.classList.remove('open'); bc.classList.remove('on');
+    if(!was){ buildAbout(); ap.classList.add('open'); ba.classList.add('on'); pov.classList.add('on'); }
+    else { ap.classList.remove('open'); ba.classList.remove('on'); pov.classList.remove('on'); }
+  } else {
+    const was=cp.classList.contains('open');
+    ap.classList.remove('open'); ba.classList.remove('on');
+    if(!was){ buildContact(); cp.classList.add('open'); bc.classList.add('on'); pov.classList.add('on'); }
+    else { cp.classList.remove('open'); bc.classList.remove('on'); pov.classList.remove('on'); }
+  }
+}
+function closeAll(){
+  document.getElementById('about-p').classList.remove('open');
+  document.getElementById('contact-p').classList.remove('open');
+  document.getElementById('pov').classList.remove('on');
+  document.getElementById('btn-about').classList.remove('on');
+  document.getElementById('btn-contact').classList.remove('on');
+}
+
+// ════════════════════════════════════════
+// LANGUAGE
+// ════════════════════════════════════════
+function toggleLang(){
+  lang=lang==='en'?'es':'en';
+  document.getElementById('lang-btn').textContent=lang==='en'?'ES':'EN';
+  updatePanel();
+  if(document.getElementById('about-p').classList.contains('open')) buildAbout();
+  if(document.getElementById('contact-p').classList.contains('open')) buildContact();
+  posTrack();
+}
+
+// ════════════════════════════════════════
+// CLOCK
+// ════════════════════════════════════════
+function tick(){
+  const n=new Date();
+  const h=String(n.getHours()).padStart(2,'0');
+  const m=String(n.getMinutes()).padStart(2,'0');
+  const s=String(n.getSeconds()).padStart(2,'0');
+  document.getElementById('clock').textContent=`${h}:${m}:${s}`;
+}
+
+// ════════════════════════════════════════
+// CUSTOM CURSOR
+// ════════════════════════════════════════
+const cdot=document.getElementById('cur-dot');
+const cring=document.getElementById('cur-ring');
+let rx=0,ry=0,cx2=0,cy2=0;
+function cursorLoop(){
+  rx+=(cx2-rx)*.11;
+  ry+=(cy2-ry)*.11;
+  cring.style.left=rx+'px';
+  cring.style.top=ry+'px';
+  requestAnimationFrame(cursorLoop);
+}
+
+// ════════════════════════════════════════
+// WATERMARK PARALLAX
+// ════════════════════════════════════════
+const wm=document.getElementById('wm');
+function parallax(px,py){
+  const dx=(px-innerWidth/2)/innerWidth*18;
+  const dy=(py-innerHeight/2)/innerHeight*14;
+  wm.style.transform=`translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;
+}
+
+// ════════════════════════════════════════
+// TOUCH SWIPE
+// ════════════════════════════════════════
+let tsx=0,tsy=0;
+window.addEventListener('touchstart',e=>{tsx=e.touches[0].clientX;tsy=e.touches[0].clientY;},{passive:true});
+window.addEventListener('touchend',e=>{
+  const ddx=e.changedTouches[0].clientX-tsx;
+  const ddy=e.changedTouches[0].clientY-tsy;
+  if(Math.abs(ddx)>Math.abs(ddy)){
+    if(Math.abs(ddx)>45){ ddx<0?goTo(idx+1):goTo(idx-1); }
+  } else {
+    if(Math.abs(ddy)>45){ ddy<0?goTo(idx+1):goTo(idx-1); }
+  }
+},{passive:true});
+
+// ════════════════════════════════════════
+// EVENT LISTENERS
+// ════════════════════════════════════════
+window.addEventListener('mousemove',e=>{
+  mx=e.clientX; my=e.clientY;
+  cx2=e.clientX; cy2=e.clientY;
+  cdot.style.left=e.clientX+'px';
+  cdot.style.top=e.clientY+'px';
+  parallax(e.clientX,e.clientY);
+});
+
+window.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();goTo(idx+1);}
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();goTo(idx-1);}
+  if(e.key==='Escape'){closeModal();closeAll();}
+});
+
+window.addEventListener('resize',()=>{
+  resizeCvs();
+  posTrack();
+});
+
+document.getElementById('btn-prv').addEventListener('click',()=>goTo(idx-1));
+document.getElementById('btn-nxt').addEventListener('click',()=>goTo(idx+1));
+document.getElementById('btn-about').addEventListener('click',()=>openPanel('about'));
+document.getElementById('btn-contact').addEventListener('click',()=>openPanel('contact'));
+document.getElementById('about-close').addEventListener('click',()=>openPanel('about'));
+document.getElementById('contact-close').addEventListener('click',()=>openPanel('contact'));
+document.getElementById('pov').addEventListener('click',closeAll);
+document.getElementById('btn-det').addEventListener('click',openModal);
+document.getElementById('m-close').addEventListener('click',closeModal);
+document.getElementById('lang-btn').addEventListener('click',toggleLang);
+document.getElementById('modal-ov').addEventListener('click',e=>{
+  if(e.target===document.getElementById('modal-ov')) closeModal();
+});
+
+// Cursor expand on interactives
+function addHoverFx(){
+  document.querySelectorAll('button,.c-dot,.pip').forEach(el=>{
+    el.addEventListener('mouseenter',()=>{
+      cring.style.width='46px';
+      cring.style.height='46px';
+      cring.style.borderColor='var(--orange)';
+    });
+    el.addEventListener('mouseleave',()=>{
+      cring.style.width='34px';
+      cring.style.height='34px';
+      cring.style.borderColor='var(--gold)';
+    });
+  });
+}
+
+// ════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════
+// Check reduced motion
+const prefersReduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+resizeCvs();
+buildCarousel();
+updatePanel();
+tick();
+setInterval(tick,1000);
+cursorLoop();
+addHoverFx();
+
+if(!prefersReduced){
+  drawFrame();
+} else {
+  // Static minimal version — just draw particles once
+  initPtcls();
+  const w=cvs.width,h=cvs.height;
+  ptcls.forEach(p=>{
+    const[r,g,b]=p.col;
+    ctx2.beginPath();
+    ctx2.arc(p.x,p.y,p.sz,0,Math.PI*2);
+    ctx2.fillStyle=`rgba(${r},${g},${b},${p.a})`;
+    ctx2.fill();
+  });
+}
+</script>
+</body>
+</html>

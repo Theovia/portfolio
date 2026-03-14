@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raul Zhou — AI Engineer &amp; Consultant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f5f2ed;
+  --accent:#9a7420;
+  --accent2:#b8892a;
+  --secondary:#c44d2a;
+  --text:#4a453e;
+  --text-light:#8a857e;
+  --glass:rgba(255,255,255,0.68);
+  --glass-border:rgba(154,116,32,0.18);
+  --glass-shadow:0 8px 40px rgba(154,116,32,0.08),0 2px 8px rgba(0,0,0,0.05);
+}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;cursor:none}
+
+/* ── Noise grain ── */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:999;opacity:.038;
+  background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/></filter><rect width='200%' height='200%' filter='url(%23n)'/></svg>");
+  background-size:180px 180px;mix-blend-mode:multiply}
+
+/* ── Blob canvas ── */
+#blob-canvas{position:fixed;inset:0;width:100%;height:100%;filter:blur(72px);opacity:.6;z-index:0;pointer-events:none}
+
+/* ── Custom cursor ── */
+#cur{position:fixed;width:7px;height:7px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .15s,background .2s}
+#cur-ring{position:fixed;width:30px;height:30px;border:1.5px solid var(--accent);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);opacity:.55;transition:width .2s,height .2s,opacity .2s}
+body:hover #cur{opacity:1}
+
+/* ── Layout ── */
+#app{position:fixed;inset:0;z-index:2;display:flex;flex-direction:column}
+
+/* ── Nav ── */
+nav{display:flex;align-items:center;justify-content:space-between;padding:22px 40px;flex-shrink:0}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:.04em;color:var(--text);display:flex;align-items:center;gap:2px}
+.logo em{color:var(--accent);font-style:normal}
+.logo sub{font-size:11px;color:var(--text-light);font-weight:400;letter-spacing:.06em;font-family:'JetBrains Mono',monospace}
+.nav-right{display:flex;align-items:center;gap:22px}
+.lang-toggle{display:flex;gap:2px;background:rgba(255,255,255,.55);border:1px solid var(--glass-border);border-radius:7px;padding:3px;backdrop-filter:blur(10px)}
+.lang-btn{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;padding:4px 10px;border-radius:5px;border:none;background:transparent;color:var(--text-light);cursor:none;transition:all .2s}
+.lang-btn.active{background:var(--accent);color:#fff}
+#clock{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-light);letter-spacing:.08em}
+
+/* ── Main area ── */
+#main{flex:1;display:flex;align-items:center;padding:0 40px 0 44px;gap:32px;overflow:hidden}
+
+/* ── Hero ── */
+#hero{flex:1;min-width:0;padding-right:20px}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.22em;color:var(--accent);text-transform:uppercase;margin-bottom:18px;opacity:0;animation:fadeUp .6s .2s forwards}
+.hero-name{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(52px,7.5vw,92px);line-height:.92;letter-spacing:-.025em;color:var(--text);margin-bottom:26px;overflow:hidden}
+.hero-name .row{display:block;overflow:hidden}
+.hero-name .sc{display:inline-block;will-change:contents}
+.hero-sub{font-size:15px;color:var(--text-light);line-height:1.65;max-width:360px;opacity:0;animation:fadeUp .6s 1.1s forwards}
+.hero-actions{display:flex;gap:10px;margin-top:28px;opacity:0;animation:fadeUp .6s 1.5s forwards}
+.btn{font-family:'Space Grotesk',sans-serif;font-size:13px;font-weight:500;letter-spacing:.04em;padding:10px 22px;border-radius:9px;border:none;cursor:none;transition:all .2s}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px)}
+.btn-ghost{background:rgba(255,255,255,.6);color:var(--text);border:1px solid var(--glass-border);backdrop-filter:blur(10px)}
+.btn-ghost:hover{background:rgba(255,255,255,.9);transform:translateY(-1px)}
+
+/* ── Info panel ── */
+#info-panel{width:330px;flex-shrink:0;background:var(--glass);border:1px solid var(--glass-border);border-radius:20px;padding:26px 28px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:var(--glass-shadow);position:relative;overflow:hidden;transition:transform .4s cubic-bezier(.4,0,.2,1)}
+#info-panel::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(154,116,32,.12),transparent 70%);pointer-events:none}
+.ip-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.22em;color:var(--accent);text-transform:uppercase;margin-bottom:8px}
+.ip-title{font-family:'Syne',sans-serif;font-weight:700;font-size:20px;color:var(--text);line-height:1.2;margin-bottom:4px;min-height:48px}
+.ip-sub{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--secondary);margin-bottom:14px}
+.ip-short{font-size:13px;color:var(--text-light);line-height:1.6;font-style:italic;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--glass-border)}
+.ip-points{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.ip-points li{font-size:12.5px;color:var(--text);line-height:1.5;padding-left:16px;position:relative}
+.ip-points li::before{content:'→';position:absolute;left:0;color:var(--accent);font-size:11px}
+.ip-foot{display:flex;justify-content:space-between;align-items:center;padding-top:14px;border-top:1px solid var(--glass-border)}
+.ip-index{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-light)}
+.ip-more{font-family:'Space Grotesk',sans-serif;font-size:12px;font-weight:500;color:var(--accent);cursor:none;background:none;border:none;text-decoration:underline;text-underline-offset:3px;letter-spacing:.04em}
+
+/* Panel fade transition */
+@keyframes panelFadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.ip-animate{animation:panelFadeIn .3s ease forwards}
+
+/* ── Diagonal dot track ── */
+#track-wrap{position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:8}
+#dot-track{position:absolute;pointer-events:all}
+.dot-item{position:absolute;display:flex;align-items:center;gap:10px;cursor:none;transition:opacity .4s ease}
+.dot-ripple-wrap{position:relative;width:14px;height:14px;flex-shrink:0}
+.dot-circle{width:10px;height:10px;border-radius:50%;background:var(--text-light);transition:all .35s cubic-bezier(.4,0,.2,1);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+.dot-item.active .dot-circle{background:var(--accent);width:13px;height:13px}
+@keyframes rippleOut{0%{transform:translate(-50%,-50%) scale(1);opacity:.5}100%{transform:translate(-50%,-50%) scale(3.2);opacity:0}}
+.rring{position:absolute;width:13px;height:13px;border:1.5px solid var(--accent);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;display:none}
+.dot-item.active .rring{display:block;animation:rippleOut 2s ease-out infinite}
+.dot-item.active .rring:nth-child(3){animation-delay:.67s}
+.dot-item.active .rring:nth-child(4){animation-delay:1.33s}
+.dot-year{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-light);white-space:nowrap;transition:color .35s}
+.dot-item.active .dot-year{color:var(--accent);font-weight:500}
+
+/* Diagonal track line */
+#track-line{position:absolute;pointer-events:none;opacity:.12}
+
+/* ── Nav controls ── */
+#nav-ctrl{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;z-index:10}
+.hex-btn{width:42px;height:42px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:rgba(255,255,255,.72);border:none;display:flex;align-items:center;justify-content:center;cursor:none;transition:background .2s;backdrop-filter:blur(10px)}
+.hex-btn:hover{background:var(--accent)}
+.hex-btn:hover svg{stroke:#fff}
+.hex-btn svg{stroke:var(--text);transition:stroke .2s}
+.pips{display:flex;gap:5px;align-items:center}
+.pip{width:5px;height:5px;border-radius:50%;background:var(--text-light);transition:all .3s cubic-bezier(.4,0,.2,1);cursor:none}
+.pip.active{background:var(--accent);width:18px;border-radius:3px}
+
+/* ── Side panel overlay ── */
+#overlay{position:fixed;inset:0;background:rgba(74,69,62,.28);backdrop-filter:blur(5px);z-index:20;opacity:0;pointer-events:none;transition:opacity .3s}
+#overlay.on{opacity:1;pointer-events:all}
+.side-panel{position:fixed;top:0;right:-480px;width:420px;height:100vh;background:rgba(247,244,239,.97);backdrop-filter:blur(20px);z-index:21;transition:right .4s cubic-bezier(.4,0,.2,1);overflow-y:auto;padding:44px 40px;border-left:1px solid var(--glass-border)}
+.side-panel.on{right:0}
+.sp-close{position:absolute;top:22px;right:22px;background:none;border:none;cursor:none;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-light);font-size:18px;transition:background .2s}
+.sp-close:hover{background:rgba(0,0,0,.06)}
+.hex-frame{width:110px;height:110px;clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);background:linear-gradient(135deg,var(--accent),var(--secondary));display:flex;align-items:center;justify-content:center;margin-bottom:22px;flex-shrink:0}
+.hex-initials{font-family:'Syne',sans-serif;font-weight:800;font-size:32px;color:#fff;letter-spacing:-.02em}
+.sp-name{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;color:var(--text);margin-bottom:5px}
+.sp-role{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.18em;color:var(--accent);margin-bottom:18px}
+.sp-bio{font-size:13.5px;line-height:1.72;color:var(--text);margin-bottom:26px}
+.sp-section-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.22em;color:var(--text-light);text-transform:uppercase;margin-bottom:12px}
+.skills-wrap{display:flex;flex-wrap:wrap;gap:7px}
+.skill-chip{font-family:'JetBrains Mono',monospace;font-size:10px;padding:4px 11px;background:rgba(154,116,32,.09);color:var(--accent);border-radius:6px;border:1px solid rgba(154,116,32,.18)}
+.contact-block{margin-bottom:28px}
+.contact-lbl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.2em;color:var(--text-light);text-transform:uppercase;margin-bottom:6px}
+.contact-val{font-size:15px;color:var(--text);font-weight:500}
+.contact-val a{color:var(--accent);text-decoration:none}
+
+/* ── Modal ── */
+#modal{position:fixed;inset:0;background:rgba(74,69,62,.38);backdrop-filter:blur(10px);z-index:30;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+#modal.on{opacity:1;pointer-events:all}
+.modal-card{width:540px;max-width:90vw;max-height:82vh;background:rgba(247,244,239,.98);border:1px solid var(--glass-border);border-radius:22px;padding:38px;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.14);transform:translateY(16px) scale(.97);transition:transform .3s cubic-bezier(.4,0,.2,1)}
+#modal.on .modal-card{transform:translateY(0) scale(1)}
+.mc-close{float:right;background:none;border:none;cursor:none;font-size:18px;color:var(--text-light);width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:-4px -4px 12px 0;transition:background .2s}
+.mc-close:hover{background:rgba(0,0,0,.06)}
+
+/* ── Animations ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Mobile ── */
+@media(max-width:768px){
+  #info-panel{display:none}
+  #hero{max-width:100%;padding-right:0}
+  .side-panel{width:100%;right:-100%}
+  nav{padding:18px 20px}
+  #main{padding:0 20px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<canvas id="blob-canvas"></canvas>
+
+<div id="cur"></div>
+<div id="cur-ring"></div>
+
+<div id="app">
+  <!-- Nav -->
+  <nav>
+    <div class="logo">RZ_<em>周</em></div>
+    <div class="nav-right">
+      <div class="lang-toggle">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="es">ES</button>
+      </div>
+      <span id="clock">00:00:00</span>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <div id="main">
+    <div id="hero">
+      <div class="eyebrow" id="eyebrow">AI ENGINEER &amp; CONSULTANT</div>
+      <div class="hero-name">
+        <span class="row"><span class="sc" id="sc-first">RAUL</span></span>
+        <span class="row"><span class="sc" id="sc-last">ZHOU</span></span>
+      </div>
+      <p class="hero-sub" id="hero-sub">Chinese-Mexican AI engineer from Guadalajara. Building the future at the intersection of biology and intelligence.</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary" id="btn-about">About</button>
+        <button class="btn btn-ghost" id="btn-contact">Contact</button>
+      </div>
+    </div>
+
+    <div id="info-panel">
+      <div class="ip-tag" id="ip-tag"></div>
+      <div class="ip-title" id="ip-title"></div>
+      <div class="ip-sub" id="ip-sub"></div>
+      <div class="ip-short" id="ip-short"></div>
+      <ul class="ip-points" id="ip-points"></ul>
+      <div class="ip-foot">
+        <span class="ip-index" id="ip-index">01 / 06</span>
+        <button class="ip-more" id="ip-more">View details →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Diagonal track -->
+<div id="track-wrap">
+  <svg id="track-line" style="position:absolute;left:0;top:0;width:100%;height:100%">
+    <line id="tl-line" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4 6"/>
+  </svg>
+  <div id="dot-track"></div>
+</div>
+
+<!-- Nav controls -->
+<div id="nav-ctrl">
+  <button class="hex-btn" id="prev-btn" aria-label="Previous">
+    <svg width="14" height="14" fill="none" stroke-width="2.2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
+  <div class="pips" id="pips"></div>
+  <button class="hex-btn" id="next-btn" aria-label="Next">
+    <svg width="14" height="14" fill="none" stroke-width="2.2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
+</div>
+
+<!-- Side overlay -->
+<div id="overlay"></div>
+
+<!-- About panel -->
+<div class="side-panel" id="about-panel">
+  <button class="sp-close" id="about-close">✕</button>
+  <div class="hex-frame"><div class="hex-initials">RZ</div></div>
+  <div class="sp-name">Raul Zhou</div>
+  <div class="sp-role" id="sp-role">AI ENGINEER · CONSULTANT · FOUNDER</div>
+  <p class="sp-bio" id="sp-bio">Chinese-Mexican from Guadalajara, born from the intersection of Canton heritage and Mexican spirit. Biotech Engineering + AI Master's from Tec de Monterrey. I build AI systems that actually work — from voice agents to enterprise automation. Currently consulting at $1K/hr and growing Eigen Atlas, my SaaS for business AI.</p>
+  <div class="sp-section-label">SKILLS</div>
+  <div class="skills-wrap" id="skills-wrap"></div>
+</div>
+
+<!-- Contact panel -->
+<div class="side-panel" id="contact-panel">
+  <button class="sp-close" id="contact-close">✕</button>
+  <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:30px;margin-bottom:30px;color:var(--text)" id="contact-h">Let's Talk</h2>
+  <div class="contact-block">
+    <div class="contact-lbl">EMAIL</div>
+    <div class="contact-val"><a href="mailto:raul.chio.leon@gmail.com">raul.chio.leon@gmail.com</a></div>
+  </div>
+  <div class="contact-block">
+    <div class="contact-lbl">LOCATION</div>
+    <div class="contact-val">Guadalajara, México</div>
+  </div>
+  <div class="contact-block">
+    <div class="contact-lbl">RATE</div>
+    <div class="contact-val">$1,000 USD / hr</div>
+  </div>
+  <div class="contact-block">
+    <div class="contact-lbl" id="avail-lbl">AVAILABILITY</div>
+    <div class="contact-val" id="avail-val">Limited — select projects</div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div id="modal">
+  <div class="modal-card">
+    <button class="mc-close" id="mc-close">✕</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// =====================================================================
+// DATA
+// =====================================================================
+const ENTRIES = [
+  {
+    id:1, year:"2015",
+    blobHue:[0.12, 0.08, 0.06],
+    en:{tag:"EDUCATION",title:"B.S. Biotechnology",sub:"Tec de Monterrey · Aug 2015",
+      short:"Where science met code",
+      pts:["Biotech Engineering at Mexico's top tech university",
+           "Computational biology and bioinformatics core",
+           "Scientific foundation for AI applications in medicine",
+           "Thesis: ML in genomic sequence analysis"]},
+    es:{tag:"EDUCACIÓN",title:"Ing. Biotecnología",sub:"Tec de Monterrey · Ago 2015",
+      short:"Donde la ciencia conoció el código",
+      pts:["Ingeniería en Biotecnología en la mejor universidad tecnológica de México",
+           "Biología computacional y bioinformática en el núcleo curricular",
+           "Base científica para aplicaciones de IA en medicina",
+           "Tesis: ML en análisis de secuencias genómicas"]}
+  },
+  {
+    id:2, year:"2020",
+    blobHue:[0.10, 0.06, 0.14],
+    en:{tag:"GRADUATE",title:"M.S. Applied AI",sub:"Tec de Monterrey · Jan 2020",
+      short:"Deep learning, NLP, computer vision",
+      pts:["Master's in Artificial Intelligence with applied focus",
+           "Deep learning architectures for medical imaging",
+           "NLP systems for clinical documentation",
+           "Computer vision for pathology slide analysis"]},
+    es:{tag:"POSGRADO",title:"Maestría en IA Aplicada",sub:"Tec de Monterrey · Ene 2020",
+      short:"Deep learning, PLN, visión computacional",
+      pts:["Maestría en Inteligencia Artificial con enfoque aplicado",
+           "Arquitecturas de deep learning para imagenología médica",
+           "Sistemas de PLN para documentación clínica",
+           "Visión computacional para análisis de laminillas de patología"]}
+  },
+  {
+    id:3, year:"2022",
+    blobHue:[0.06, 0.14, 0.08],
+    en:{tag:"CONSULTING",title:"Medical AI Consulting",sub:"Independent · Mar 2022",
+      short:"Voice agents and chatbots for doctors",
+      pts:["HIPAA-aware voice agents for clinical workflows",
+           "Chatbot systems for patient intake and triage",
+           "Reduced admin overhead by 40% for clinic clients",
+           "Pioneered conversational AI in Mexican healthcare"]},
+    es:{tag:"CONSULTORÍA",title:"Consultoría IA Médica",sub:"Independiente · Mar 2022",
+      short:"Agentes de voz y chatbots para médicos",
+      pts:["Agentes de voz con consideraciones HIPAA para flujos clínicos",
+           "Sistemas de chatbot para registro y triage de pacientes",
+           "Reducción del 40% en carga administrativa para clínicas",
+           "Pionero en IA conversacional en el sector salud mexicano"]}
+  },
+  {
+    id:4, year:"2023",
+    blobHue:[0.14, 0.10, 0.06],
+    en:{tag:"ENTERPRISE",title:"Enterprise AI — $1K/hr",sub:"Independent · Jun 2023",
+      short:"ERP migrations and automation at scale",
+      pts:["Enterprise AI consulting at premium $1,000/hr rate",
+           "ERP modernization with AI-assisted data migration",
+           "Process automation pipelines saving thousands of hours",
+           "AI strategy for Fortune-level clients"]},
+    es:{tag:"EMPRESA",title:"IA Empresarial — $1K/hr",sub:"Independiente · Jun 2023",
+      short:"Migraciones ERP y automatización a escala",
+      pts:["Consultoría de IA empresarial a tarifa premium de $1,000/hr",
+           "Modernización de ERP con migración de datos asistida por IA",
+           "Pipelines de automatización que ahorran miles de horas",
+           "Estrategia de IA para clientes de nivel Fortune"]}
+  },
+  {
+    id:5, year:"2024",
+    blobHue:[0.08, 0.12, 0.10],
+    en:{tag:"FOUNDER",title:"Eigen Atlas SaaS",sub:"Founder & CEO · Jan 2024",
+      short:"AI platform for business intelligence",
+      pts:["Founded Eigen Atlas — AI platform for SMB and enterprise",
+           "Multi-agent orchestration system built on OpenClaw",
+           "Natural language interface for business operations",
+           "Growing ARR with zero external funding"]},
+    es:{tag:"FUNDADOR",title:"Eigen Atlas SaaS",sub:"Fundador & CEO · Ene 2024",
+      short:"Plataforma de IA para inteligencia de negocios",
+      pts:["Fundé Eigen Atlas — plataforma de IA para PYMES y empresas",
+           "Sistema de orquestación multi-agente construido sobre OpenClaw",
+           "Interfaz en lenguaje natural para operaciones de negocio",
+           "ARR en crecimiento sin financiamiento externo"]}
+  },
+  {
+    id:6, year:"2026",
+    blobHue:[0.10, 0.07, 0.12],
+    en:{tag:"KEYNOTE",title:"John Deere — Enterprise AI",sub:"Invited Speaker · Mar 2026",
+      short:"Enterprise AI presentation to global leadership",
+      pts:["Invited to present AI strategy to John Deere global leadership",
+           "Multi-agent systems for agricultural automation",
+           "ROI models for AI adoption at enterprise scale",
+           "Positioned Eigen Atlas as enterprise-ready solution"]},
+    es:{tag:"KEYNOTE",title:"John Deere — IA Empresarial",sub:"Ponente Invitado · Mar 2026",
+      short:"Presentación de IA empresarial al liderazgo global",
+      pts:["Invitado a presentar estrategia de IA al liderazgo global de John Deere",
+           "Sistemas multi-agente para automatización agrícola",
+           "Modelos de ROI para adopción de IA a escala empresarial",
+           "Posicionó Eigen Atlas como solución lista para empresas"]}
+  }
+];
+
+const SKILLS = ["PyTorch","TensorFlow","LLMs","NLP","CV","n8n","Retell AI","OpenAI","Anthropic","GHL","Python","JS","TS","Node","React","SQL","BigQuery","Pandas","Docker","Linux","Git"];
+
+const I18N = {
+  en:{eyebrow:"AI ENGINEER & CONSULTANT",heroSub:"Chinese-Mexican AI engineer from Guadalajara. Building the future at the intersection of biology and intelligence.",spRole:"AI ENGINEER · CONSULTANT · FOUNDER",spBio:"Chinese-Mexican from Guadalajara, born from the intersection of Canton heritage and Mexican spirit. Biotech Engineering + AI Master's from Tec de Monterrey. I build AI systems that actually work — from voice agents to enterprise automation. Currently consulting at $1K/hr and growing Eigen Atlas, my SaaS for business AI.",contactH:"Let's Talk",avail:"Limited — select projects",btnAbout:"About",btnContact:"Contact",viewDetails:"View details →"},
+  es:{eyebrow:"INGENIERO DE IA & CONSULTOR",heroSub:"Ingeniero de IA chino-mexicano de Guadalajara. Construyendo el futuro en la intersección de la biología y la inteligencia.",spRole:"INGENIERO IA · CONSULTOR · FUNDADOR",spBio:"Chino-mexicano de Guadalajara, nacido de la intersección entre la herencia cantonesa y el espíritu mexicano. Ingeniería Biotecnológica + Maestría en IA del Tec de Monterrey. Construyo sistemas de IA que realmente funcionan — desde agentes de voz hasta automatización empresarial. Actualmente consultando a $1K/hr y creciendo Eigen Atlas, mi SaaS de IA para negocios.",contactH:"Hablemos",avail:"Limitada — proyectos selectos",btnAbout:"Sobre mí",btnContact:"Contacto",viewDetails:"Ver detalles →"}
+};
+
+// =====================================================================
+// STATE
+// =====================================================================
+let cur = 0;
+let lang = 'en';
+let animating = false;
+let touchX = 0, touchY = 0;
+
+// =====================================================================
+// CLOCK
+// =====================================================================
+function tick() {
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    [n.getHours(),n.getMinutes(),n.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');
+}
+setInterval(tick,1000); tick();
+
+// =====================================================================
+// CURSOR
+// =====================================================================
+const curEl = document.getElementById('cur');
+const ringEl = document.getElementById('cur-ring');
+let mx = innerWidth/2, my = innerHeight/2, rx = mx, ry = my;
+
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; curEl.style.left=mx+'px'; curEl.style.top=my+'px'; });
+
+function animRing() {
+  rx += (mx - rx) * 0.11;
+  ry += (my - ry) * 0.11;
+  ringEl.style.left = rx + 'px';
+  ringEl.style.top  = ry + 'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+
+function hoverCursor(el) {
+  el.addEventListener('mouseenter', () => { ringEl.style.width='46px'; ringEl.style.height='46px'; curEl.style.transform='translate(-50%,-50%) scale(1.6)'; });
+  el.addEventListener('mouseleave', () => { ringEl.style.width='30px'; ringEl.style.height='30px'; curEl.style.transform='translate(-50%,-50%) scale(1)'; });
+}
+
+// =====================================================================
+// BLOB CANVAS
+// =====================================================================
+const bcanvas = document.getElementById('blob-canvas');
+const bctx = bcanvas.getContext('2d');
+let BW, BH;
+
+// Blob color palettes per entry index (blended)
+const PALETTES = [
+  [['#d4a843','#e8c170','#f2d98a'],['#c8b060','#e0c878','#f0dca0'],['#e8c878','#f0da90','#faeab8'],['#f0e0b0','#f8eecc','#fffae8']],
+  [['#c47830','#d4a060','#e8c08a'],['#c44d2a','#d97a55','#e8a882'],['#d4a843','#e0bc60','#ecd080'],['#e8d090','#f0e0b0','#f8ecd0']],
+  [['#c44d2a','#d97a55','#e8a882'],['#9a7420','#c4a240','#d4b860'],['#d47830','#e0a050','#ecc080'],['#e8c070','#f0d498','#f8e4b8']],
+  [['#9a7420','#c4a240','#d4b860'],['#d4a843','#e8c170','#f2d98a'],['#c47830','#d8a060','#e8c090'],['#e8d8a8','#f4eac8','#fffbe8']],
+  [['#8a6818','#b89038','#d0b060'],['#c44d2a','#d47050','#e49878'],['#d4a843','#e8c060','#f2d880'],['#e0d0a0','#ece0b8','#f8ecd0']],
+  [['#b89030','#d4a840','#e8c460'],['#9a7020','#b89038','#cca850'],['#d4c050','#e4d470','#f0e090'],['#f0e8b8','#f8f0d0','#fffce8']],
+];
+
+function makePalette(idx) {
+  return PALETTES[idx % PALETTES.length];
+}
+
+const blobs = [];
+
+function initBlobs() {
+  BW = bcanvas.width = innerWidth;
+  BH = bcanvas.height = innerHeight;
+  blobs.length = 0;
+  const defs = [
+    {fx:0.18,fy:0.28,fr:0.38,sp:0.00028,ph:0,pidx:0},
+    {fx:0.72,fy:0.18,fr:0.32,sp:0.00035,ph:2.1,pidx:1},
+    {fx:0.45,fy:0.72,fr:0.42,sp:0.00022,ph:4.3,pidx:2},
+    {fx:0.88,fy:0.58,fr:0.28,sp:0.00040,ph:1.2,pidx:3},
+  ];
+  defs.forEach(d => {
+    const N = 8;
+    blobs.push({
+      cx: d.fx*BW, cy: d.fy*BH,
+      baseR: d.fr*Math.min(BW,BH),
+      sp: d.sp, ph: d.ph, pidx: d.pidx,
+      N, offsets: Array.from({length:N}, ()=>Math.random()*Math.PI*2),
+      radii:  Array.from({length:N}, ()=>0.72+Math.random()*0.56),
+      freqs:  Array.from({length:N}, ()=>0.8+Math.random()*1.4),
+      vx:0, vy:0,
+      dph: Math.random()*Math.PI*2,
+      targetPalette: null, curPalette: null, blendT: 1,
+    });
+  });
+  // init palettes
+  blobs.forEach(b => {
+    const p = makePalette(b.pidx + cur);
+    b.curPalette = p; b.targetPalette = p; b.blendT = 1;
+  });
+}
+
+function lerpColor(a,b,t) {
+  const parse = s => [parseInt(s.slice(1,3),16),parseInt(s.slice(3,5),16),parseInt(s.slice(5,7),16)];
+  const hex = n => n.toString(16).padStart(2,'0');
+  const ca=parse(a), cb=parse(b);
+  return '#'+hex(Math.round(ca[0]+(cb[0]-ca[0])*t))+hex(Math.round(ca[1]+(cb[1]-ca[1])*t))+hex(Math.round(ca[2]+(cb[2]-ca[2])*t));
+}
+
+function drawBlob(b, t) {
+  const cx = b.cx, cy = b.cy;
+  const pts = [];
+  for (let i=0; i<b.N; i++) {
+    const angle = (i/b.N)*Math.PI*2;
+    const r = b.baseR * b.radii[i] * (0.82 + 0.18*Math.sin(t*b.sp*b.freqs[i]*6000 + b.offsets[i]));
+    pts.push({x: cx+Math.cos(angle)*r, y: cy+Math.sin(angle)*r});
+  }
+  const N = pts.length;
+  bctx.beginPath();
+  for (let i=0; i<N; i++) {
+    const p = pts[i], n = pts[(i+1)%N], prev = pts[(i-1+N)%N], nn = pts[(i+2)%N];
+    if(i===0) bctx.moveTo(p.x,p.y);
+    const cp1x = p.x+(n.x-prev.x)*0.22, cp1y = p.y+(n.y-prev.y)*0.22;
+    const cp2x = n.x-(nn.x-p.x)*0.22,  cp2y = n.y-(nn.y-p.y)*0.22;
+    bctx.bezierCurveTo(cp1x,cp1y,cp2x,cp2y,n.x,n.y);
+  }
+  bctx.closePath();
+
+  // Blend palette
+  const bt = Math.min(b.blendT, 1);
+  const stops = b.curPalette.map((cp, si) => {
+    const tp = b.targetPalette[si];
+    return cp.map((c,ci) => lerpColor(c, tp[ci], bt));
+  });
+
+  const gr = bctx.createRadialGradient(cx,cy,0,cx,cy,b.baseR*1.15);
+  gr.addColorStop(0,   stops[0][0]);
+  gr.addColorStop(0.45,stops[0][1]);
+  gr.addColorStop(0.8, stops[0][2]);
+  gr.addColorStop(1,   stops[0][2]+'00');
+  bctx.fillStyle = gr;
+  bctx.fill();
+}
+
+let lastTS = 0;
+function animBlobs(ts) {
+  const dt = ts - lastTS; lastTS = ts;
+  bctx.clearRect(0,0,BW,BH);
+  blobs.forEach((b,i) => {
+    // Drift
+    b.dph += 0.0004 + i*0.00006;
+    const driftX = Math.cos(b.dph + i*1.7)*0.25;
+    const driftY = Math.sin(b.dph*0.8 + i*2.4)*0.25;
+    // Mouse pull (gentle)
+    const ddx = mx - b.cx, ddy = my - b.cy;
+    const dist = Math.sqrt(ddx*ddx+ddy*ddy)+1;
+    const mf = Math.max(0, 1 - dist/(BW*0.55)) * 0.04;
+    b.vx += driftX + ddx*mf*0.0008;
+    b.vy += driftY + ddy*mf*0.0008;
+    b.vx *= 0.94; b.vy *= 0.94;
+    b.cx += b.vx; b.cy += b.vy;
+    // Bounds
+    const m = b.baseR*0.25;
+    if(b.cx<m) b.vx+=0.6; if(b.cx>BW-m) b.vx-=0.6;
+    if(b.cy<m) b.vy+=0.6; if(b.cy>BH-m) b.vy-=0.6;
+    // Palette blend
+    b.blendT = Math.min(b.blendT + dt*0.001, 1);
+    drawBlob(b, ts);
+  });
+  requestAnimationFrame(animBlobs);
+}
+
+function shiftBlobColors(entryIdx) {
+  blobs.forEach((b,i) => {
+    b.curPalette  = b.targetPalette.map(s=>[...s]);
+    b.targetPalette = makePalette((b.pidx + entryIdx) % PALETTES.length);
+    b.blendT = 0;
+  });
+}
+
+// =====================================================================
+// TEXT SCRAMBLE
+// =====================================================================
+const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#@!%';
+function scramble(el, finalText, dur=700, delay=0) {
+  const len = finalText.length;
+  let startTime = null;
+  function step(ts) {
+    if(!startTime) startTime = ts;
+    const el_ = typeof el === 'string' ? document.getElementById(el) : el;
+    if(!el_) return;
+    const prog = Math.min((ts-startTime)/dur, 1);
+    let out = '';
+    for(let i=0; i<len; i++) {
+      const cp = prog*len - i;
+      if(cp>1) out += finalText[i];
+      else if(cp>0) out += CHARS[Math.floor(Math.random()*CHARS.length)];
+      else out += CHARS[Math.floor(Math.random()*CHARS.length)];
+    }
+    el_.textContent = out;
+    if(prog<1) requestAnimationFrame(step);
+    else el_.textContent = finalText;
+  }
+  setTimeout(()=>requestAnimationFrame(step), delay);
+}
+
+// =====================================================================
+// DIAGONAL CAROUSEL
+// =====================================================================
+const STEP_X = 58, STEP_Y = -68;
+
+function getAnchor() {
+  return { x: Math.max(80, innerWidth*0.1), y: Math.min(innerHeight*0.68, innerHeight-100) };
+}
+
+function buildTrack() {
+  const track = document.getElementById('dot-track');
+  track.innerHTML = '';
+  ENTRIES.forEach((e,i) => {
+    const item = document.createElement('div');
+    item.className = 'dot-item';
+    item.dataset.i = i;
+
+    const wrap = document.createElement('div'); wrap.className='dot-ripple-wrap';
+    const circle = document.createElement('div'); circle.className='dot-circle';
+    wrap.appendChild(circle);
+    for(let r=0;r<3;r++){const ring=document.createElement('div');ring.className='rring';wrap.appendChild(ring);}
+
+    const year = document.createElement('div'); year.className='dot-year'; year.textContent=e.year;
+
+    item.appendChild(wrap); item.appendChild(year);
+    item.addEventListener('click', ()=>goTo(i));
+    hoverCursor(item);
+    track.appendChild(item);
+  });
+  buildPips();
+  updateTrack();
+  updateTrackLine();
+}
+
+function updateTrack() {
+  const a = getAnchor();
+  const items = document.querySelectorAll('.dot-item');
+  items.forEach((item,i) => {
+    const off = i - cur;
+    const x = a.x + off*STEP_X;
+    const y = a.y + off*STEP_Y;
+    item.style.left = x+'px';
+    item.style.top  = y+'px';
+    const dist = Math.abs(off);
+    const op = Math.max(0.12, 1 - dist*0.2);
+    item.style.opacity = op;
+    item.classList.toggle('active', i===cur);
+  });
+  updatePips();
+}
+
+function updateTrackLine() {
+  // Draw diagonal line from first to last dot position
+  const a = getAnchor();
+  const first = { x: a.x + (0-cur)*STEP_X + 7, y: a.y + (0-cur)*STEP_Y + 7 };
+  const last  = { x: a.x + (ENTRIES.length-1-cur)*STEP_X + 7, y: a.y + (ENTRIES.length-1-cur)*STEP_Y + 7 };
+  const line = document.getElementById('tl-line');
+  line.setAttribute('x1', first.x); line.setAttribute('y1', first.y);
+  line.setAttribute('x2', last.x);  line.setAttribute('y2', last.y);
+}
+
+function buildPips() {
+  const cont = document.getElementById('pips'); cont.innerHTML='';
+  ENTRIES.forEach((_,i) => {
+    const p = document.createElement('div'); p.className='pip';
+    p.addEventListener('click',()=>goTo(i)); hoverCursor(p);
+    cont.appendChild(p);
+  });
+}
+function updatePips() {
+  document.querySelectorAll('.pip').forEach((p,i)=>p.classList.toggle('active',i===cur));
+}
+
+// =====================================================================
+// INFO PANEL
+// =====================================================================
+function updateInfoPanel(animate=true) {
+  const e = ENTRIES[cur][lang];
+  if(animate) {
+    const panel = document.getElementById('info-panel');
+    panel.style.opacity='0'; panel.style.transform='translateY(8px)';
+    setTimeout(()=>{
+      fillPanel(e);
+      panel.style.transition='opacity .3s,transform .3s';
+      panel.style.opacity='1'; panel.style.transform='translateY(0)';
+    },180);
+  } else {
+    fillPanel(e);
+  }
+}
+
+function fillPanel(e) {
+  document.getElementById('ip-tag').textContent = e.tag;
+  scramble(document.getElementById('ip-title'), e.title, 420);
+  document.getElementById('ip-sub').textContent = e.sub;
+  document.getElementById('ip-short').textContent = e.short;
+  const ul = document.getElementById('ip-points'); ul.innerHTML='';
+  e.pts.forEach(p=>{ const li=document.createElement('li'); li.textContent=p; ul.appendChild(li); });
+  document.getElementById('ip-index').textContent = String(cur+1).padStart(2,'0')+' / '+String(ENTRIES.length).padStart(2,'0');
+  document.getElementById('ip-more').textContent = I18N[lang].viewDetails;
+}
+
+// =====================================================================
+// NAVIGATION
+// =====================================================================
+function navigate(dir) {
+  if(animating) return;
+  const n = cur+dir;
+  if(n<0||n>=ENTRIES.length) return;
+  goTo(n);
+}
+
+function goTo(idx) {
+  if(idx===cur&&animating) return;
+  animating = true;
+  cur = idx;
+  updateTrack();
+  updateTrackLine();
+  updateInfoPanel(true);
+  shiftBlobColors(idx);
+  setTimeout(()=>animating=false, 420);
+}
+
+// =====================================================================
+// LANGUAGE
+// =====================================================================
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active', b.dataset.lang===l));
+  // Update i18n texts
+  document.getElementById('eyebrow').textContent = I18N[l].eyebrow;
+  document.getElementById('hero-sub').textContent = I18N[l].heroSub;
+  document.getElementById('sp-role').textContent  = I18N[l].spRole;
+  document.getElementById('sp-bio').textContent   = I18N[l].spBio;
+  document.getElementById('contact-h').textContent = I18N[l].contactH;
+  document.getElementById('avail-val').textContent = I18N[l].avail;
+  document.getElementById('btn-about').textContent  = I18N[l].btnAbout;
+  document.getElementById('btn-contact').textContent = I18N[l].btnContact;
+  updateInfoPanel(false);
+}
+
+// =====================================================================
+// PANELS
+// =====================================================================
+function openPanel(name) {
+  document.getElementById('overlay').classList.add('on');
+  ['about','contact'].forEach(n=>{
+    document.getElementById(n+'-panel').classList.toggle('on', n===name);
+  });
+}
+function closePanels() {
+  document.getElementById('overlay').classList.remove('on');
+  document.querySelectorAll('.side-panel').forEach(p=>p.classList.remove('on'));
+}
+
+// =====================================================================
+// MODAL
+// =====================================================================
+function openModal() {
+  const e = ENTRIES[cur][lang];
+  document.getElementById('modal-body').innerHTML = `
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.22em;color:var(--accent);margin-bottom:10px">${e.tag}</div>
+    <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:26px;color:var(--text);margin-bottom:5px;line-height:1.15">${e.title}</h2>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--secondary);margin-bottom:18px">${e.sub}</div>
+    <p style="font-size:14px;color:var(--text-light);font-style:italic;line-height:1.65;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--glass-border)">${e.short}</p>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.22em;color:var(--text-light);text-transform:uppercase;margin-bottom:14px">HIGHLIGHTS</div>
+    <ul style="list-style:none;display:flex;flex-direction:column;gap:12px">
+      ${e.pts.map(p=>`<li style="font-size:13.5px;color:var(--text);line-height:1.6;padding-left:20px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">→</span>${p}</li>`).join('')}
+    </ul>
+  `;
+  document.getElementById('modal').classList.add('on');
+}
+function closeModal() { document.getElementById('modal').classList.remove('on'); }
+
+// =====================================================================
+// SKILLS GRID
+// =====================================================================
+function buildSkills() {
+  const wrap = document.getElementById('skills-wrap');
+  SKILLS.forEach(s => {
+    const chip = document.createElement('div'); chip.className='skill-chip'; chip.textContent=s;
+    wrap.appendChild(chip);
+  });
+}
+
+// =====================================================================
+// EVENTS
+// =====================================================================
+document.getElementById('prev-btn').addEventListener('click', ()=>navigate(-1));
+document.getElementById('next-btn').addEventListener('click', ()=>navigate(1));
+document.getElementById('btn-about').addEventListener('click', ()=>openPanel('about'));
+document.getElementById('btn-contact').addEventListener('click', ()=>openPanel('contact'));
+document.getElementById('overlay').addEventListener('click', closePanels);
+document.getElementById('about-close').addEventListener('click', closePanels);
+document.getElementById('contact-close').addEventListener('click', closePanels);
+document.getElementById('ip-more').addEventListener('click', openModal);
+document.getElementById('mc-close').addEventListener('click', closeModal);
+document.getElementById('modal').addEventListener('click', e=>{ if(e.target===document.getElementById('modal')) closeModal(); });
+
+document.querySelectorAll('.lang-btn').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.lang)));
+
+[document.getElementById('prev-btn'),document.getElementById('next-btn'),
+ document.getElementById('btn-about'),document.getElementById('btn-contact'),
+ document.getElementById('ip-more'),document.getElementById('mc-close'),
+ document.getElementById('about-close'),document.getElementById('contact-close')
+].forEach(hoverCursor);
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowUp') navigate(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowDown') navigate(-1);
+  if(e.key==='Escape'){closePanels();closeModal();}
+});
+document.addEventListener('touchstart', e=>{touchX=e.touches[0].clientX;touchY=e.touches[0].clientY;},{passive:true});
+document.addEventListener('touchend', e=>{
+  const dx=e.changedTouches[0].clientX-touchX, dy=e.changedTouches[0].clientY-touchY;
+  if(Math.abs(dx)>40) navigate(dx<0?1:-1);
+  else if(Math.abs(dy)>40) navigate(dy<0?1:-1);
+},{passive:true});
+
+window.addEventListener('resize', ()=>{ initBlobs(); updateTrack(); updateTrackLine(); });
+
+// =====================================================================
+// INIT
+// =====================================================================
+function init() {
+  initBlobs();
+  buildTrack();
+  buildSkills();
+  updateInfoPanel(false);
+  // Hero name scramble on load
+  setTimeout(()=>{
+    scramble('sc-first','RAUL',900,0);
+    scramble('sc-last','ZHOU',900,180);
+  }, 400);
+  requestAnimationFrame(animBlobs);
+}
+
+window.addEventListener('load', init);
+</script>
+</body>
+</html>

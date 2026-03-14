@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raul Zhou — AI Consultant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: #f5f2ed;
+  color: #4a453e;
+  cursor: none;
+  user-select: none;
+}
+
+/* ===== CUSTOM CURSOR ===== */
+#cursor-dot {
+  position: fixed;
+  width: 6px; height: 6px;
+  background: #9a7420;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: background 0.2s;
+}
+#cursor-ring {
+  position: fixed;
+  width: 32px; height: 32px;
+  border: 1.5px solid rgba(154,116,32,0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s, border-color 0.3s;
+}
+body.cursor-hover #cursor-ring {
+  width: 48px; height: 48px;
+  border-color: rgba(154,116,32,0.8);
+}
+
+/* ===== MATRIX CANVAS ===== */
+#matrix-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ===== LAYOUT ===== */
+#app {
+  position: relative;
+  z-index: 1;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== NAV ===== */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  background: rgba(245,242,237,0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(154,116,32,0.12);
+}
+.nav-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #9a7420;
+  letter-spacing: 0.05em;
+}
+.nav-logo span { color: #c44d2a; }
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.nav-clock {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: rgba(74,69,62,0.5);
+  letter-spacing: 0.08em;
+}
+.nav-btn {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(74,69,62,0.6);
+  background: none;
+  border: 1px solid rgba(154,116,32,0.25);
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: none;
+  transition: all 0.2s;
+  letter-spacing: 0.06em;
+}
+.nav-btn:hover { background: rgba(154,116,32,0.08); color: #9a7420; border-color: rgba(154,116,32,0.5); }
+.nav-btn.active { background: rgba(154,116,32,0.12); color: #9a7420; border-color: #9a7420; }
+
+/* ===== MAIN STAGE ===== */
+#stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 56px;
+  height: 100vh;
+}
+
+/* ===== CAROUSEL AREA ===== */
+#carousel-area {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+  width: 100%;
+  max-width: 1100px;
+  padding: 0 32px;
+}
+
+/* ===== DOT TRACK ===== */
+#dot-track-wrapper {
+  position: relative;
+  width: 60px;
+  height: 340px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+#dot-track {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  transition: top 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.dot-item {
+  position: relative;
+  width: 60px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: none;
+  flex-shrink: 0;
+}
+
+.dot-outer {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.dot-inner {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(74,69,62,0.25);
+  transition: all 0.4s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.dot-item:hover .dot-inner {
+  background: rgba(154,116,32,0.5);
+  transform: scale(1.2);
+}
+
+.dot-item.active .dot-inner {
+  background: #9a7420;
+  width: 14px;
+  height: 14px;
+  box-shadow: 0 0 12px rgba(154,116,32,0.5);
+}
+
+/* Ripple rings on active dot */
+.dot-ripple {
+  position: absolute;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid #9a7420;
+  animation: dotRipple 2s ease-out infinite;
+  opacity: 0;
+}
+.dot-ripple:nth-child(2) { animation-delay: 0.6s; }
+.dot-ripple:nth-child(3) { animation-delay: 1.2s; }
+@keyframes dotRipple {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(3.5); opacity: 0; }
+}
+
+/* Pip indicators */
+.dot-pip {
+  position: absolute;
+  right: 6px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #9a7420;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.dot-item.active .dot-pip { opacity: 1; }
+
+/* ===== HEX BUTTONS ===== */
+.hex-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+.hex-btn {
+  width: 36px;
+  height: 36px;
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(154,116,32,0.3);
+  clip-path: polygon(50% 0%, 95% 25%, 95% 75%, 50% 100%, 5% 75%, 5% 25%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: none;
+  transition: all 0.2s;
+  color: #9a7420;
+}
+.hex-btn:hover {
+  background: rgba(154,116,32,0.15);
+  border-color: #9a7420;
+}
+.hex-btn svg { width: 14px; height: 14px; pointer-events: none; }
+
+/* ===== INFO PANEL ===== */
+#info-panel {
+  flex: 1;
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(154,116,32,0.18);
+  border-radius: 16px;
+  padding: 36px 40px;
+  min-height: 320px;
+  max-width: 560px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(154,116,32,0.08), 0 2px 8px rgba(0,0,0,0.04);
+  transition: opacity 0.3s;
+}
+
+#info-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #9a7420, transparent);
+  opacity: 0.4;
+}
+
+.panel-index {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: rgba(154,116,32,0.5);
+  letter-spacing: 0.15em;
+  margin-bottom: 8px;
+}
+
+.panel-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  color: #c44d2a;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+
+.panel-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #4a453e;
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+
+.panel-subtitle {
+  font-size: 0.85rem;
+  color: rgba(74,69,62,0.6);
+  margin-bottom: 20px;
+}
+
+.panel-stats {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+.stat-item {
+  display: flex;
+  flex-direction: column;
+}
+.stat-value {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #9a7420;
+}
+.stat-label {
+  font-size: 0.7rem;
+  color: rgba(74,69,62,0.5);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.panel-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  border-radius: 3px;
+  background: rgba(154,116,32,0.08);
+  border: 1px solid rgba(154,116,32,0.2);
+  color: #9a7420;
+  letter-spacing: 0.05em;
+}
+
+.panel-cta {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+.btn-detail {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: none;
+  transition: all 0.2s;
+  letter-spacing: 0.04em;
+}
+.btn-primary {
+  background: #9a7420;
+  color: white;
+  border: none;
+}
+.btn-primary:hover { background: #7d5e1a; }
+.btn-ghost {
+  background: transparent;
+  color: #9a7420;
+  border: 1px solid rgba(154,116,32,0.4);
+}
+.btn-ghost:hover { background: rgba(154,116,32,0.08); }
+
+/* Panel transition */
+.panel-content {
+  animation: panelIn 0.4s ease;
+}
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== SIDE PANELS ===== */
+.side-panel {
+  position: fixed;
+  top: 0; right: -420px;
+  width: 400px;
+  height: 100vh;
+  background: rgba(245,242,237,0.95);
+  backdrop-filter: blur(24px);
+  border-left: 1px solid rgba(154,116,32,0.18);
+  z-index: 200;
+  transition: right 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  padding: 80px 40px 40px;
+  overflow-y: auto;
+}
+.side-panel.open { right: 0; }
+
+.side-panel h2 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #4a453e;
+  margin-bottom: 24px;
+}
+.side-panel p {
+  font-size: 0.9rem;
+  line-height: 1.7;
+  color: rgba(74,69,62,0.75);
+  margin-bottom: 16px;
+}
+.side-panel .close-btn {
+  position: absolute;
+  top: 20px; right: 20px;
+  width: 32px; height: 32px;
+  background: rgba(154,116,32,0.08);
+  border: 1px solid rgba(154,116,32,0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: none;
+  color: #9a7420;
+  transition: all 0.2s;
+}
+.side-panel .close-btn:hover { background: rgba(154,116,32,0.15); }
+
+.contact-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(154,116,32,0.1);
+  font-size: 0.88rem;
+}
+.contact-row .icon {
+  width: 32px; height: 32px;
+  background: rgba(154,116,32,0.08);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9a7420;
+  flex-shrink: 0;
+}
+.contact-label { font-size: 0.7rem; color: rgba(74,69,62,0.5); display: block; }
+.contact-value { font-weight: 500; color: #4a453e; }
+
+.skill-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 16px;
+}
+
+/* ===== MODAL ===== */
+#modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(74,69,62,0.4);
+  backdrop-filter: blur(8px);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+#modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+#modal {
+  background: rgba(245,242,237,0.97);
+  border: 1px solid rgba(154,116,32,0.2);
+  border-radius: 16px;
+  padding: 48px;
+  max-width: 560px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  transform: scale(0.95);
+  transition: transform 0.3s;
+  position: relative;
+}
+#modal-overlay.open #modal { transform: scale(1); }
+
+#modal h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+#modal .modal-date {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: #c44d2a;
+  letter-spacing: 0.12em;
+  margin-bottom: 24px;
+}
+#modal ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#modal ul li {
+  font-size: 0.88rem;
+  color: rgba(74,69,62,0.8);
+  line-height: 1.6;
+  padding-left: 18px;
+  position: relative;
+}
+#modal ul li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: #9a7420;
+  font-size: 0.75rem;
+}
+.modal-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 32px; height: 32px;
+  background: rgba(154,116,32,0.08);
+  border: 1px solid rgba(154,116,32,0.2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: none;
+  color: #9a7420;
+  font-size: 1rem;
+}
+.modal-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 20px;
+}
+
+/* ===== PANEL OVERLAY ===== */
+#panel-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 199;
+  display: none;
+}
+#panel-overlay.open { display: block; }
+
+/* ===== SKILLS TICKER ===== */
+#skills-ticker {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 32px;
+  background: rgba(245,242,237,0.85);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(154,116,32,0.1);
+  z-index: 50;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+.ticker-track {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  animation: ticker 30s linear infinite;
+  white-space: nowrap;
+}
+.ticker-item {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  color: rgba(154,116,32,0.55);
+  letter-spacing: 0.08em;
+}
+.ticker-sep {
+  width: 3px; height: 3px;
+  border-radius: 50%;
+  background: rgba(154,116,32,0.3);
+  flex-shrink: 0;
+}
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ===== WAVE FLASH ===== */
+#wave-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  #carousel-area {
+    flex-direction: column;
+    gap: 24px;
+    padding: 16px;
+    align-items: center;
+  }
+  #dot-track-wrapper {
+    width: 100%;
+    height: 60px;
+    overflow: hidden;
+  }
+  #dot-track {
+    flex-direction: row;
+    top: 50% !important;
+    left: 0;
+    transform: translateY(-50%);
+    transition: left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .dot-item { width: 56px; height: 60px; }
+  #info-panel { max-width: 100%; min-height: 260px; padding: 24px; }
+  .side-panel { width: 100%; right: -100%; }
+}
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- Matrix Canvas -->
+<canvas id="matrix-canvas"></canvas>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-logo">RZ_<span>周</span></div>
+  <div class="nav-right">
+    <div class="nav-clock" id="live-clock">00:00:00</div>
+    <button class="nav-btn" id="btn-about" onclick="togglePanel('about')">About</button>
+    <button class="nav-btn" id="btn-contact" onclick="togglePanel('contact')">Contact</button>
+    <button class="nav-btn" id="btn-lang" onclick="toggleLang()">ES</button>
+  </div>
+</nav>
+
+<!-- Stage -->
+<div id="stage">
+  <div id="carousel-area">
+
+    <!-- Dot Track -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">
+      <div id="dot-track-wrapper">
+        <div id="dot-track">
+          <!-- dots injected by JS -->
+        </div>
+      </div>
+      <div class="hex-nav">
+        <div class="hex-btn" onclick="navigate(-1)" title="Previous">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3,9 7,5 11,9"/>
+          </svg>
+        </div>
+        <div class="hex-btn" onclick="navigate(1)" title="Next">
+          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3,5 7,9 11,5"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Panel -->
+    <div id="info-panel">
+      <div class="panel-content" id="panel-content">
+        <!-- injected by JS -->
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Skills Ticker -->
+<div id="skills-ticker">
+  <div class="ticker-track" id="ticker-track"></div>
+</div>
+
+<!-- About Panel -->
+<div class="side-panel" id="panel-about">
+  <div class="close-btn" onclick="closePanel('about')">✕</div>
+  <h2 id="about-title">About</h2>
+  <p id="about-p1">Raul Zhou is a 28-year-old AI consultant and entrepreneur based in Guadalajara, Mexico. Of Chinese-Mexican heritage, he bridges cutting-edge technology with real-world business impact.</p>
+  <p id="about-p2">Holding a B.S. in Biotechnology and an M.S. in Artificial Intelligence from Tec de Monterrey, Raul operates at the intersection of life sciences and intelligent systems.</p>
+  <p id="about-p3">As the founder of Eigen Atlas, he builds AI-native SaaS products. His consulting practice focuses on enterprise AI strategy and implementation at $1,000/hr.</p>
+  <div class="skill-grid" id="about-skills"></div>
+</div>
+
+<!-- Contact Panel -->
+<div class="side-panel" id="panel-contact">
+  <div class="close-btn" onclick="closePanel('contact')">✕</div>
+  <h2 id="contact-title">Contact</h2>
+  <div class="contact-row">
+    <div class="icon">@</div>
+    <div>
+      <span class="contact-label">Email</span>
+      <span class="contact-value">raul.chio.leon@gmail.com</span>
+    </div>
+  </div>
+  <div class="contact-row">
+    <div class="icon">📍</div>
+    <div>
+      <span class="contact-label" id="loc-label">Location</span>
+      <span class="contact-value">Guadalajara, México</span>
+    </div>
+  </div>
+  <div class="contact-row">
+    <div class="icon">⚡</div>
+    <div>
+      <span class="contact-label" id="rate-label">Rate</span>
+      <span class="contact-value">$1,000 USD / hr</span>
+    </div>
+  </div>
+  <div class="contact-row">
+    <div class="icon">🏢</div>
+    <div>
+      <span class="contact-label" id="company-label">Company</span>
+      <span class="contact-value">Eigen Atlas</span>
+    </div>
+  </div>
+</div>
+
+<!-- Panel Overlay -->
+<div id="panel-overlay" onclick="closeAllPanels()"></div>
+
+<!-- Detail Modal -->
+<div id="modal-overlay" onclick="closeModal(event)">
+  <div id="modal">
+    <div class="modal-close" onclick="closeModal(null, true)">✕</div>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+<script>
+// ===== DATA =====
+const ENTRIES = [
+  {
+    id: 0,
+    date: { en: 'AUG 2015', es: 'AGO 2015' },
+    title: { en: 'B.S. Biotechnology', es: 'Ing. Biotecnología' },
+    subtitle: { en: 'Tec de Monterrey', es: 'Tec de Monterrey' },
+    stats: [
+      { value: '4', suffix: '', label: { en: 'Years', es: 'Años' } },
+      { value: '3.9', suffix: '', label: { en: 'GPA', es: 'Promedio' } },
+    ],
+    tags: ['Genomics', 'Biochemistry', 'MATLAB', 'Python', 'Stats'],
+    bullets: {
+      en: [
+        'Specialized in computational biology and bioinformatics pipelines',
+        'Thesis on machine learning applied to genomic sequence classification',
+        'Published research on protein folding prediction models',
+        'Dean\'s List for 4 consecutive semesters',
+      ],
+      es: [
+        'Especialización en biología computacional y pipelines bioinformáticos',
+        'Tesis sobre aprendizaje automático aplicado a clasificación de secuencias genómicas',
+        'Investigación publicada sobre modelos de predicción de plegamiento de proteínas',
+        'Lista del Decano por 4 semestres consecutivos',
+      ],
+    },
+  },
+  {
+    id: 1,
+    date: { en: 'JAN 2020', es: 'ENE 2020' },
+    title: { en: 'M.S. Artificial Intelligence', es: 'Maestría en IA' },
+    subtitle: { en: 'Tec de Monterrey', es: 'Tec de Monterrey' },
+    stats: [
+      { value: '2', suffix: '', label: { en: 'Years', es: 'Años' } },
+      { value: '5', suffix: '+', label: { en: 'Papers', es: 'Papers' } },
+    ],
+    tags: ['PyTorch', 'TensorFlow', 'NLP', 'Computer Vision', 'Deep Learning'],
+    bullets: {
+      en: [
+        'Focus on deep learning, natural language processing, and computer vision',
+        'Graduate research on transformer-based biomedical text mining',
+        'Collaboration with hospital networks on clinical NLP systems',
+        'Graduated with distinction — top 5% of cohort',
+      ],
+      es: [
+        'Enfoque en deep learning, procesamiento de lenguaje natural y visión por computadora',
+        'Investigación de posgrado en minería de texto biomédico basado en transformers',
+        'Colaboración con redes hospitalarias en sistemas de NLP clínico',
+        'Graduado con distinción — top 5% de la cohorte',
+      ],
+    },
+  },
+  {
+    id: 2,
+    date: { en: 'MAR 2022', es: 'MAR 2022' },
+    title: { en: 'Medical AI Consulting', es: 'Consultoría IA Médica' },
+    subtitle: { en: 'Healthcare Systems', es: 'Sistemas de Salud' },
+    stats: [
+      { value: '15', suffix: '+', label: { en: 'Clients', es: 'Clientes' } },
+      { value: '8', suffix: '', label: { en: 'Systems', es: 'Sistemas' } },
+    ],
+    tags: ['LLMs', 'OpenAI', 'Anthropic', 'HIPAA', 'Python', 'SQL'],
+    bullets: {
+      en: [
+        'Built AI diagnostic assistance tools for 15+ medical practices across Mexico',
+        'Deployed NLP systems for automated clinical note generation saving 2hrs/day per physician',
+        'Integrated LLM pipelines with EHR systems (Epic, HL7, FHIR)',
+        'Trained medical staff on AI workflow integration and best practices',
+      ],
+      es: [
+        'Herramientas de asistencia diagnóstica IA para 15+ consultorios médicos en México',
+        'Sistemas NLP para generación automática de notas clínicas ahorrando 2hrs/día por médico',
+        'Integración de pipelines LLM con sistemas EHR (Epic, HL7, FHIR)',
+        'Capacitación de personal médico en integración de flujos de trabajo con IA',
+      ],
+    },
+  },
+  {
+    id: 3,
+    date: { en: 'JUN 2023', es: 'JUN 2023' },
+    title: { en: 'Enterprise AI at $1K/hr', es: 'IA Empresarial $1K/hr' },
+    subtitle: { en: 'Independent Practice', es: 'Práctica Independiente' },
+    stats: [
+      { value: '1000', suffix: '/hr', label: { en: '$ USD Rate', es: '$ USD Tarifa' } },
+      { value: '20', suffix: '+', label: { en: 'Projects', es: 'Proyectos' } },
+    ],
+    tags: ['n8n', 'Retell', 'GHL', 'OpenAI', 'Automation', 'Docker'],
+    bullets: {
+      en: [
+        'Established premium consulting practice at $1,000 USD/hour rate',
+        'Architected end-to-end AI automation stacks for Fortune 500 subsidiaries',
+        'Voice AI systems with Retell reducing call center costs by 60%',
+        'Built n8n automation pipelines handling millions of events/month',
+      ],
+      es: [
+        'Consultoría premium a $1,000 USD/hora establecida',
+        'Arquitectura de stacks de automatización IA para subsidiarias Fortune 500',
+        'Sistemas de IA de voz con Retell reduciendo costos de call center 60%',
+        'Pipelines de automatización n8n manejando millones de eventos/mes',
+      ],
+    },
+  },
+  {
+    id: 4,
+    date: { en: 'JAN 2024', es: 'ENE 2024' },
+    title: { en: 'Eigen Atlas SaaS', es: 'Eigen Atlas SaaS' },
+    subtitle: { en: 'Founder & CTO', es: 'Fundador & CTO' },
+    stats: [
+      { value: '1', suffix: '', label: { en: 'Product', es: 'Producto' } },
+      { value: '100', suffix: '+', label: { en: 'Users', es: 'Usuarios' } },
+    ],
+    tags: ['React', 'Node', 'TypeScript', 'BigQuery', 'OpenAI', 'Anthropic'],
+    bullets: {
+      en: [
+        'Founded Eigen Atlas — AI-native SaaS platform for business intelligence',
+        'Full-stack architecture: React + Node/TS backend, BigQuery data warehouse',
+        'Integrated multi-LLM orchestration (OpenAI, Anthropic, custom fine-tunes)',
+        'Bootstrapped to 100+ paying users in under 6 months',
+      ],
+      es: [
+        'Fundé Eigen Atlas — plataforma SaaS nativa de IA para inteligencia de negocios',
+        'Arquitectura full-stack: React + backend Node/TS, data warehouse BigQuery',
+        'Orquestación multi-LLM integrada (OpenAI, Anthropic, fine-tunes personalizados)',
+        'Bootstrapped a 100+ usuarios pagos en menos de 6 meses',
+      ],
+    },
+  },
+  {
+    id: 5,
+    date: { en: 'MAR 2026', es: 'MAR 2026' },
+    title: { en: 'John Deere AI Partnership', es: 'Alianza IA John Deere' },
+    subtitle: { en: 'Strategic AI Advisor', es: 'Asesor Estratégico de IA' },
+    stats: [
+      { value: '1', suffix: '', label: { en: 'Enterprise', es: 'Empresa' } },
+      { value: '∞', suffix: '', label: { en: 'Scale', es: 'Escala' } },
+    ],
+    tags: ['AgriTech', 'Computer Vision', 'Edge AI', 'Python', 'Docker', 'Linux'],
+    bullets: {
+      en: [
+        'Strategic AI advisor for John Deere\'s Latin America digital transformation',
+        'Computer vision systems for automated crop health monitoring at scale',
+        'Edge AI deployment on precision agriculture hardware fleet',
+        'Integrating LLM workflows into field operations and decision support',
+      ],
+      es: [
+        'Asesor estratégico de IA para la transformación digital de John Deere en Latinoamérica',
+        'Sistemas de visión por computadora para monitoreo automatizado de salud de cultivos a escala',
+        'Despliegue de Edge AI en flota de hardware de agricultura de precisión',
+        'Integración de flujos LLM en operaciones de campo y soporte de decisiones',
+      ],
+    },
+  },
+];
+
+const SKILLS = ['PyTorch','TensorFlow','LLMs','NLP','Computer Vision','n8n','Retell','OpenAI API','Anthropic','GHL','Python','JavaScript','TypeScript','Node.js','React','SQL','BigQuery','Pandas','Docker','Linux','Git'];
+
+// ===== STATE =====
+let currentIdx = 0;
+let lang = 'en';
+let openPanelId = null;
+let animatingCounter = false;
+let counterAnimations = [];
+
+// ===== MATRIX CANVAS =====
+const canvas = document.getElementById('matrix-canvas');
+const ctx = canvas.getContext('2d');
+let cells = [];
+let cellW, cellH, cols, rows;
+const CELL_SIZE = 28;
+let mouseX = -999, mouseY = -999;
+let waveActive = false;
+let waveProgress = 0;
+let waveDir = 1; // 1 = left-to-right diagonal
+
+function initCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  cols = Math.ceil(canvas.width / CELL_SIZE) + 1;
+  rows = Math.ceil(canvas.height / CELL_SIZE) + 1;
+  cellW = canvas.width / (cols - 1);
+  cellH = canvas.height / (rows - 1);
+  cells = [];
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      cells.push({ r, c, glow: 0, sonar: 0, sonarAge: 0 });
+    }
+  }
+}
+
+function triggerWave(dir = 1) {
+  waveActive = true;
+  waveDir = dir;
+  waveProgress = 0;
+}
+
+let sonarRipples = []; // {x, y, age, maxAge}
+
+function addSonarRipple(x, y) {
+  sonarRipples.push({ x, y, age: 0, maxAge: 60 });
+}
+
+let lastSonarTime = 0;
+function updateSonar(ts) {
+  if (ts - lastSonarTime > 80) {
+    lastSonarTime = ts;
+    addSonarRipple(mouseX, mouseY);
+  }
+}
+
+function renderCanvas(ts) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Update sonar ripples
+  sonarRipples = sonarRipples.filter(r => r.age < r.maxAge);
+  sonarRipples.forEach(r => r.age++);
+
+  // Update wave
+  if (waveActive) {
+    waveProgress += 0.022;
+    if (waveProgress > 1.5) waveActive = false;
+  }
+
+  for (let i = 0; i < cells.length; i++) {
+    const cell = cells[i];
+    const cx = cell.c * cellW;
+    const cy = cell.r * cellH;
+
+    // Base grid (subtle)
+    ctx.strokeStyle = 'rgba(154,116,32,0.055)';
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(cx, cy, cellW, cellH);
+
+    let glow = 0;
+
+    // Mouse proximity
+    const dx = cx - mouseX, dy = cy - mouseY;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    const proximity = Math.max(0, 1 - dist / 160);
+    glow = Math.max(glow, proximity * proximity * 0.9);
+
+    // Sonar ripples
+    sonarRipples.forEach(rip => {
+      const rdx = cx - rip.x, rdy = cy - rip.y;
+      const rd = Math.sqrt(rdx*rdx + rdy*rdy);
+      const ripProgress = rip.age / rip.maxAge;
+      const ripRadius = ripProgress * 220;
+      const ripWidth = 40;
+      const ripDist = Math.abs(rd - ripRadius);
+      if (ripDist < ripWidth) {
+        const ripGlow = (1 - ripDist/ripWidth) * (1 - ripProgress) * 0.7;
+        glow = Math.max(glow, ripGlow);
+      }
+    });
+
+    // Wave sweep
+    if (waveActive) {
+      const normalizedPos = (cx + cy * 0.6) / (canvas.width + canvas.height * 0.6);
+      const waveFront = waveProgress - 0.12;
+      const waveTail = waveProgress;
+      if (normalizedPos > waveFront && normalizedPos < waveTail) {
+        const t = (normalizedPos - waveFront) / (waveTail - waveFront);
+        const waveGlow = Math.sin(t * Math.PI) * 0.85;
+        glow = Math.max(glow, waveGlow);
+      }
+    }
+
+    if (glow > 0.01) {
+      // Fill cell with glow
+      const alpha = glow * 0.18;
+      ctx.fillStyle = `rgba(154,116,32,${alpha})`;
+      ctx.fillRect(cx + 0.5, cy + 0.5, cellW - 1, cellH - 1);
+
+      // Bright border
+      const borderAlpha = glow * 0.55;
+      ctx.strokeStyle = `rgba(154,116,32,${borderAlpha})`;
+      ctx.lineWidth = 0.8;
+      ctx.strokeRect(cx, cy, cellW, cellH);
+
+      // Dot at corner
+      if (glow > 0.4) {
+        ctx.fillStyle = `rgba(196,77,42,${(glow - 0.4) * 0.6})`;
+        ctx.beginPath();
+        ctx.arc(cx + cellW/2, cy + cellH/2, 1.5, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
+  }
+
+  requestAnimationFrame(renderCanvas);
+}
+
+// ===== DOTS SETUP =====
+function buildDots() {
+  const track = document.getElementById('dot-track');
+  track.innerHTML = '';
+  ENTRIES.forEach((e, i) => {
+    const item = document.createElement('div');
+    item.className = 'dot-item' + (i === currentIdx ? ' active' : '');
+    item.dataset.idx = i;
+    item.innerHTML = `
+      <div class="dot-outer">
+        <div class="dot-ripple"></div>
+        <div class="dot-ripple"></div>
+        <div class="dot-ripple"></div>
+        <div class="dot-inner"></div>
+      </div>
+      <div class="dot-pip"></div>
+    `;
+    item.addEventListener('click', () => goTo(i));
+    track.appendChild(item);
+  });
+  positionTrack();
+}
+
+function positionTrack() {
+  const track = document.getElementById('dot-track');
+  const wrapper = document.getElementById('dot-track-wrapper');
+  const isMobile = window.innerWidth <= 768;
+
+  if (!isMobile) {
+    const itemH = 56;
+    const anchorY = wrapper.offsetHeight / 2;
+    const offset = anchorY - currentIdx * itemH - itemH / 2;
+    track.style.top = offset + 'px';
+    track.style.left = '';
+  } else {
+    const itemW = 56;
+    const anchorX = wrapper.offsetWidth / 2;
+    const offset = anchorX - currentIdx * itemW - itemW / 2;
+    track.style.left = offset + 'px';
+    track.style.top = '';
+  }
+}
+
+function updateDotOpacities() {
+  const items = document.querySelectorAll('.dot-item');
+  const opacities = [1, 0.5, 0.22, 0.08, 0];
+  items.forEach((item, i) => {
+    const dist = Math.abs(i - currentIdx);
+    const op = dist < opacities.length ? opacities[dist] : 0;
+    item.style.opacity = op;
+    item.classList.toggle('active', i === currentIdx);
+  });
+}
+
+// ===== COUNTER ANIMATION =====
+function animateCounter(el, target, suffix, duration = 900) {
+  const start = performance.now();
+  const isFloat = String(target).includes('.');
+  
+  function tick(now) {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    const val = isFloat 
+      ? (eased * target).toFixed(1)
+      : Math.round(eased * target);
+    el.textContent = val + suffix;
+    if (progress < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// ===== PANEL RENDER =====
+function renderPanel(idx, animate = true) {
+  const entry = ENTRIES[idx];
+  const content = document.getElementById('panel-content');
+
+  if (animate) {
+    content.style.animation = 'none';
+    content.offsetHeight; // reflow
+    content.style.animation = '';
+  }
+
+  const statsHTML = entry.stats.map((s, si) => {
+    const isSpecial = s.value === '∞';
+    return `<div class="stat-item">
+      <div class="stat-value" id="stat-${idx}-${si}">${isSpecial ? '∞' : '0'}${isSpecial ? '' : s.suffix}</div>
+      <div class="stat-label">${s.label[lang]}</div>
+    </div>`;
+  }).join('');
+
+  const tagsHTML = entry.tags.map(t => `<span class="tag">${t}</span>`).join('');
+
+  content.innerHTML = `
+    <div class="panel-index">0${idx + 1} / 0${ENTRIES.length}</div>
+    <div class="panel-date">${entry.date[lang]}</div>
+    <div class="panel-title">${entry.title[lang]}</div>
+    <div class="panel-subtitle">${entry.subtitle[lang]}</div>
+    <div class="panel-stats">${statsHTML}</div>
+    <div class="panel-tags">${tagsHTML}</div>
+    <div class="panel-cta">
+      <button class="btn-detail btn-primary" onclick="openModal(${idx})">${lang === 'en' ? 'Details' : 'Detalles'}</button>
+    </div>
+  `;
+
+  // Animate counters
+  entry.stats.forEach((s, si) => {
+    if (s.value === '∞') return;
+    const el = document.getElementById(`stat-${idx}-${si}`);
+    if (el) {
+      setTimeout(() => {
+        animateCounter(el, parseFloat(s.value), s.suffix, 800);
+      }, 200);
+    }
+  });
+}
+
+// ===== NAVIGATION =====
+function goTo(idx) {
+  if (idx < 0 || idx >= ENTRIES.length) return;
+  const dir = idx > currentIdx ? 1 : -1;
+  currentIdx = idx;
+  updateDotOpacities();
+  positionTrack();
+  renderPanel(idx);
+  triggerWave(dir);
+}
+
+function navigate(dir) {
+  goTo(Math.max(0, Math.min(ENTRIES.length - 1, currentIdx + dir)));
+}
+
+// ===== MODAL =====
+function openModal(idx) {
+  const entry = ENTRIES[idx];
+  const bulletsHTML = entry.bullets[lang].map(b => `<li>${b}</li>`).join('');
+  const tagsHTML = entry.tags.map(t => `<span class="tag">${t}</span>`).join('');
+
+  document.getElementById('modal-content').innerHTML = `
+    <h3>${entry.title[lang]}</h3>
+    <div class="modal-date">${entry.date[lang]} — ${entry.subtitle[lang]}</div>
+    <ul>${bulletsHTML}</ul>
+    <div class="modal-tags">${tagsHTML}</div>
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal(e, force = false) {
+  if (force || (e && e.target === document.getElementById('modal-overlay'))) {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+}
+
+// ===== SIDE PANELS =====
+function togglePanel(id) {
+  if (openPanelId === id) {
+    closePanel(id);
+  } else {
+    closeAllPanels();
+    openPanel(id);
+  }
+}
+
+function openPanel(id) {
+  document.getElementById('panel-' + id).classList.add('open');
+  document.getElementById('panel-overlay').classList.add('open');
+  document.getElementById('btn-' + id).classList.add('active');
+  openPanelId = id;
+}
+
+function closePanel(id) {
+  document.getElementById('panel-' + id).classList.remove('open');
+  document.getElementById('panel-overlay').classList.remove('open');
+  document.getElementById('btn-' + id).classList.remove('active');
+  openPanelId = null;
+}
+
+function closeAllPanels() {
+  ['about', 'contact'].forEach(id => {
+    document.getElementById('panel-' + id).classList.remove('open');
+    const btn = document.getElementById('btn-' + id);
+    if (btn) btn.classList.remove('active');
+  });
+  document.getElementById('panel-overlay').classList.remove('open');
+  openPanelId = null;
+}
+
+// ===== LANGUAGE TOGGLE =====
+function toggleLang() {
+  lang = lang === 'en' ? 'es' : 'en';
+  document.getElementById('btn-lang').textContent = lang === 'en' ? 'ES' : 'EN';
+  renderPanel(currentIdx, false);
+  updateAboutPanel();
+  updateContactPanel();
+}
+
+function updateAboutPanel() {
+  if (lang === 'es') {
+    document.getElementById('about-title').textContent = 'Acerca de';
+    document.getElementById('about-p1').textContent = 'Raul Zhou es un consultor de IA y emprendedor de 28 años radicado en Guadalajara, México. De herencia chino-mexicana, conecta tecnología de vanguardia con impacto empresarial real.';
+    document.getElementById('about-p2').textContent = 'Con una Ingeniería en Biotecnología y una Maestría en Inteligencia Artificial del Tec de Monterrey, Raul opera en la intersección de ciencias de la vida y sistemas inteligentes.';
+    document.getElementById('about-p3').textContent = 'Como fundador de Eigen Atlas, construye productos SaaS nativos de IA. Su práctica de consultoría se enfoca en estrategia e implementación de IA empresarial a $1,000/hr.';
+  } else {
+    document.getElementById('about-title').textContent = 'About';
+    document.getElementById('about-p1').textContent = 'Raul Zhou is a 28-year-old AI consultant and entrepreneur based in Guadalajara, Mexico. Of Chinese-Mexican heritage, he bridges cutting-edge technology with real-world business impact.';
+    document.getElementById('about-p2').textContent = 'Holding a B.S. in Biotechnology and an M.S. in Artificial Intelligence from Tec de Monterrey, Raul operates at the intersection of life sciences and intelligent systems.';
+    document.getElementById('about-p3').textContent = 'As the founder of Eigen Atlas, he builds AI-native SaaS products. His consulting practice focuses on enterprise AI strategy and implementation at $1,000/hr.';
+  }
+}
+
+function updateContactPanel() {
+  document.getElementById('loc-label').textContent = lang === 'es' ? 'Ubicación' : 'Location';
+  document.getElementById('rate-label').textContent = lang === 'es' ? 'Tarifa' : 'Rate';
+  document.getElementById('company-label').textContent = lang === 'es' ? 'Empresa' : 'Company';
+  document.getElementById('contact-title').textContent = lang === 'es' ? 'Contacto' : 'Contact';
+}
+
+// ===== SKILLS TICKER =====
+function buildTicker() {
+  const track = document.getElementById('ticker-track');
+  const items = [...SKILLS, ...SKILLS]; // double for seamless loop
+  track.innerHTML = items.map(s => `
+    <span class="ticker-item">${s}</span>
+    <span class="ticker-sep"></span>
+  `).join('');
+}
+
+// ===== ABOUT SKILLS =====
+function buildAboutSkills() {
+  const container = document.getElementById('about-skills');
+  container.innerHTML = SKILLS.map(s => `<span class="tag">${s}</span>`).join('');
+}
+
+// ===== CLOCK =====
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('live-clock').textContent = `${h}:${m}:${s}`;
+}
+
+// ===== CURSOR =====
+const cursorDot = document.getElementById('cursor-dot');
+const cursorRing = document.getElementById('cursor-ring');
+let ringX = 0, ringY = 0, dotX = 0, dotY = 0;
+let targetRingX = 0, targetRingY = 0;
+
+function animateCursor() {
+  ringX += (targetRingX - ringX) * 0.12;
+  ringY += (targetRingY - ringY) * 0.12;
+  cursorRing.style.left = ringX + 'px';
+  cursorRing.style.top = ringY + 'px';
+  requestAnimationFrame(animateCursor);
+}
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  dotX = e.clientX;
+  dotY = e.clientY;
+  targetRingX = e.clientX;
+  targetRingY = e.clientY;
+  cursorDot.style.left = dotX + 'px';
+  cursorDot.style.top = dotY + 'px';
+});
+
+document.addEventListener('mouseover', e => {
+  const el = e.target;
+  if (el.matches('button, .dot-item, .hex-btn, .close-btn, .modal-close, .nav-btn')) {
+    document.body.classList.add('cursor-hover');
+  }
+});
+document.addEventListener('mouseout', e => {
+  document.body.classList.remove('cursor-hover');
+});
+
+// ===== KEYBOARD =====
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') navigate(-1);
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') navigate(1);
+  if (e.key === 'Escape') { closeAllPanels(); closeModal(null, true); }
+});
+
+// ===== TOUCH SWIPE =====
+let touchStartY = 0, touchStartX = 0;
+document.addEventListener('touchstart', e => {
+  touchStartY = e.touches[0].clientY;
+  touchStartX = e.touches[0].clientX;
+});
+document.addEventListener('touchend', e => {
+  const dy = touchStartY - e.changedTouches[0].clientY;
+  const dx = touchStartX - e.changedTouches[0].clientX;
+  if (Math.abs(dy) > Math.abs(dx)) {
+    if (Math.abs(dy) > 40) navigate(dy > 0 ? 1 : -1);
+  } else {
+    if (Math.abs(dx) > 40) navigate(dx > 0 ? 1 : -1);
+  }
+});
+
+// ===== RESIZE =====
+window.addEventListener('resize', () => {
+  initCanvas();
+  positionTrack();
+});
+
+// ===== INIT =====
+function init() {
+  initCanvas();
+  buildDots();
+  updateDotOpacities();
+  renderPanel(0);
+  buildTicker();
+  buildAboutSkills();
+  updateClock();
+  setInterval(updateClock, 1000);
+  requestAnimationFrame(renderCanvas);
+  animateCursor();
+  // Initial wave
+  setTimeout(() => triggerWave(1), 600);
+}
+
+init();
+</script>
+</body>
+</html>

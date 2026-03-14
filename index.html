@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Raul Zhou — AI Architect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f2ed;
+  --bg2:#eae6df;
+  --accent:#9a7420;
+  --accent-dim:rgba(154,116,32,.1);
+  --accent-glow:rgba(154,116,32,.3);
+  --accent2:#c44d2a;
+  --white:#1a1714;
+  --gray:#8a8279;
+  --text:#4a453e;
+  --border:rgba(154,116,32,.18);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--bg);color-scheme:light}
+body{font-family:'Space Grotesk',sans-serif;color:var(--text);cursor:none;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+a,button{cursor:none}
+
+/* ── CUSTOM CURSOR ── */
+#cur-dot{position:fixed;width:8px;height:8px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .18s,height .18s;will-change:left,top}
+#cur-ring{position:fixed;width:38px;height:38px;border:1.5px solid rgba(154,116,32,.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s cubic-bezier(.25,.46,.45,.94),height .3s cubic-bezier(.25,.46,.45,.94),opacity .2s;will-change:left,top}
+body.hovering #cur-dot{width:10px;height:10px}
+body.hovering #cur-ring{width:56px;height:56px;border-color:var(--accent)}
+@media(hover:none),(pointer:coarse){#cur-dot,#cur-ring{display:none!important}body,a,button{cursor:auto!important}}
+
+/* ── GRAIN ── */
+#grain{position:fixed;inset:0;pointer-events:none;z-index:190;opacity:.018;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ── NAV ── */
+#nav{position:fixed;top:0;left:0;right:0;height:54px;z-index:300;display:flex;align-items:center;padding:0 28px;gap:12px;background:rgba(245,242,237,.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--white);letter-spacing:.04em;user-select:none;flex-shrink:0}
+.nav-logo em{color:var(--accent);font-style:normal}
+.nav-links{display:flex;gap:4px;margin-left:auto}
+.nav-link{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--gray);background:none;border:none;padding:6px 14px;border-radius:2px;transition:color .2s,background .2s;flex-shrink:0}
+.nav-link:hover,.nav-link.active{color:var(--accent);background:var(--accent-dim)}
+.nav-right{display:flex;align-items:center;gap:14px;margin-left:12px;flex-shrink:0}
+.lang-toggle{display:flex;gap:2px;background:rgba(154,116,32,.06);border-radius:3px;padding:2px}
+.lang-btn{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.1em;border:none;background:none;color:var(--gray);padding:4px 9px;border-radius:2px;transition:all .2s}
+.lang-btn.active{background:var(--accent);color:#f5f2ed}
+#clock{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gray);letter-spacing:.08em;min-width:68px;text-align:right}
+
+/* ── HERO ── */
+#hero{position:fixed;inset:0;overflow:hidden}
+
+/* Diagonal warm band */
+.diag-band{position:absolute;inset:0;pointer-events:none;background:linear-gradient(-26deg,transparent 28%,rgba(154,116,32,.08) 40%,rgba(180,140,50,.06) 50%,rgba(154,116,32,.08) 60%,transparent 72%)}
+
+/* Ghost 周 */
+.ghost-zhou{position:absolute;right:-3%;top:50%;transform:translateY(-50%);font-family:'Syne',sans-serif;font-size:clamp(160px,28vw,400px);font-weight:800;color:var(--accent);opacity:.06;pointer-events:none;user-select:none;will-change:transform;line-height:1}
+
+/* Ghost numbers container */
+.ghost-nums{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.ghost-num{position:absolute;font-family:'JetBrains Mono',monospace;font-size:clamp(60px,10vw,140px);font-weight:700;color:var(--accent);opacity:0;transition:opacity .5s;pointer-events:none;user-select:none}
+.ghost-num.vis{opacity:.07}
+
+/* Large diagonal SVG line accent */
+.diag-line-svg{position:absolute;inset:0;pointer-events:none;width:100%;height:100%}
+
+/* Hero name block */
+.hero-name-block{position:absolute;left:6vw;top:50%;transform:translateY(-54%);pointer-events:none;z-index:2}
+#hero-date-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:.22em;margin-bottom:14px;opacity:.85;transition:opacity .35s}
+.hero-solid{font-family:'Syne',sans-serif;font-size:clamp(58px,7.8vw,110px);font-weight:800;color:var(--white);line-height:.9;letter-spacing:-.025em;display:block}
+.hero-outline{font-family:'Syne',sans-serif;font-size:clamp(58px,7.8vw,110px);font-weight:800;line-height:.88;letter-spacing:-.025em;display:block;-webkit-text-stroke:2px rgba(154,116,32,.3);color:transparent}
+.hero-sub{margin-top:18px;font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:500;color:var(--accent);letter-spacing:.18em}
+.hero-role{margin-top:5px;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--gray);letter-spacing:.16em}
+
+/* ── CAROUSEL ── */
+#carousel-stage{position:absolute;inset:0;pointer-events:none;transition:opacity .4s}
+#carousel-stage.hidden{opacity:0;pointer-events:none}
+#carousel-track{position:absolute;left:38vw;top:52vh;transition:transform .68s cubic-bezier(.22,.68,0,1.2);pointer-events:all}
+.dot-wrap{position:absolute;width:0;height:0;cursor:pointer;transform-origin:center;transition:opacity .55s cubic-bezier(.25,.46,.45,.94),transform .55s cubic-bezier(.25,.46,.45,.94)}
+.dot-inner{position:absolute;width:15px;height:15px;border-radius:50%;background:rgba(154,116,32,.3);border:2px solid rgba(154,116,32,.4);transform:translate(-50%,-50%);transition:background .3s,box-shadow .3s,width .35s,height .35s,border-color .3s}
+.dot-wrap.active .dot-inner{background:var(--accent);border-color:var(--accent);box-shadow:0 0 22px var(--accent-glow),0 0 8px rgba(154,116,32,.5);width:18px;height:18px}
+.dot-wrap.active .dot-inner::before,.dot-wrap.active .dot-inner::after{content:'';position:absolute;inset:0;border-radius:50%;background:var(--accent);animation:ripplePulse 2.6s ease-out infinite;transform-origin:center}
+.dot-wrap.active .dot-inner::after{animation-delay:1.3s}
+@keyframes ripplePulse{0%{transform:scale(1);opacity:.45}100%{transform:scale(4.8);opacity:0}}
+.dot-label{position:absolute;top:13px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--gray);white-space:nowrap;pointer-events:none;letter-spacing:.1em;transition:opacity .4s,color .3s}
+.dot-wrap.active .dot-label{color:var(--accent);opacity:1}
+
+/* Connector SVG */
+#connector-svg{position:absolute;inset:0;pointer-events:none;overflow:visible}
+
+/* ── INFO PANEL ── */
+#info-panel{position:absolute;right:28px;top:50%;transform:translateY(-50%);width:clamp(270px,24vw,348px);background:rgba(255,255,255,.72);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);border:1px solid var(--border);padding:26px 26px 22px;clip-path:polygon(0 0,calc(100% - 16px) 0,100% 16px,100% 100%,16px 100%,0 calc(100% - 16px));transition:opacity .35s,transform .35s;z-index:10}
+#info-panel.hidden{opacity:0;transform:translateY(-50%) translateX(24px);pointer-events:none}
+.ip-tag{font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.24em;color:var(--accent2);margin-bottom:10px}
+.ip-title{font-family:'Syne',sans-serif;font-size:clamp(15px,1.7vw,21px);font-weight:800;color:var(--white);line-height:1.18;margin-bottom:4px}
+.ip-company{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--accent);letter-spacing:.14em;margin-bottom:14px;opacity:.75}
+.ip-desc{font-size:12.5px;line-height:1.65;color:var(--text);margin-bottom:16px;font-weight:300}
+.ip-techs{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:18px}
+.tech-tag{font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:500;letter-spacing:.07em;color:var(--text);background:rgba(154,116,32,.06);border:1px solid rgba(154,116,32,.18);padding:3px 8px;border-radius:2px}
+.details-btn{width:100%;background:none;border:1px solid var(--accent);color:var(--accent);font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:.2em;padding:10px;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));transition:background .2s,color .2s}
+.details-btn:hover{background:var(--accent);color:#f5f2ed}
+
+/* ── BOTTOM NAV ── */
+#bottom-nav{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:18px;transition:opacity .4s;z-index:5}
+#bottom-nav.hidden{opacity:0;pointer-events:none}
+.hex-btn{width:44px;height:44px;background:rgba(154,116,32,.06);border:1px solid var(--border);clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);display:flex;align-items:center;justify-content:center;color:var(--gray);font-size:15px;transition:background .2s,color .2s,border-color .2s}
+.hex-btn:hover{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+.hex-btn:disabled{opacity:.22;pointer-events:none}
+.pips{display:flex;gap:7px;align-items:center}
+.pip{width:6px;height:6px;border-radius:50%;background:var(--gray);opacity:.35;cursor:pointer;transition:background .3s,transform .25s,opacity .3s}
+.pip.active{background:var(--accent);transform:scale(1.5);opacity:1}
+
+/* ── SIDE PANELS ── */
+.side-panel{position:fixed;inset:0;z-index:400;background:var(--bg);transform:translateX(105%);transition:transform .58s cubic-bezier(.22,.68,0,1);overflow-y:auto;overflow-x:hidden}
+.side-panel.open{transform:translateX(0)}
+.panel-close-btn{position:sticky;top:0;left:0;z-index:10;display:flex;justify-content:flex-end;padding:14px 22px 0;background:linear-gradient(var(--bg),transparent);pointer-events:none}
+.panel-close-btn button{pointer-events:all;width:40px;height:40px;background:rgba(154,116,32,.06);border:1px solid var(--border);color:var(--gray);font-size:16px;clip-path:polygon(0 0,calc(100% - 6px) 0,100% 6px,100% 100%,6px 100%,0 calc(100% - 6px));transition:all .2s;display:flex;align-items:center;justify-content:center}
+.panel-close-btn button:hover{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+
+/* ── ABOUT PANEL ── */
+#about-inner{padding:0 6vw 60px}
+.about-header-bar{border:1px solid var(--border);padding:12px 20px;margin-bottom:36px;display:flex;gap:32px;flex-wrap:wrap;background:rgba(154,116,32,.04)}
+.about-field{flex:1;min-width:100px}
+.afield-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.22em;color:var(--gray);text-transform:uppercase;margin-bottom:3px}
+.afield-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--white)}
+.about-body-grid{display:grid;grid-template-columns:200px 1fr;gap:36px;align-items:start}
+.hex-frame-wrap{display:flex;flex-direction:column;align-items:center;gap:24px}
+.hex-frame{width:172px;height:172px;position:relative}
+.hex-outer{width:172px;height:172px;clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 100%);display:flex;align-items:center;justify-content:center;animation:hexGlow 4s ease-in-out infinite alternate}
+@keyframes hexGlow{0%{filter:brightness(1)}100%{filter:brightness(1.15)}}
+.hex-inner{width:160px;height:160px;clip-path:polygon(50% 0%,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%);background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--accent)}
+.about-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat-box{border:1px solid var(--border);padding:12px 14px;background:rgba(154,116,32,.04)}
+.stat-val{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--accent);line-height:1}
+.stat-lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.14em;color:var(--gray);text-transform:uppercase;margin-top:3px}
+.about-bio{font-size:13.5px;line-height:1.72;color:var(--text);margin-bottom:28px;font-weight:300}
+.skills-section{margin-top:4px}
+.skills-title{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.2em;color:var(--gray);text-transform:uppercase;margin-bottom:16px;border-bottom:1px solid var(--border);padding-bottom:8px}
+.skill-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.skill-cat-lbl{font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:700;letter-spacing:.12em;color:var(--gray);text-transform:uppercase;min-width:64px;padding-top:4px;flex-shrink:0}
+.skill-tags{display:flex;flex-wrap:wrap;gap:5px}
+.stag{font-family:'JetBrains Mono',monospace;font-size:9.5px;padding:3px 9px;border-radius:2px;border:1px solid;letter-spacing:.05em}
+.stag-ai{color:#7a5a10;border-color:rgba(122,90,16,.25);background:rgba(154,116,32,.08)}
+.stag-plt{color:#a03818;border-color:rgba(160,56,24,.25);background:rgba(196,77,42,.08)}
+.stag-dev{color:#2d7a3a;border-color:rgba(45,122,58,.25);background:rgba(45,122,58,.08)}
+.stag-dat{color:#1a7a94;border-color:rgba(26,122,148,.25);background:rgba(26,122,148,.08)}
+.stag-inf{color:#6a3d94;border-color:rgba(106,61,148,.25);background:rgba(106,61,148,.08)}
+.next-skill-bar{margin-top:28px;padding:13px 18px;border-left:2px solid var(--accent);background:rgba(154,116,32,.06);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text)}
+.next-skill-bar span{color:var(--accent)}
+
+/* ── CONTACT PANEL ── */
+#contact-inner{padding:0 6vw 60px;display:flex;flex-direction:column;min-height:calc(100vh - 80px)}
+.contact-eyebrow{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--accent);letter-spacing:.22em;margin-bottom:14px}
+.contact-heading{font-family:'Syne',sans-serif;font-size:clamp(44px,7vw,92px);font-weight:800;color:var(--white);line-height:.88;letter-spacing:-.03em;margin-bottom:26px}
+.contact-desc{font-size:14.5px;line-height:1.72;color:var(--text);max-width:500px;margin-bottom:44px;font-weight:300}
+.contact-links-list{display:flex;flex-direction:column;gap:14px;margin-bottom:auto}
+.contact-link{display:flex;align-items:center;gap:14px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--text);text-decoration:none;padding:15px 20px;border:1px solid var(--border);background:rgba(154,116,32,.04);clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,0 100%);transition:border-color .2s,color .2s,background .2s}
+.contact-link:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.clink-label{font-size:8px;letter-spacing:.2em;color:var(--gray);text-transform:uppercase;margin-bottom:2px}
+.clink-val{font-size:12.5px}
+.contact-footer{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--gray);letter-spacing:.1em;border-top:1px solid var(--border);padding-top:20px;margin-top:48px}
+
+/* ── MODAL ── */
+#modal{position:fixed;inset:0;z-index:600;background:rgba(245,242,237,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .35s}
+#modal.open{opacity:1;pointer-events:all}
+.modal-box{width:min(680px,90vw);max-height:85vh;overflow-y:auto;background:rgba(255,255,255,.96);border:1px solid var(--border);padding:38px 38px 32px;clip-path:polygon(0 0,calc(100% - 20px) 0,100% 20px,100% 100%,20px 100%,0 calc(100% - 20px));position:relative;transform:translateY(24px);transition:transform .35s}
+#modal.open .modal-box{transform:translateY(0)}
+.modal-close{position:absolute;top:14px;right:14px;width:34px;height:34px;background:none;border:1px solid var(--border);color:var(--gray);font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.modal-close:hover{border-color:var(--accent);color:var(--accent)}
+.m-tag{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.24em;color:var(--accent2);margin-bottom:8px}
+.m-title{font-family:'Syne',sans-serif;font-size:clamp(20px,2.8vw,30px);font-weight:800;color:var(--white);margin-bottom:4px;line-height:1.1}
+.m-company{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--accent);letter-spacing:.14em;margin-bottom:26px;opacity:.8}
+.m-points{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:26px}
+.m-point{display:flex;align-items:flex-start;gap:12px;font-size:13.5px;line-height:1.65;color:var(--text)}
+.m-point::before{content:'▸';color:var(--accent);flex-shrink:0;margin-top:2px}
+.m-techs{display:flex;flex-wrap:wrap;gap:6px}
+
+/* ── MOTION REDUCE ── */
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  #info-panel{right:16px;width:clamp(250px,40vw,320px)}
+  #carousel-track{left:32vw;top:46vh}
+}
+@media(max-width:680px){
+  #info-panel{position:absolute;right:10px;left:10px;top:auto;bottom:70px;transform:none;width:auto}
+  #info-panel.hidden{transform:translateY(10px)}
+  .hero-name-block{left:4vw}
+  #carousel-track{left:28vw;top:36vh}
+  #bottom-nav{bottom:14px}
+  .about-body-grid{grid-template-columns:1fr}
+  .hex-frame-wrap{flex-direction:row;flex-wrap:wrap}
+  .about-stats{grid-template-columns:repeat(4,1fr)}
+  #clock{display:none}
+}
+@media(max-width:420px){
+  .nav-logo{font-size:13px}
+  .nav-link{padding:5px 9px;font-size:9.5px}
+  .contact-heading{font-size:38px}
+  #about-inner,#contact-inner{padding-left:20px;padding-right:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div id="cur-dot"></div>
+<div id="cur-ring"></div>
+
+<!-- Film Grain -->
+<div id="grain"></div>
+
+<!-- ── NAV ── -->
+<nav id="nav">
+  <div class="nav-logo">RZ<em>_周</em></div>
+  <div class="nav-links">
+    <button class="nav-link active" data-panel="timeline" data-en="Timeline" data-es="Línea">Timeline</button>
+    <button class="nav-link" data-panel="about" data-en="About" data-es="Perfil">About</button>
+    <button class="nav-link" data-panel="contact" data-en="Contact" data-es="Contacto">Contact</button>
+  </div>
+  <div class="nav-right">
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btn-en">EN</button>
+      <button class="lang-btn" id="btn-es">ES</button>
+    </div>
+    <div id="clock">00:00:00</div>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<main id="hero">
+  <div class="diag-band"></div>
+  <div class="ghost-zhou" id="ghost-zhou">周</div>
+  <div class="ghost-nums" id="ghost-nums"></div>
+
+  <!-- SVG diagonal accent line -->
+  <svg class="diag-line-svg" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <line x1="4" y1="88" x2="78" y2="8" stroke="rgba(154,116,32,.06)" stroke-width="0.12"/>
+    <line x1="8" y1="92" x2="82" y2="12" stroke="rgba(154,116,32,.04)" stroke-width="0.08"/>
+  </svg>
+
+  <!-- Hero Name -->
+  <div class="hero-name-block">
+    <div id="hero-date-label">AUG 2015</div>
+    <span class="hero-solid">RAUL</span>
+    <span class="hero-outline">ZHOU</span>
+    <div class="hero-sub" data-en="// AI ARCHITECT · BIOTECH × INTELLIGENCE //" data-es="// ARQUITECTO IA · BIOTECH × INTELIGENCIA //">// AI ARCHITECT · BIOTECH × INTELLIGENCE //</div>
+    <div class="hero-role">CONSULTING · SAAS · AUTOMATION</div>
+  </div>
+
+  <!-- Carousel Stage -->
+  <div id="carousel-stage">
+    <svg id="connector-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <line id="connector-line" stroke="rgba(201,162,39,.18)" stroke-width="1" stroke-dasharray="5 5"/>
+    </svg>
+    <div id="carousel-track"></div>
+  </div>
+
+  <!-- Info Panel -->
+  <div id="info-panel" role="region" aria-label="Entry details">
+    <div class="ip-tag" id="ip-tag"></div>
+    <div class="ip-title" id="ip-title"></div>
+    <div class="ip-company" id="ip-company"></div>
+    <div class="ip-desc" id="ip-desc"></div>
+    <div class="ip-techs" id="ip-techs"></div>
+    <button class="details-btn" id="details-btn" data-en="FULL DETAILS" data-es="VER DETALLES">FULL DETAILS</button>
+  </div>
+
+  <!-- Bottom Nav -->
+  <div id="bottom-nav">
+    <button class="hex-btn" id="btn-prev" aria-label="Previous">&#8592;</button>
+    <div class="pips" id="pips" role="tablist" aria-label="Timeline entries"></div>
+    <button class="hex-btn" id="btn-next" aria-label="Next">&#8594;</button>
+  </div>
+</main>
+
+<!-- ── ABOUT PANEL ── -->
+<div class="side-panel" id="about-panel" role="dialog" aria-label="About Raul Zhou">
+  <div class="panel-close-btn"><button data-close="about" aria-label="Close about panel">✕</button></div>
+  <div id="about-inner">
+    <div class="about-header-bar">
+      <div class="about-field">
+        <div class="afield-label" data-en="ORIGIN" data-es="ORIGEN">ORIGIN</div>
+        <div class="afield-val">Canton × Mexico</div>
+      </div>
+      <div class="about-field">
+        <div class="afield-label">LV</div>
+        <div class="afield-val">28</div>
+      </div>
+      <div class="about-field">
+        <div class="afield-label" data-en="TITLE" data-es="TÍTULO">TITLE</div>
+        <div class="afield-val" data-en="AI Architect" data-es="Arquitecto IA">AI Architect</div>
+      </div>
+      <div class="about-field">
+        <div class="afield-label" data-en="LOCATION" data-es="UBICACIÓN">LOCATION</div>
+        <div class="afield-val">Guadalajara, MX</div>
+      </div>
+    </div>
+
+    <div class="about-body-grid">
+      <!-- Left: hex frame + stats -->
+      <div class="hex-frame-wrap">
+        <div class="hex-frame">
+          <div class="hex-outer">
+            <div class="hex-inner">RZ</div>
+          </div>
+        </div>
+        <div class="about-stats">
+          <div class="stat-box">
+            <div class="stat-val">4+</div>
+            <div class="stat-lbl" data-en="Years" data-es="Años">Years</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val">15+</div>
+            <div class="stat-lbl" data-en="Clients" data-es="Clientes">Clients</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val">$1M+</div>
+            <div class="stat-lbl" data-en="Revenue" data-es="Ingresos">Revenue</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-val">5+</div>
+            <div class="stat-lbl" data-en="Industries" data-es="Industrias">Industries</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: bio + skills -->
+      <div>
+        <p class="about-bio"
+           data-en="Born where Canton meets Mexico. My grandfather's generation crossed the Pacific; I crossed the divide between wet lab and machine learning. Biotechnology engineering gave me the systems thinking. A Master's in Applied AI gave me the tools. The result: AI solutions grounded in scientific rigor — not just vibes and prompts."
+           data-es="Nacido donde Canton se encuentra con México. La generación de mi abuelo cruzó el Pacífico; yo crucé la división entre el laboratorio húmedo y el machine learning. Ingeniería en biotecnología me dio el pensamiento sistémico. Una maestría en IA Aplicada me dio las herramientas. El resultado: soluciones de IA con rigor científico — no solo vibras y prompts.">
+          Born where Canton meets Mexico. My grandfather's generation crossed the Pacific; I crossed the divide between wet lab and machine learning. Biotechnology engineering gave me the systems thinking. A Master's in Applied AI gave me the tools. The result: AI solutions grounded in scientific rigor — not just vibes and prompts.
+        </p>
+
+        <div class="skills-section">
+          <div class="skills-title" data-en="// SKILL STACK //" data-es="// STACK DE HABILIDADES //">// SKILL STACK //</div>
+          <div class="skill-row">
+            <span class="skill-cat-lbl">AI/ML</span>
+            <div class="skill-tags">
+              <span class="stag stag-ai">PyTorch</span>
+              <span class="stag stag-ai">TensorFlow</span>
+              <span class="stag stag-ai">LLMs/NLP</span>
+              <span class="stag stag-ai">Computer Vision</span>
+              <span class="stag stag-ai">Fine-tuning</span>
+              <span class="stag stag-ai">RAG</span>
+            </div>
+          </div>
+          <div class="skill-row">
+            <span class="skill-cat-lbl">Platforms</span>
+            <div class="skill-tags">
+              <span class="stag stag-plt">n8n</span>
+              <span class="stag stag-plt">Retell AI</span>
+              <span class="stag stag-plt">OpenAI API</span>
+              <span class="stag stag-plt">Anthropic API</span>
+              <span class="stag stag-plt">GHL</span>
+            </div>
+          </div>
+          <div class="skill-row">
+            <span class="skill-cat-lbl">Dev</span>
+            <div class="skill-tags">
+              <span class="stag stag-dev">Python</span>
+              <span class="stag stag-dev">JavaScript</span>
+              <span class="stag stag-dev">TypeScript</span>
+              <span class="stag stag-dev">Node.js</span>
+              <span class="stag stag-dev">React</span>
+            </div>
+          </div>
+          <div class="skill-row">
+            <span class="skill-cat-lbl">Data</span>
+            <div class="skill-tags">
+              <span class="stag stag-dat">SQL</span>
+              <span class="stag stag-dat">BigQuery</span>
+              <span class="stag stag-dat">Pandas</span>
+              <span class="stag stag-dat">NumPy</span>
+            </div>
+          </div>
+          <div class="skill-row">
+            <span class="skill-cat-lbl">Infra</span>
+            <div class="skill-tags">
+              <span class="stag stag-inf">Docker</span>
+              <span class="stag stag-inf">Linux</span>
+              <span class="stag stag-inf">Git</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="next-skill-bar">
+          <span data-en="NEXT LEVEL" data-es="SIGUIENTE NIVEL">NEXT LEVEL</span>: LV 29 ▸ <span data-en="Global AI Practice" data-es="Práctica Global de IA">Global AI Practice</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── CONTACT PANEL ── -->
+<div class="side-panel" id="contact-panel" role="dialog" aria-label="Contact Raul Zhou">
+  <div class="panel-close-btn"><button data-close="contact" aria-label="Close contact panel">✕</button></div>
+  <div id="contact-inner">
+    <div class="contact-eyebrow">// LET'S BUILD //</div>
+    <h2 class="contact-heading">LET'S<br>BUILD</h2>
+    <p class="contact-desc"
+       data-en="Open to enterprise engagements, consulting partnerships, and high-stakes AI implementations. If you're ready to bring AI into your operations at scale — let's talk."
+       data-es="Abierto a compromisos empresariales, asociaciones de consultoría e implementaciones de IA de alto impacto. Si estás listo para traer IA a tus operaciones a escala — hablemos.">
+      Open to enterprise engagements, consulting partnerships, and high-stakes AI implementations. If you're ready to bring AI into your operations at scale — let's talk.
+    </p>
+    <div class="contact-links-list">
+      <a href="mailto:raul.chio.leon@gmail.com" class="contact-link">
+        <div><div class="clink-label">EMAIL</div><div class="clink-val">raul.chio.leon@gmail.com</div></div>
+      </a>
+      <a href="https://linkedin.com/in/raulzhou" target="_blank" rel="noopener" class="contact-link">
+        <div><div class="clink-label">LINKEDIN</div><div class="clink-val">linkedin.com/in/raulzhou</div></div>
+      </a>
+      <a href="https://github.com/raulzhou" target="_blank" rel="noopener" class="contact-link">
+        <div><div class="clink-label">GITHUB</div><div class="clink-val">github.com/raulzhou</div></div>
+      </a>
+    </div>
+    <div class="contact-footer">© 2026 Raul Zhou · Obsidian Architect</div>
+  </div>
+</div>
+
+<!-- ── MODAL ── -->
+<div id="modal" role="dialog" aria-modal="true" aria-label="Entry details">
+  <div class="modal-box">
+    <button class="modal-close" id="modal-close" aria-label="Close">✕</button>
+    <div class="m-tag" id="m-tag"></div>
+    <div class="m-title" id="m-title"></div>
+    <div class="m-company" id="m-company"></div>
+    <ul class="m-points" id="m-points"></ul>
+    <div class="m-techs" id="m-techs"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+const ENTRIES = [
+  {
+    tag:{en:'EDUCATION',es:'EDUCACIÓN'},
+    title:{en:'B.S. Biotechnology Engineering',es:'Ing. Biotecnología'},
+    company:'TECNOLÓGICO DE MONTERREY',
+    date:{en:'Aug 2015',es:'Ago 2015'},
+    short:{en:'Where science met code. Biotechnology degree that laid the foundation for understanding biological systems through computational thinking.',es:'Donde la ciencia conoció el código. Ingeniería en biotecnología que sentó las bases para entender sistemas biológicos con pensamiento computacional.'},
+    points:{
+      en:['Biotechnology Engineering degree at Tec de Monterrey, Guadalajara.','Developed strong foundations in biological systems, data analysis, and scientific methodology.','First exposure to programming and computational approaches to biological problems.','Thesis work combining wet lab techniques with data-driven analysis.'],
+      es:['Ingeniería en Biotecnología en el Tec de Monterrey, Guadalajara.','Bases sólidas en sistemas biológicos, análisis de datos y metodología científica.','Primera exposición a programación y enfoques computacionales para problemas biológicos.','Tesis combinando técnicas de laboratorio con análisis basado en datos.']
+    },
+    techs:['Biology','Data Analysis','Python','Scientific Method','Research']
+  },
+  {
+    tag:{en:'EDUCATION',es:'EDUCACIÓN'},
+    title:{en:'M.S. Applied Artificial Intelligence',es:'Maestría en IA Aplicada'},
+    company:'TECNOLÓGICO DE MONTERREY',
+    date:{en:'Jan 2020',es:'Ene 2020'},
+    short:{en:"Deep dive into AI. Master's in Applied AI covering deep learning, NLP, computer vision, and building production ML systems.",es:'Inmersión profunda en IA. Maestría en IA Aplicada cubriendo deep learning, NLP, visión por computadora y sistemas ML en producción.'},
+    points:{
+      en:['M.S. in Applied Artificial Intelligence at Tec de Monterrey.','Specialized in deep learning architectures, NLP, and computer vision.','Built production-grade ML pipelines and learned deployment strategies.','Research on applying AI to healthcare and biological systems.','Unique intersection: one of few people bridging biotech + AI with hands-on expertise in both.'],
+      es:['Maestría en Inteligencia Artificial Aplicada en el Tec de Monterrey.','Especialización en arquitecturas de deep learning, NLP y visión por computadora.','Construcción de pipelines ML de producción y estrategias de deployment.','Investigación aplicando IA a salud y sistemas biológicos.','Intersección única: de los pocos que combinan biotech + IA con experiencia práctica en ambos.']
+    },
+    techs:['PyTorch','TensorFlow','NLP','Computer Vision','Deep Learning','ML Pipelines']
+  },
+  {
+    tag:{en:'CONSULTING',es:'CONSULTORÍA'},
+    title:{en:'Medical AI Systems',es:'Sistemas de IA Médica'},
+    company:'AI CONSULTING',
+    date:{en:'Mar 2022',es:'Mar 2022'},
+    short:{en:'Building AI systems for doctors and clinics. Voice agents, chatbots, and digital assistants that automate patient interaction and save hundreds of hours.',es:'Construyendo sistemas de IA para médicos y clínicas. Agentes de voz, chatbots y asistentes digitales que automatizan la interacción con pacientes y ahorran cientos de horas.'},
+    points:{
+      en:['Launched AI consulting practice focused on healthcare professionals.','Built voice agents and chatbots for dental clinics and medical practices.','Designed digital assistants that handle patient scheduling, FAQ, and follow-ups.','Saved clients hundreds of hours in administrative tasks through automation.','Developed HIPAA-aware systems with proper data handling protocols.'],
+      es:['Lancé práctica de consultoría de IA enfocada en profesionales de la salud.','Construí agentes de voz y chatbots para clínicas dentales y consultorios médicos.','Diseñé asistentes digitales para agendamiento, FAQ y seguimiento de pacientes.','Ahorré a clientes cientos de horas en tareas administrativas mediante automatización.','Desarrollé sistemas conscientes de privacidad médica con protocolos de manejo de datos.']
+    },
+    techs:['Retell AI','OpenAI API','n8n','Voice Agents','Chatbots','GHL']
+  },
+  {
+    tag:{en:'CONSULTING',es:'CONSULTORÍA'},
+    title:{en:'Enterprise AI Automation',es:'Automatización IA Empresarial'},
+    company:'AI CONSULTING · $1K/HR',
+    date:{en:'Jun 2023',es:'Jun 2023'},
+    short:{en:'High-value AI consulting for enterprises. ERP migrations, custom chatbots, workflow automation. $1,000 USD/hour rate for complex AI implementations.',es:'Consultoría de IA de alto valor para empresas. Migraciones ERP, chatbots custom, automatización de flujos. $1,000 USD/hora para implementaciones complejas.'},
+    points:{
+      en:['Scaled consulting practice to enterprise-level engagements.','Led $656K+ MXN ERP migration projects for manufacturing companies.','Built custom AI chatbots and workflow automation systems.','Commanded $1,000 USD/hour rate for complex AI implementations.','Delivered measurable ROI: reduced operational costs, increased efficiency, automated manual processes.','Clients span healthcare, manufacturing, accounting, and retail sectors.'],
+      es:['Escalé la práctica de consultoría a nivel empresarial.','Lideré proyectos de migración ERP de $656K+ MXN para empresas manufactureras.','Construí chatbots de IA custom y sistemas de automatización de flujos.','Rate de $1,000 USD/hora para implementaciones complejas de IA.','ROI medible: reducción de costos operativos, aumento de eficiencia, automatización de procesos manuales.','Clientes en salud, manufactura, contabilidad y retail.']
+    },
+    techs:['n8n','OpenAI','Anthropic','ERP','GHL','Python','Automation']
+  },
+  {
+    tag:{en:'PRODUCT',es:'PRODUCTO'},
+    title:{en:'Eigen Atlas',es:'Eigen Atlas'},
+    company:'FOUNDER · AI SAAS',
+    date:{en:'Jan 2024',es:'Ene 2024'},
+    short:{en:"Founded Eigen Atlas — an AI SaaS platform delivering digital assistants for businesses. Multi-tier pricing. The vision: make AI accessible to every business.",es:'Fundé Eigen Atlas — plataforma SaaS de IA que entrega asistentes digitales para empresas. Pricing multi-tier. La visión: hacer la IA accesible para cada negocio.'},
+    points:{
+      en:['Founded Eigen Atlas, an AI SaaS platform for business automation.','Built multi-tier pricing model serving different business sizes.','Platform delivers customizable digital assistants: chatbots, voice agents, workflow automation.',"Vision: democratize AI for businesses that can't afford custom development.",'Active clients in healthcare, accounting, and retail verticals.','Full-stack product: from ML backend to customer-facing dashboard.'],
+      es:['Fundé Eigen Atlas, plataforma SaaS de IA para automatización empresarial.','Modelo de pricing multi-tier sirviendo diferentes tamaños de empresa.','La plataforma entrega asistentes digitales personalizables: chatbots, agentes de voz, automatización.','Visión: democratizar la IA para negocios que no pueden pagar desarrollo custom.','Clientes activos en salud, contabilidad y retail.','Producto full-stack: desde backend ML hasta dashboard de cliente.']
+    },
+    techs:['React','Node.js','Python','OpenAI','Anthropic','Retell AI','GHL','Docker']
+  },
+  {
+    tag:{en:'ENTERPRISE',es:'EMPRESA'},
+    title:{en:'John Deere AI Solutions',es:'Soluciones de IA John Deere'},
+    company:'JOHN DEERE',
+    date:{en:'Mar 2026',es:'Mar 2026'},
+    short:{en:'Presented AI solutions to John Deere. Enterprise-level engagement demonstrating AI automation capabilities for agricultural technology.',es:'Presenté soluciones de IA a John Deere. Engagement a nivel empresarial demostrando capacidades de automatización con IA para tecnología agrícola.'},
+    points:{
+      en:['Invited to present AI solutions to John Deere leadership.','Demonstrated enterprise-grade AI automation capabilities.','Showcased voice agents, workflow automation, and intelligent document processing.','Engagement validated consulting practice at Fortune 500 level.','Bridging AI and agricultural technology — a natural extension of biotech roots.'],
+      es:['Invitado a presentar soluciones de IA al liderazgo de John Deere.','Demostré capacidades de automatización de IA de grado empresarial.','Mostré agentes de voz, automatización de flujos y procesamiento inteligente de documentos.','El engagement validó la práctica de consultoría a nivel Fortune 500.','Uniendo IA y tecnología agrícola — extensión natural de las raíces en biotech.']
+    },
+    techs:['AI Automation','Voice Agents','Enterprise','Workflow','Document Processing']
+  }
+];
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let activeIdx = 0;
+let lang = 'en';
+let activePanel = null;
+
+// Carousel geometry
+const ANGLE_DEG = 26;
+const ANGLE = ANGLE_DEG * Math.PI / 180;
+const COS = Math.cos(ANGLE);
+const SIN = -Math.sin(ANGLE); // NEGATIVE = dots go UPWARD to the right
+const STEP = 138; // px between dots along diagonal
+
+// DOM refs
+const track    = document.getElementById('carousel-track');
+const stage    = document.getElementById('carousel-stage');
+const infoPanel= document.getElementById('info-panel');
+const pipsEl   = document.getElementById('pips');
+const btnPrev  = document.getElementById('btn-prev');
+const btnNext  = document.getElementById('btn-next');
+const heroDate = document.getElementById('hero-date-label');
+const modal    = document.getElementById('modal');
+const connLine = document.getElementById('connector-line');
+const bottomNav= document.getElementById('bottom-nav');
+const ghostZhou= document.getElementById('ghost-zhou');
+
+let dotWraps = [];
+let pipEls   = [];
+
+// ─────────────────────────────────────────────
+// CAROUSEL INIT
+// ─────────────────────────────────────────────
+function initCarousel() {
+  ENTRIES.forEach((entry, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'dot-wrap';
+    wrap.style.left = (i * STEP * COS) + 'px';
+    wrap.style.top  = (i * STEP * SIN) + 'px';
+
+    const inner = document.createElement('div');
+    inner.className = 'dot-inner';
+
+    const label = document.createElement('div');
+    label.className = 'dot-label';
+    label.setAttribute('data-en', entry.date.en);
+    label.setAttribute('data-es', entry.date.es);
+    label.textContent = entry.date[lang];
+
+    wrap.appendChild(inner);
+    wrap.appendChild(label);
+    wrap.addEventListener('click', () => setActive(i));
+    track.appendChild(wrap);
+    dotWraps.push(wrap);
+  });
+
+  // Pips
+  ENTRIES.forEach((_, i) => {
+    const pip = document.createElement('div');
+    pip.className = 'pip';
+    pip.setAttribute('role', 'tab');
+    pip.setAttribute('aria-label', `Entry ${i + 1}`);
+    pip.addEventListener('click', () => setActive(i));
+    pipsEl.appendChild(pip);
+    pipEls.push(pip);
+  });
+
+  renderCarousel();
+}
+
+// ─────────────────────────────────────────────
+// CAROUSEL RENDER
+// ─────────────────────────────────────────────
+function renderCarousel() {
+  // Translate track so active dot aligns with anchor
+  const tx = -(activeIdx * STEP * COS);
+  const ty = -(activeIdx * STEP * SIN);
+  track.style.transform = `translate(${tx}px, ${ty}px)`;
+
+  const OPACITIES = [1, 0.5, 0.22, 0.08, 0];
+  const SCALES    = [1, 0.74, 0.56, 0.42, 0.3];
+
+  dotWraps.forEach((wrap, i) => {
+    const dist = Math.abs(i - activeIdx);
+    const clamp = Math.min(dist, 4);
+    wrap.style.opacity      = OPACITIES[clamp];
+    wrap.style.transform    = `scale(${SCALES[clamp]})`;
+    wrap.style.pointerEvents= dist >= 4 ? 'none' : 'all';
+    wrap.classList.toggle('active', i === activeIdx);
+  });
+
+  pipEls.forEach((pip, i) => pip.classList.toggle('active', i === activeIdx));
+  btnPrev.disabled = activeIdx === 0;
+  btnNext.disabled = activeIdx === ENTRIES.length - 1;
+
+  heroDate.textContent = ENTRIES[activeIdx].date[lang].toUpperCase();
+  updateGhostNums(activeIdx);
+  updateConnector();
+  renderInfoPanel();
+}
+
+// ─────────────────────────────────────────────
+// GHOST NUMBERS
+// ─────────────────────────────────────────────
+function initGhostNums() {
+  const container = document.getElementById('ghost-nums');
+  const positions = [
+    {left:'10%',top:'14%'},{right:'16%',top:'18%'},
+    {left:'22%',bottom:'20%'},{right:'6%',top:'46%'},
+    {left:'8%',bottom:'12%'},{right:'22%',bottom:'14%'}
+  ];
+  ENTRIES.forEach((_, i) => {
+    const el = document.createElement('div');
+    el.className = 'ghost-num';
+    el.id = `gn-${i}`;
+    el.textContent = String(i + 1).padStart(2, '0');
+    const pos = positions[i] || {left:'50%',top:'50%'};
+    Object.assign(el.style, pos);
+    container.appendChild(el);
+  });
+}
+
+function updateGhostNums(idx) {
+  document.querySelectorAll('.ghost-num').forEach((el, i) => {
+    el.classList.toggle('vis', i === idx);
+  });
+}
+
+// ─────────────────────────────────────────────
+// CONNECTOR LINE (anchor → info panel left edge)
+// ─────────────────────────────────────────────
+function updateConnector() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  if (vw <= 680) { connLine.setAttribute('stroke','transparent'); return; }
+  const ax = vw * 0.38;
+  const ay = vh * 0.52;
+  const panelW = Math.min(348, vw * 0.24);
+  const panelLeft = vw - 28 - panelW;
+  const panelMidY = vh * 0.5;
+  connLine.setAttribute('x1', ax);
+  connLine.setAttribute('y1', ay);
+  connLine.setAttribute('x2', panelLeft - 4);
+  connLine.setAttribute('y2', panelMidY);
+  connLine.setAttribute('stroke','rgba(154,116,32,.15)');
+}
+
+// ─────────────────────────────────────────────
+// INFO PANEL
+// ─────────────────────────────────────────────
+function renderInfoPanel() {
+  const e = ENTRIES[activeIdx];
+  document.getElementById('ip-tag').textContent     = e.tag[lang];
+  document.getElementById('ip-title').textContent   = e.title[lang];
+  document.getElementById('ip-company').textContent = e.company;
+  document.getElementById('ip-desc').textContent    = e.short[lang];
+
+  const techsEl = document.getElementById('ip-techs');
+  techsEl.innerHTML = '';
+  e.techs.forEach(t => {
+    const s = document.createElement('span');
+    s.className = 'tech-tag';
+    s.textContent = t;
+    techsEl.appendChild(s);
+  });
+}
+
+// ─────────────────────────────────────────────
+// SET ACTIVE
+// ─────────────────────────────────────────────
+function setActive(idx) {
+  activeIdx = Math.max(0, Math.min(ENTRIES.length - 1, idx));
+  renderCarousel();
+}
+
+// ─────────────────────────────────────────────
+// MODAL
+// ─────────────────────────────────────────────
+function openModal() {
+  const e = ENTRIES[activeIdx];
+  document.getElementById('m-tag').textContent     = e.tag[lang];
+  document.getElementById('m-title').textContent   = e.title[lang];
+  document.getElementById('m-company').textContent = e.company;
+
+  const pointsEl = document.getElementById('m-points');
+  pointsEl.innerHTML = '';
+  e.points[lang].forEach(p => {
+    const li = document.createElement('li');
+    li.className = 'm-point';
+    li.textContent = p;
+    pointsEl.appendChild(li);
+  });
+
+  const techsEl = document.getElementById('m-techs');
+  techsEl.innerHTML = '';
+  e.techs.forEach(t => {
+    const s = document.createElement('span');
+    s.className = 'tech-tag';
+    s.textContent = t;
+    techsEl.appendChild(s);
+  });
+
+  modal.classList.add('open');
+  document.getElementById('modal-close').focus();
+}
+
+function closeModal() {
+  modal.classList.remove('open');
+}
+
+// ─────────────────────────────────────────────
+// SIDE PANELS
+// ─────────────────────────────────────────────
+function openPanel(name) {
+  if (activePanel) closePanel(activePanel, true);
+  activePanel = name;
+  document.getElementById(`${name}-panel`).classList.add('open');
+  stage.classList.add('hidden');
+  infoPanel.classList.add('hidden');
+  bottomNav.classList.add('hidden');
+  document.querySelectorAll('.nav-link').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.panel === name);
+  });
+}
+
+function closePanel(name, silent) {
+  if (!name) return;
+  document.getElementById(`${name}-panel`).classList.remove('open');
+  activePanel = null;
+  stage.classList.remove('hidden');
+  infoPanel.classList.remove('hidden');
+  bottomNav.classList.remove('hidden');
+  if (!silent) {
+    document.querySelectorAll('.nav-link').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.panel === 'timeline');
+    });
+  }
+}
+
+// ─────────────────────────────────────────────
+// LANGUAGE
+// ─────────────────────────────────────────────
+function setLang(l) {
+  lang = l;
+  document.getElementById('btn-en').classList.toggle('active', l === 'en');
+  document.getElementById('btn-es').classList.toggle('active', l === 'es');
+
+  // Update all elements with data-[lang] attributes
+  document.querySelectorAll('[data-en]').forEach(el => {
+    const val = el.getAttribute(`data-${l}`);
+    if (val !== null) el.textContent = val;
+  });
+
+  // Dot labels
+  dotWraps.forEach((wrap, i) => {
+    const label = wrap.querySelector('.dot-label');
+    if (label) label.textContent = ENTRIES[i].date[l];
+  });
+
+  heroDate.textContent = ENTRIES[activeIdx].date[l].toUpperCase();
+  renderInfoPanel();
+}
+
+// ─────────────────────────────────────────────
+// CLOCK
+// ─────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+}
+
+// ─────────────────────────────────────────────
+// CUSTOM CURSOR (lerp ring)
+// ─────────────────────────────────────────────
+const curDot  = document.getElementById('cur-dot');
+const curRing = document.getElementById('cur-ring');
+let mX = window.innerWidth / 2;
+let mY = window.innerHeight / 2;
+let rX = mX, rY = mY;
+
+document.addEventListener('mousemove', e => {
+  mX = e.clientX;
+  mY = e.clientY;
+  // Ghost 周 parallax
+  if (ghostZhou) {
+    const px = (e.clientX / window.innerWidth  - 0.5) * 18;
+    const py = (e.clientY / window.innerHeight - 0.5) * 9;
+    ghostZhou.style.transform = `translateY(calc(-50% + ${py}px)) translateX(${px}px)`;
+  }
+});
+
+// Hover effects
+document.addEventListener('mouseover', e => {
+  if (e.target.closest('button, a, .dot-wrap, .pip')) {
+    document.body.classList.add('hovering');
+  }
+});
+document.addEventListener('mouseout', e => {
+  if (e.target.closest('button, a, .dot-wrap, .pip')) {
+    document.body.classList.remove('hovering');
+  }
+});
+
+function animCursor() {
+  rX += (mX - rX) * 0.11;
+  rY += (mY - rY) * 0.11;
+  curDot.style.left  = mX + 'px';
+  curDot.style.top   = mY + 'px';
+  curRing.style.left = rX + 'px';
+  curRing.style.top  = rY + 'px';
+  requestAnimationFrame(animCursor);
+}
+
+// ─────────────────────────────────────────────
+// TOUCH SWIPE
+// ─────────────────────────────────────────────
+let touchStartX = 0;
+let touchStartY = 0;
+document.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}, {passive: true});
+document.addEventListener('touchend', e => {
+  if (activePanel || modal.classList.contains('open')) return;
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  const dy = e.changedTouches[0].clientY - touchStartY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 42) {
+    if (dx < 0) setActive(activeIdx + 1);
+    else         setActive(activeIdx - 1);
+  }
+}, {passive: true});
+
+// ─────────────────────────────────────────────
+// KEYBOARD
+// ─────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (modal.classList.contains('open')) {
+    if (e.key === 'Escape') closeModal();
+    return;
+  }
+  if (activePanel) {
+    if (e.key === 'Escape') closePanel(activePanel);
+    return;
+  }
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown')  { e.preventDefault(); setActive(activeIdx + 1); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')    { e.preventDefault(); setActive(activeIdx - 1); }
+});
+
+// ─────────────────────────────────────────────
+// EVENT BINDINGS
+// ─────────────────────────────────────────────
+btnPrev.addEventListener('click', () => setActive(activeIdx - 1));
+btnNext.addEventListener('click', () => setActive(activeIdx + 1));
+
+document.getElementById('details-btn').addEventListener('click', openModal);
+document.getElementById('modal-close').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+document.querySelectorAll('[data-close]').forEach(btn => {
+  btn.addEventListener('click', () => closePanel(btn.dataset.close));
+});
+
+document.querySelectorAll('.nav-link').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const panel = btn.dataset.panel;
+    if (panel === 'timeline') { if (activePanel) closePanel(activePanel); }
+    else openPanel(panel);
+  });
+});
+
+document.getElementById('btn-en').addEventListener('click', () => setLang('en'));
+document.getElementById('btn-es').addEventListener('click', () => setLang('es'));
+
+window.addEventListener('resize', updateConnector);
+
+// Contact links cursor fix
+document.querySelectorAll('.contact-link').forEach(el => {
+  el.style.cursor = 'none';
+});
+
+// ─────────────────────────────────────────────
+// BOOT
+// ─────────────────────────────────────────────
+initGhostNums();
+initCarousel();
+updateConnector();
+animCursor();
+updateClock();
+setInterval(updateClock, 1000);
+</script>
+</body>
+</html>
