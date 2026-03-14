@@ -5,110 +5,87 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>R. Zhou — Specimen Analysis</title>
 <meta name="description" content="Portfolio of Raul Zhou — AI Architect & Biotech Engineer. View through the microscope.">
-
-<!-- Open Graph / Twitter -->
+<!-- OG Meta Tags (#4) -->
+<meta property="og:title" content="Raul Zhou — AI Architect & Biotech Engineer">
+<meta property="og:description" content="Interactive microscope portfolio. Zoom from macro to quantum to explore skills, experience, and vision.">
 <meta property="og:type" content="website">
-<meta property="og:title" content="R. Zhou — Specimen Analysis">
-<meta property="og:description" content="Interactive microscope portfolio. Scroll to zoom from macro cell view to quantum level.">
-<meta property="og:image" content="">
+<meta property="og:url" content="https://theovia.github.io/portfolio/">
+<!-- Replace with actual screenshot URL when available -->
+<meta property="og:image" content="https://theovia.github.io/portfolio/og-image.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="R. Zhou — Specimen Analysis">
-<meta name="twitter:description" content="AI Architect & Biotech Engineer. View through the brightfield microscope.">
-<meta name="theme-color" content="#f5f0e8">
-
+<meta name="twitter:title" content="Raul Zhou — AI Architect & Biotech Engineer">
+<meta name="twitter:description" content="Interactive microscope portfolio. Zoom from macro to quantum.">
+<meta name="twitter:image" content="https://theovia.github.io/portfolio/og-image.png">
+<meta name="theme-color" content="#060610">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  /* Brightfield microscopy palette */
-  --bg-slide:    #f5f0e8;
-  --bg-warm:     #ede7d9;
-  --teal:        #1a6b5a;
-  --teal-dim:    #1a6b5a66;
-  --teal-glow:   #1a6b5a22;
-  --amber:       #8b6914;
-  --amber-dim:   #8b691488;
-  --charcoal:    #2a2a3e;
-  --charcoal-dim:#2a2a3e99;
-  --text-muted:  #8a8072;
-  /* H&E stain colors */
-  --hematoxylin: #6a4c8c; /* purple-blue — nuclei */
-  --eosin:       #d45f7a; /* pink — cytoplasm */
-  --eosin-light: #e8a0b0; /* lighter pink */
-  --stain-blue:  #4a6fa5;
-  --font-display:'Space Grotesk', sans-serif;
-  --font-mono:   'JetBrains Mono', monospace;
-  --font-body:   'Inter', sans-serif;
+  --bg-void: #060610;
+  --bg-primary: #0a0a12;
+  --cyan: #00d4aa;
+  --cyan-dim: #00d4aa66;
+  --cyan-glow: #00d4aa33;
+  --gold: #c4a44a;
+  --gold-dim: #c4a44a88;
+  --white: #e8e8f0;
+  --white-dim: #e8e8f066;
+  --text-muted: #5a5a72;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-body: 'Inter', sans-serif;
 }
 
 html, body {
   width: 100%; height: 100%;
   overflow: hidden;
-  background: var(--bg-slide);
-  color: var(--charcoal);
+  background: var(--bg-void);
+  color: var(--white);
   font-family: var(--font-body);
   cursor: none;
 }
 
-/* ─── LOADING SCREEN ─── */
+/* ─── LOADING SCREEN (#3) ──────────────────────── */
 #loading-screen {
   position: fixed;
   inset: 0;
-  background: var(--bg-slide);
-  z-index: 200;
+  z-index: 200000;
+  background: var(--bg-void);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 24px;
-  transition: opacity 0.6s ease;
+  transition: opacity 0.8s ease-out;
 }
-#loading-screen.fade-out { opacity: 0; pointer-events: none; }
-
-.lens-rings {
-  position: relative;
-  width: 120px;
-  height: 120px;
-}
-.lens-ring {
+#loading-screen.hidden { opacity: 0; pointer-events: none; }
+.focus-rings { position: relative; width: 120px; height: 120px; }
+.focus-ring {
   position: absolute;
+  border: 1px solid var(--gold);
   border-radius: 50%;
-  border: 2px solid var(--teal);
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  opacity: 0;
-  animation: lens-pulse 2s ease-in-out infinite;
+  animation: focus-pulse 2s ease-in-out infinite;
 }
-.lens-ring:nth-child(1) { width: 30px;  height: 30px;  animation-delay: 0s;    border-color: var(--teal); }
-.lens-ring:nth-child(2) { width: 55px;  height: 55px;  animation-delay: 0.2s;  border-color: var(--amber); }
-.lens-ring:nth-child(3) { width: 80px;  height: 80px;  animation-delay: 0.4s;  border-color: var(--teal); opacity:0.5; }
-.lens-ring:nth-child(4) { width: 105px; height: 105px; animation-delay: 0.6s;  border-color: var(--amber); opacity:0.3; }
-.lens-center {
-  position: absolute;
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--teal);
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
+.focus-ring:nth-child(1) { width: 30px; height: 30px; animation-delay: 0s; }
+.focus-ring:nth-child(2) { width: 55px; height: 55px; animation-delay: 0.15s; }
+.focus-ring:nth-child(3) { width: 80px; height: 80px; animation-delay: 0.3s; }
+.focus-ring:nth-child(4) { width: 105px; height: 105px; animation-delay: 0.45s; }
+@keyframes focus-pulse {
+  0%, 100% { opacity: 0.15; transform: translate(-50%,-50%) scale(1); }
+  50% { opacity: 0.7; transform: translate(-50%,-50%) scale(0.92); }
 }
-@keyframes lens-pulse {
-  0%   { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
-  50%  { opacity: 0.2; transform: translate(-50%, -50%) scale(0.92); }
-  100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
-}
-.loading-text {
+#loading-text {
+  margin-top: 24px;
   font-family: var(--font-mono);
   font-size: 11px;
-  letter-spacing: 0.2em;
-  color: var(--teal);
-  opacity: 0.7;
+  color: var(--gold-dim);
+  letter-spacing: 0.15em;
 }
 
-/* ─── CUSTOM CURSOR ─── */
 #cursor {
   position: fixed;
   pointer-events: none;
@@ -120,19 +97,13 @@ html, body {
 }
 #cursor.hidden { opacity: 0; }
 
-/* ─── CANVAS ─── */
 #microscope-canvas {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
   z-index: 1;
-  transition: filter 0s;
-}
-#microscope-canvas.rack-focus {
-  filter: blur(3px);
 }
 
-/* ─── VIGNETTE: warm brownish like real optics ─── */
 #vignette {
   position: fixed;
   top: 0; left: 0;
@@ -140,17 +111,16 @@ html, body {
   z-index: 50;
   pointer-events: none;
   background: radial-gradient(
-    ellipse 58% 58% at 50% 50%,
+    ellipse 55% 55% at 50% 50%,
     transparent 0%,
-    transparent 55%,
-    rgba(100,70,40,0.12) 70%,
-    rgba(80,50,20,0.35) 83%,
-    rgba(60,35,10,0.65) 93%,
-    rgba(40,20,5,0.88) 100%
+    transparent 60%,
+    rgba(0,0,0,0.3) 75%,
+    rgba(0,0,0,0.7) 85%,
+    rgba(0,0,0,0.95) 95%,
+    #000 100%
   );
 }
 
-/* ─── UI LAYER ─── */
 #ui-layer {
   position: fixed;
   top: 0; left: 0;
@@ -165,7 +135,7 @@ html, body {
   position: absolute;
   bottom: 32px; left: 32px;
   font-size: 14px;
-  color: var(--amber);
+  color: var(--gold);
   letter-spacing: 0.1em;
   display: flex;
   flex-direction: column;
@@ -175,23 +145,23 @@ html, body {
   font-size: 36px;
   font-weight: 600;
   font-family: var(--font-display);
-  color: var(--amber);
+  color: var(--gold);
+  text-shadow: 0 0 20px var(--gold-dim);
   line-height: 1;
-  text-shadow: 0 1px 3px rgba(139,105,20,0.25);
 }
 #mag-bar {
   width: 120px; height: 3px;
-  background: var(--amber-dim);
+  background: var(--gold-dim);
   border-radius: 2px;
   overflow: hidden;
   margin-top: 4px;
 }
 #mag-bar-fill {
   height: 100%;
-  background: var(--amber);
+  background: var(--gold);
   border-radius: 2px;
   transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 0 6px var(--amber-dim);
+  box-shadow: 0 0 8px var(--gold);
 }
 
 #scale-bar {
@@ -199,21 +169,22 @@ html, body {
   bottom: 32px; right: 32px;
   text-align: right;
   font-size: 11px;
-  color: var(--amber);
+  color: var(--gold);
   letter-spacing: 0.05em;
 }
 #scale-line {
   width: 80px; height: 2px;
-  background: var(--amber);
+  background: var(--gold);
   margin-top: 4px;
   margin-left: auto;
   position: relative;
+  box-shadow: 0 0 6px var(--gold-dim);
 }
 #scale-line::before, #scale-line::after {
   content: '';
   position: absolute;
   width: 2px; height: 8px;
-  background: var(--amber);
+  background: var(--gold);
   top: -3px;
 }
 #scale-line::before { left: 0; }
@@ -223,14 +194,10 @@ html, body {
   position: absolute;
   top: 24px; right: 32px;
   font-size: 11px;
-  color: var(--amber-dim);
+  color: var(--gold-dim);
   letter-spacing: 0.08em;
   text-align: right;
   line-height: 1.6;
-  border: 1px solid var(--amber-dim);
-  padding: 8px 12px;
-  background: rgba(245,240,232,0.7);
-  backdrop-filter: blur(4px);
 }
 
 #focus-knob {
@@ -242,13 +209,13 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
-  opacity: 0.25;
+  gap: 2px;
+  opacity: 0.3;
   pointer-events: none;
 }
 .knob-groove {
   width: 16px; height: 2px;
-  background: var(--amber);
+  background: var(--gold);
   border-radius: 1px;
 }
 
@@ -264,7 +231,7 @@ html, body {
 }
 #illumination label {
   font-size: 9px;
-  color: var(--amber-dim);
+  color: var(--gold-dim);
   letter-spacing: 0.15em;
   writing-mode: vertical-rl;
   text-orientation: mixed;
@@ -274,7 +241,7 @@ html, body {
   -webkit-appearance: none;
   appearance: none;
   width: 80px; height: 3px;
-  background: var(--amber-dim);
+  background: var(--gold-dim);
   border-radius: 2px;
   outline: none;
   transform: rotate(-90deg);
@@ -284,7 +251,8 @@ html, body {
   -webkit-appearance: none;
   width: 12px; height: 12px;
   border-radius: 50%;
-  background: var(--amber);
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold-dim);
   cursor: pointer;
 }
 
@@ -300,19 +268,20 @@ html, body {
 .zoom-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
-  border: 1.5px solid var(--amber-dim);
+  border: 1.5px solid var(--gold-dim);
   background: transparent;
   transition: all 0.4s ease;
   cursor: pointer;
 }
 .zoom-dot.active {
-  background: var(--amber);
-  border-color: var(--amber);
+  background: var(--gold);
+  border-color: var(--gold);
+  box-shadow: 0 0 10px var(--gold-dim);
   transform: scale(1.3);
 }
 .zoom-connector {
   width: 20px; height: 1px;
-  background: var(--amber-dim);
+  background: var(--gold-dim);
 }
 
 #nav-hint {
@@ -325,93 +294,34 @@ html, body {
   letter-spacing: 0.1em;
   animation: pulse-hint 2s ease-in-out infinite;
   text-align: center;
-  pointer-events: none;
 }
 @keyframes pulse-hint {
   0%, 100% { opacity: 0.4; }
-  50%       { opacity: 0.9; }
+  50% { opacity: 0.8; }
 }
 
-/* ─── SOUND TOGGLE ─── */
-#sound-toggle {
-  position: absolute;
-  top: 24px; left: 32px;
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  border: 1px solid var(--amber-dim);
-  background: rgba(245,240,232,0.7);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--amber);
-  font-size: 14px;
-  transition: all 0.3s;
-  user-select: none;
-}
-#sound-toggle:hover { background: var(--teal-glow); border-color: var(--teal); color: var(--teal); }
-
-/* ─── SCREENSHOT BUTTON ─── */
-#screenshot-btn {
-  position: absolute;
-  top: 64px; left: 32px;
-  width: 32px; height: 32px;
-  border-radius: 50%;
-  border: 1px solid var(--amber-dim);
-  background: rgba(245,240,232,0.7);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  color: var(--amber);
-  font-size: 13px;
-  transition: all 0.3s;
-  user-select: none;
-}
-#screenshot-btn:hover { background: var(--teal-glow); border-color: var(--teal); color: var(--teal); }
-
-/* ─── ECO MODE BADGE (hidden by default) ─── */
-#eco-badge {
-  display: none;
-  position: absolute;
-  top: 108px; left: 32px;
-  font-size: 8px;
-  font-family: var(--font-mono);
-  color: var(--amber);
-  letter-spacing: 0.12em;
-  opacity: 0.5;
-  border: 1px solid var(--amber-dim);
-  padding: 2px 6px;
-  border-radius: 3px;
-}
-#eco-badge.visible { display: block; }
-
-/* ─── DETAIL PANEL ─── */
 #detail-panel {
   position: fixed;
-  right: -440px;
+  right: -420px;
   top: 0;
-  width: 420px;
+  width: 400px;
   height: 100%;
-  background: linear-gradient(160deg, rgba(245,240,232,0.97), rgba(237,231,217,0.99));
-  border-left: 1px solid var(--teal-dim);
+  background: linear-gradient(135deg, rgba(10,10,18,0.95), rgba(6,6,16,0.98));
+  border-left: 1px solid var(--cyan-dim);
   z-index: 70;
   padding: 60px 32px 32px;
   transition: right 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   overflow-y: auto;
   font-family: var(--font-body);
   backdrop-filter: blur(20px);
-  box-shadow: -8px 0 40px rgba(42,42,62,0.12);
 }
 #detail-panel.open { right: 0; }
 #detail-panel-close {
   position: absolute;
   top: 20px; right: 20px;
   background: none;
-  border: 1px solid var(--teal-dim);
-  color: var(--teal);
+  border: 1px solid var(--cyan-dim);
+  color: var(--cyan);
   width: 32px; height: 32px;
   border-radius: 50%;
   cursor: pointer;
@@ -422,89 +332,160 @@ html, body {
   justify-content: center;
   transition: all 0.3s;
 }
-#detail-panel-close:hover { background: var(--teal-glow); }
+#detail-panel-close:hover {
+  background: var(--cyan-glow);
+  box-shadow: 0 0 15px var(--cyan-glow);
+}
 #detail-title {
   font-family: var(--font-display);
   font-size: 24px;
   font-weight: 600;
-  color: var(--teal);
+  color: var(--cyan);
   margin-bottom: 8px;
 }
 #detail-subtitle {
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--amber);
+  color: var(--gold);
   letter-spacing: 0.1em;
   margin-bottom: 24px;
 }
 #detail-body {
   font-size: 14px;
-  line-height: 1.75;
-  color: var(--charcoal-dim);
+  line-height: 1.7;
+  color: var(--white-dim);
 }
-#detail-body strong { color: var(--teal); font-weight: 600; }
+#detail-body strong { color: var(--cyan); font-weight: 500; }
 #detail-body .tag {
   display: inline-block;
   padding: 2px 10px;
   margin: 3px 4px 3px 0;
-  border: 1px solid var(--teal-dim);
+  border: 1px solid var(--cyan-dim);
   border-radius: 12px;
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--teal);
-  background: var(--teal-glow);
+  color: var(--cyan);
 }
-#detail-body em { color: var(--text-muted); font-style: italic; }
 
-/* ─── TRANSITION FLASH ─── */
 #transition-flash {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background: rgba(245,240,232,0.9);
+  background: white;
   opacity: 0;
   z-index: 55;
   pointer-events: none;
-  transition: opacity 0.12s ease-out;
+  transition: opacity 0.15s ease-out;
 }
-#transition-flash.flash { opacity: 0.3; }
+#transition-flash.flash { opacity: 0.15; }
 
-/* ─── PRINT CSS ─── */
-@media print {
-  #cursor, #vignette, #ui-layer, #detail-panel, #transition-flash, #loading-screen { display: none !important; }
-  #microscope-canvas { display: none !important; }
-  body { overflow: auto; background: white; color: #1a1a2e; cursor: auto; }
-  .print-cv {
-    display: block !important;
-    font-family: 'Inter', sans-serif;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 40px;
-    font-size: 13px;
-    line-height: 1.6;
-  }
-  .print-cv h1 { font-size: 32px; font-weight: 700; color: #1a6b5a; margin-bottom: 4px; }
-  .print-cv h2 { font-size: 14px; color: #8b6914; letter-spacing: 0.1em; margin-bottom: 32px; }
-  .print-cv h3 { font-size: 16px; font-weight: 600; color: #1a6b5a; margin: 24px 0 8px; border-bottom: 1px solid #ccc; padding-bottom: 4px; }
-  .print-cv p, .print-cv li { margin-bottom: 4px; }
-  .print-cv ul { padding-left: 20px; }
+/* ─── TOOLBAR BUTTONS (#1 sound, #11 screenshot) ── */
+#toolbar {
+  position: absolute;
+  top: 24px; left: 24px;
+  display: flex;
+  gap: 8px;
+  z-index: 80;
 }
-.print-cv { display: none; }
+.toolbar-btn {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--gold-dim);
+  background: rgba(6,6,16,0.6);
+  color: var(--gold);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  backdrop-filter: blur(8px);
+}
+.toolbar-btn:hover {
+  background: rgba(196,164,74,0.15);
+  box-shadow: 0 0 12px var(--gold-dim);
+}
+.toolbar-btn.active { border-color: var(--gold); color: var(--gold); }
+.toolbar-btn.muted { opacity: 0.4; }
 
-/* ─── MOBILE ─── */
+/* ─── ECO INDICATOR (#9) ───────────────────────── */
+#eco-badge {
+  position: absolute;
+  top: 24px; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--gold-dim);
+  letter-spacing: 0.15em;
+  opacity: 0;
+  transition: opacity 0.5s;
+}
+#eco-badge.visible { opacity: 1; }
+
+/* ─── KEYBOARD HINTS (#2) ──────────────────────── */
+#kbd-hints {
+  position: absolute;
+  top: 24px; left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  opacity: 0;
+  transition: opacity 0.5s;
+  white-space: nowrap;
+}
+#kbd-hints.visible { opacity: 0.5; }
+
 @media (max-width: 768px) {
   #cursor { display: none; }
-  body { cursor: crosshair; }
-  #mag-display { bottom: 20px; left: 16px; }
-  #mag-value { font-size: 28px; }
-  #scale-bar { bottom: 20px; right: 16px; font-size: 9px; }
-  #specimen-label { display: none; }
+  body { cursor: default; -webkit-tap-highlight-color: transparent; }
+  #mag-display { bottom: 16px; left: 12px; }
+  #mag-value { font-size: 24px; }
+  #mag-bar { width: 80px; }
+  #scale-bar { bottom: 16px; right: 12px; font-size: 10px; }
+  #scale-line { width: 50px; }
+  #specimen-label { top: 12px; right: 12px; font-size: 8px; line-height: 1.4; }
   #illumination { display: none; }
   #focus-knob { display: none; }
-  #zoom-steps { bottom: 20px; }
-  #nav-hint { bottom: 56px; font-size: 10px; }
-  #detail-panel { width: 100%; right: -100%; }
-  #screenshot-btn { display: none; }
+  #zoom-steps { bottom: 16px; gap: 8px; }
+  .zoom-dot { width: 10px; height: 10px; }
+  .zoom-connector { width: 12px; }
+  #nav-hint { bottom: 52px; font-size: 9px; }
+  #detail-panel {
+    width: 100%; right: -100%;
+    padding: 48px 20px 20px;
+    border-left: none;
+    border-top: 1px solid var(--cyan-dim);
+  }
+  #detail-panel.open { right: 0; }
+  #detail-title { font-size: 20px; }
+  #detail-subtitle { font-size: 10px; }
+  #detail-body { font-size: 13px; }
+  #detail-body .tag { font-size: 10px; padding: 2px 8px; }
+  #toolbar { top: auto; bottom: 60px; left: auto; right: 12px; flex-direction: column; }
+  #kbd-hints { display: none; }
+}
+
+@media (max-width: 480px) {
+  #mag-display { bottom: 12px; left: 8px; }
+  #mag-value { font-size: 20px; }
+  #scale-bar { bottom: 12px; right: 8px; font-size: 9px; }
+  #specimen-label { top: 8px; right: 8px; font-size: 7px; }
+  #zoom-steps { bottom: 12px; gap: 6px; }
+  .zoom-dot { width: 12px; height: 12px; }
+  #nav-hint { bottom: 48px; font-size: 8px; }
+  #detail-panel { padding: 40px 16px 16px; }
+  #detail-title { font-size: 18px; }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  #mag-display { bottom: 8px; left: 8px; }
+  #mag-value { font-size: 18px; }
+  #scale-bar { bottom: 8px; right: 8px; }
+  #specimen-label { display: none; }
+  #zoom-steps { bottom: 8px; }
+  #nav-hint { bottom: 36px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -513,87 +494,87 @@ html, body {
     transition-duration: 0.2s !important;
   }
 }
+
+/* ─── PRINT CSS (#12) ──────────────────────────── */
+@media print {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  body { background: white !important; color: #111 !important; cursor: auto !important; overflow: visible !important; height: auto !important; }
+  #microscope-canvas, #vignette, #transition-flash, #cursor, #ui-layer,
+  #detail-panel, #loading-screen, #toolbar, #eco-badge, #kbd-hints { display: none !important; }
+  #print-cv { display: block !important; }
+}
+#print-cv {
+  display: none;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: 'Inter', 'Helvetica Neue', sans-serif;
+  color: #111;
+  line-height: 1.6;
+}
+#print-cv h1 { font-family: 'Space Grotesk', sans-serif; font-size: 28px; margin-bottom: 4px; }
+#print-cv .print-subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
+#print-cv h2 { font-size: 16px; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin: 20px 0 12px; }
+#print-cv p, #print-cv li { font-size: 13px; }
+#print-cv ul { padding-left: 20px; }
+#print-cv .print-tags { font-size: 12px; color: #555; }
+#print-cv .print-contact { font-size: 12px; color: #555; margin-top: 24px; border-top: 1px solid #ccc; padding-top: 12px; }
 </style>
 </head>
 <body>
 
-<!-- Loading Screen -->
+<!-- Loading Screen (#3) -->
 <div id="loading-screen">
-  <div class="lens-rings">
-    <div class="lens-ring"></div>
-    <div class="lens-ring"></div>
-    <div class="lens-ring"></div>
-    <div class="lens-ring"></div>
-    <div class="lens-center"></div>
+  <div class="focus-rings">
+    <div class="focus-ring"></div>
+    <div class="focus-ring"></div>
+    <div class="focus-ring"></div>
+    <div class="focus-ring"></div>
   </div>
-  <div class="loading-text">FOCUSING LENS&hellip;</div>
+  <div id="loading-text">FOCUSING...</div>
 </div>
 
-<!-- Print CV (hidden normally) -->
-<div class="print-cv">
-  <h1>Raul Zhou</h1>
-  <h2>AI ARCHITECT &middot; BIOTECH ENGINEER</h2>
-  <h3>Contact</h3>
-  <p>Email: raul.chio.leon@gmail.com | GitHub: github.com/Theovia | Location: Guadalajara, Mexico</p>
-  <h3>Education</h3>
-  <p><strong>M.S. Applied Artificial Intelligence</strong> &mdash; Tec de Monterrey, 2022&ndash;2024</p>
-  <p><strong>B.S. Biotechnology Engineering</strong> &mdash; Tec de Monterrey, 2017&ndash;2022 | "Leaders of Tomorrow" full scholarship</p>
-  <p>Exchange semesters: Colombia (2019), Spain (2020)</p>
-  <h3>Work</h3>
-  <p>AI Consulting &mdash; Enterprise AI implementation &amp; strategy at $1,000/hr</p>
-  <ul>
-    <li>LLM integration &amp; fine-tuning</li>
-    <li>AI workflow automation</li>
-    <li>Voice agent development</li>
-    <li>Full-stack AI products</li>
-  </ul>
-  <h3>Projects</h3>
-  <ul>
-    <li><strong>Eigen Atlas SaaS</strong> &mdash; AI-powered knowledge management platform</li>
-    <li><strong>Voice Agent Factory</strong> &mdash; Production voice AI agents using Retell AI</li>
-    <li><strong>GHL Integrations</strong> &mdash; GoHighLevel automation workflows</li>
-    <li><strong>AI Workflow Automation</strong> &mdash; n8n-based automation connecting LLMs with business systems</li>
-  </ul>
-  <h3>Skills</h3>
-  <p>Python &middot; ML/DL &middot; NLP &middot; Computer Vision &middot; LLMs &middot; TensorFlow &middot; LangChain &middot; n8n &middot; GHL &middot; Retell AI &middot; OpenAI API &middot; Anthropic API &middot; React &middot; Node.js &middot; Supabase &middot; Docker &middot; Git &middot; Vercel</p>
-</div>
-
-<!-- Custom cursor: crosshair reticle -->
 <svg id="cursor" viewBox="0 0 40 40">
-  <circle cx="20" cy="20" r="15" fill="none" stroke="#8b6914" stroke-width="0.8" opacity="0.5"/>
-  <circle cx="20" cy="20" r="2" fill="#8b6914" opacity="0.9"/>
-  <line x1="20" y1="2"  x2="20" y2="11" stroke="#8b6914" stroke-width="1" opacity="0.7"/>
-  <line x1="20" y1="29" x2="20" y2="38" stroke="#8b6914" stroke-width="1" opacity="0.7"/>
-  <line x1="2"  y1="20" x2="11" y2="20" stroke="#8b6914" stroke-width="1" opacity="0.7"/>
-  <line x1="29" y1="20" x2="38" y2="20" stroke="#8b6914" stroke-width="1" opacity="0.7"/>
+  <circle cx="20" cy="20" r="15" fill="none" stroke="#c4a44a" stroke-width="0.5" opacity="0.5"/>
+  <circle cx="20" cy="20" r="1.5" fill="#c4a44a" opacity="0.8"/>
+  <line x1="20" y1="2" x2="20" y2="12" stroke="#c4a44a" stroke-width="0.7" opacity="0.6"/>
+  <line x1="20" y1="28" x2="20" y2="38" stroke="#c4a44a" stroke-width="0.7" opacity="0.6"/>
+  <line x1="2" y1="20" x2="12" y2="20" stroke="#c4a44a" stroke-width="0.7" opacity="0.6"/>
+  <line x1="28" y1="20" x2="38" y2="20" stroke="#c4a44a" stroke-width="0.7" opacity="0.6"/>
 </svg>
 
 <canvas id="microscope-canvas"></canvas>
+
 <div id="vignette"></div>
 <div id="transition-flash"></div>
 
 <div id="ui-layer">
-  <!-- Magnification display -->
+  <!-- Toolbar: Sound + Screenshot (#1, #11) -->
+  <div id="toolbar">
+    <button class="toolbar-btn muted" id="sound-btn" title="Toggle Sound">🔇</button>
+    <button class="toolbar-btn" id="screenshot-btn" title="Screenshot">📷</button>
+  </div>
+
+  <div id="eco-badge">⚡ ECO MODE</div>
+  <div id="kbd-hints">↑↓ ZOOM · 1-5 LEVELS · ESC CLOSE</div>
+
   <div id="mag-display">
-    <span style="font-size:10px;opacity:0.6;letter-spacing:0.15em;">MAGNIFICATION</span>
+    <span style="font-size:10px; opacity:0.6;">MAGNIFICATION</span>
     <span id="mag-value">1x</span>
     <div id="mag-bar"><div id="mag-bar-fill" style="width:5%"></div></div>
   </div>
 
-  <!-- Scale bar -->
   <div id="scale-bar">
     <span id="scale-text">500 &mu;m</span>
     <div id="scale-line"></div>
   </div>
 
-  <!-- Specimen label (top right) -->
   <div id="specimen-label">
     SPECIMEN: R. ZHOU<br>
-    <em style="opacity:0.6;font-style:normal;">Homo sapiens artificialis</em><br>
-    <span style="font-size:9px;opacity:0.4;">SLIDE 001 &mdash; PREPARED 2024</span>
+    <em style="opacity:0.6;">Homo sapiens artificialis</em><br>
+    <span style="font-size:9px; opacity:0.4;">SLIDE 001 &mdash; PREPARED 2024</span>
   </div>
 
-  <!-- Focus knob (decorative) -->
   <div id="focus-knob">
     <div class="knob-groove"></div><div class="knob-groove"></div>
     <div class="knob-groove"></div><div class="knob-groove"></div>
@@ -603,13 +584,11 @@ html, body {
     <div class="knob-groove"></div><div class="knob-groove"></div>
   </div>
 
-  <!-- Illumination slider -->
   <div id="illumination">
     <label>ILLUM</label>
     <input type="range" id="illum-slider" min="30" max="150" value="100">
   </div>
 
-  <!-- Zoom step indicators -->
   <div id="zoom-steps">
     <div class="zoom-dot active" data-level="0"></div>
     <div class="zoom-connector"></div>
@@ -622,15 +601,9 @@ html, body {
     <div class="zoom-dot" data-level="4"></div>
   </div>
 
-  <div id="nav-hint">SCROLL TO ZOOM IN &nbsp;&mdash;&nbsp; KEYS 1-5</div>
-
-  <!-- Controls -->
-  <div id="sound-toggle" title="Toggle ambient sound">&#9834;</div>
-  <div id="screenshot-btn" title="Download PNG">&#9711;</div>
-  <div id="eco-badge">ECO</div>
+  <div id="nav-hint">SCROLL TO CHANGE MAGNIFICATION</div>
 </div>
 
-<!-- Detail Panel -->
 <div id="detail-panel">
   <button id="detail-panel-close">&times;</button>
   <div id="detail-title"></div>
@@ -638,11 +611,59 @@ html, body {
   <div id="detail-body"></div>
 </div>
 
+<!-- Print CV (#12) -->
+<div id="print-cv">
+  <h1>Raul Zhou</h1>
+  <div class="print-subtitle">AI Architect · Biotech Engineer · Guadalajara, MX</div>
+  <h2>Education</h2>
+  <p><strong>M.S. Applied Artificial Intelligence</strong> — Tec de Monterrey, 2022–2024</p>
+  <p><strong>B.S. Biotechnology Engineering</strong> — Tec de Monterrey, 2017–2022</p>
+  <p>"Leaders of Tomorrow" full scholarship · Exchange: Colombia (2019), Spain (2020)</p>
+  <h2>Experience</h2>
+  <p><strong>AI Consulting</strong> — Enterprise AI implementation & strategy</p>
+  <ul>
+    <li>LLM integration & fine-tuning</li>
+    <li>AI workflow automation (n8n, LangChain)</li>
+    <li>Voice agent development (Retell AI)</li>
+    <li>Full-stack AI products</li>
+  </ul>
+  <h2>Projects</h2>
+  <p><strong>Eigen Atlas SaaS</strong> — AI-powered knowledge management platform</p>
+  <p><strong>Voice Agent Factory</strong> — Production voice AI agents</p>
+  <p><strong>GHL Integrations</strong> — GoHighLevel automation workflows</p>
+  <h2>Skills</h2>
+  <p class="print-tags">Python · ML/DL · NLP · Computer Vision · LLMs · TensorFlow · LangChain · n8n · GHL · Retell AI · OpenAI API · Anthropic API · React · Node.js · Supabase · Docker · Git · Vercel</p>
+  <h2>Achievements</h2>
+  <ul>
+    <li>"Leaders of Tomorrow" full scholarship</li>
+    <li>International experience across 3 countries</li>
+    <li>Chinese-Mexican heritage — bridging cultures</li>
+  </ul>
+  <div class="print-contact">raul.chio.leon@gmail.com · github.com/Theovia · Guadalajara, MX</div>
+</div>
+
 <script>
 (function() {
 'use strict';
 
-// ─── CANVAS SETUP ────────────────────────────────────────────
+// ═══════════════════════════════════════════════
+//  LOADING SCREEN (#3)
+// ═══════════════════════════════════════════════
+var loadingScreen = document.getElementById('loading-screen');
+document.fonts.ready.then(function() {
+  setTimeout(function() {
+    loadingScreen.classList.add('hidden');
+    setTimeout(function() { loadingScreen.style.display = 'none'; }, 800);
+    // Show keyboard hints briefly on desktop
+    if (!('ontouchstart' in window)) {
+      var hints = document.getElementById('kbd-hints');
+      hints.classList.add('visible');
+      setTimeout(function() { hints.classList.remove('visible'); }, 5000);
+    }
+  }, 600);
+});
+
+// ─── CANVAS SETUP ─────────────────────────────────────────────
 const canvas = document.getElementById('microscope-canvas');
 const ctx = canvas.getContext('2d');
 let W, H, CX, CY, DPR;
@@ -662,193 +683,193 @@ function resize() {
 resize();
 window.addEventListener('resize', resize);
 
-// ─── LOADING SCREEN ──────────────────────────────────────────
-const loadingScreen = document.getElementById('loading-screen');
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    loadingScreen.classList.add('fade-out');
-    setTimeout(function() { loadingScreen.style.display = 'none'; }, 700);
-  }, 1600);
-});
-
-// ─── PERFORMANCE AUTO-DETECTION ──────────────────────────────
-let ecoMode = false;
-let perfFrameCount = 0;
-let perfTotalMs = 0;
-let perfLastTime = performance.now();
-const ecoBadge = document.getElementById('eco-badge');
-
-function checkPerf(now) {
-  if (perfFrameCount < 10) {
-    perfTotalMs += now - perfLastTime;
-    perfLastTime = now;
-    perfFrameCount++;
-    if (perfFrameCount === 10) {
-      var avgMs = perfTotalMs / 10;
-      if (avgMs > 25) {
-        ecoMode = true;
-        // Reduce particles 50%
-        MEDIUM_PARTICLES.length = Math.floor(MEDIUM_PARTICLES.length / 2);
-        CYTO_PARTICLES.length = Math.floor(CYTO_PARTICLES.length / 2);
-        QUANTUM_PARTICLES.length = Math.floor(QUANTUM_PARTICLES.length / 2);
-        ecoBadge.classList.add('visible');
-      }
-    }
-  }
-}
-
-// ─── AMBIENT SOUND (Web Audio API) ───────────────────────────
-let audioCtx = null;
-let soundEnabled = false;
-let droneNode = null, droneGain = null;
-
-function initAudio() {
-  try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    // Create a subtle drone: two slightly detuned oscillators
-    const osc1 = audioCtx.createOscillator();
-    const osc2 = audioCtx.createOscillator();
-    droneGain = audioCtx.createGain();
-    const filter = audioCtx.createBiquadFilter();
-
-    osc1.type = 'sine';
-    osc1.frequency.value = 60;
-    osc2.type = 'sine';
-    osc2.frequency.value = 60.5;
-
-    filter.type = 'lowpass';
-    filter.frequency.value = 200;
-    filter.Q.value = 0.5;
-
-    droneGain.gain.value = 0;
-
-    osc1.connect(filter);
-    osc2.connect(filter);
-    filter.connect(droneGain);
-    droneGain.connect(audioCtx.destination);
-
-    osc1.start();
-    osc2.start();
-  } catch(e) {}
-}
-
-function playZoomClick() {
-  if (!soundEnabled || !audioCtx) return;
-  try {
-    var osc = audioCtx.createOscillator();
-    var gain = audioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.15);
-    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2);
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.22);
-  } catch(e) {}
-}
-
-document.getElementById('sound-toggle').addEventListener('click', function() {
-  if (!audioCtx) initAudio();
-  soundEnabled = !soundEnabled;
-  if (audioCtx) {
-    if (audioCtx.state === 'suspended') audioCtx.resume();
-    if (droneGain) {
-      droneGain.gain.cancelScheduledValues(audioCtx.currentTime);
-      droneGain.gain.setTargetAtTime(soundEnabled ? 0.03 : 0, audioCtx.currentTime, 0.5);
-    }
-  }
-  this.style.opacity = soundEnabled ? '1' : '0.5';
-  this.textContent = soundEnabled ? '♬' : '♩';
-});
-
-// ─── STATE ───────────────────────────────────────────────────
-const ZOOM_LABELS  = ['1x','10x','100x','1000x','10000x'];
-const SCALE_LABELS = ['500 \u00b5m','50 \u00b5m','5 \u00b5m','500 nm','50 nm'];
-const MAG_FILLS    = [5,25,50,75,100];
+// ─── STATE ────────────────────────────────────────────────────
+const ZOOM_LABELS = ['1x', '10x', '100x', '1000x', '10000x'];
+const SCALE_LABELS = ['500 \u00b5m', '50 \u00b5m', '5 \u00b5m', '500 nm', '50 nm'];
+const MAG_FILLS = [5, 25, 50, 75, 100];
 
 let currentLevel = 0;
-let targetLevel  = 0;
+let targetLevel = 0;
 let zoomProgress = 0;
 let isTransitioning = false;
-let scrollAccum  = 0;
+let scrollAccum = 0;
 const SCROLL_THRESHOLD = 120;
 
 let mouseX = -999, mouseY = -999;
 let illumination = 100;
 let time = 0;
+var isMobileDevice = false;
+function checkMobile() { isMobileDevice = window.innerWidth <= 768; }
+checkMobile();
+window.addEventListener('resize', checkMobile);
 
-// ─── CURSOR ──────────────────────────────────────────────────
+// ═══════════════════════════════════════════════
+//  PERFORMANCE AUTO-DETECTION (#9)
+// ═══════════════════════════════════════════════
+var perfMode = false;
+var perfFrameTimes = [];
+var perfChecked = false;
+var particleMultiplier = 1;
+
+function checkPerformance(dt) {
+  if (perfChecked) return;
+  perfFrameTimes.push(dt);
+  if (perfFrameTimes.length >= 10) {
+    var avg = perfFrameTimes.reduce(function(a,b){return a+b;},0) / perfFrameTimes.length;
+    if (avg > 0.025) { // >25ms per frame = slow
+      perfMode = true;
+      particleMultiplier = 0.5;
+      document.getElementById('eco-badge').classList.add('visible');
+      // Reduce quantum particles
+      QUANTUM_PARTICLES.length = Math.floor(QUANTUM_PARTICLES.length * 0.5);
+      MEDIUM_PARTICLES.length = Math.floor(MEDIUM_PARTICLES.length * 0.5);
+      CYTO_PARTICLES.length = Math.floor(CYTO_PARTICLES.length * 0.5);
+    }
+    perfChecked = true;
+  }
+}
+
+// ═══════════════════════════════════════════════
+//  WEB AUDIO — AMBIENT SOUND (#1)
+// ═══════════════════════════════════════════════
+var audioCtx = null;
+var soundEnabled = false;
+var humOsc = null, humGain = null, lfoOsc = null, lfoGain = null;
+
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  // Hum oscillator
+  humOsc = audioCtx.createOscillator();
+  humOsc.type = 'sine';
+  humOsc.frequency.value = 60;
+  humGain = audioCtx.createGain();
+  humGain.gain.value = 0;
+
+  // LFO for subtle warble
+  lfoOsc = audioCtx.createOscillator();
+  lfoOsc.type = 'sine';
+  lfoOsc.frequency.value = 0.3;
+  lfoGain = audioCtx.createGain();
+  lfoGain.gain.value = 5;
+  lfoOsc.connect(lfoGain);
+  lfoGain.connect(humOsc.frequency);
+
+  humOsc.connect(humGain);
+  humGain.connect(audioCtx.destination);
+  humOsc.start();
+  lfoOsc.start();
+}
+
+function updateHumPitch(level) {
+  if (!audioCtx || !soundEnabled) return;
+  var freqs = [55, 80, 120, 180, 260];
+  humOsc.frequency.setTargetAtTime(freqs[level], audioCtx.currentTime, 0.3);
+}
+
+function playClickSound() {
+  if (!audioCtx || !soundEnabled) return;
+  var osc = audioCtx.createOscillator();
+  var gain = audioCtx.createGain();
+  osc.type = 'square';
+  osc.frequency.value = 800;
+  gain.gain.value = 0.03;
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.08);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start();
+  osc.stop(audioCtx.currentTime + 0.08);
+}
+
+var soundBtn = document.getElementById('sound-btn');
+soundBtn.addEventListener('click', function() {
+  initAudio();
+  soundEnabled = !soundEnabled;
+  if (soundEnabled) {
+    humGain.gain.setTargetAtTime(0.015, audioCtx.currentTime, 0.3);
+    soundBtn.textContent = '🔊';
+    soundBtn.classList.remove('muted');
+    soundBtn.classList.add('active');
+    updateHumPitch(currentLevel);
+  } else {
+    humGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1);
+    soundBtn.textContent = '🔇';
+    soundBtn.classList.add('muted');
+    soundBtn.classList.remove('active');
+  }
+});
+
+// ═══════════════════════════════════════════════
+//  SCREENSHOT (#11)
+// ═══════════════════════════════════════════════
+document.getElementById('screenshot-btn').addEventListener('click', function() {
+  // Draw UI text onto canvas temporarily
+  var tempCanvas = document.createElement('canvas');
+  tempCanvas.width = canvas.width;
+  tempCanvas.height = canvas.height;
+  var tCtx = tempCanvas.getContext('2d');
+  tCtx.drawImage(canvas, 0, 0);
+  // Add watermark
+  tCtx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  tCtx.font = '600 14px "Space Grotesk", sans-serif';
+  tCtx.fillStyle = 'rgba(196,164,74,0.5)';
+  tCtx.textAlign = 'right';
+  tCtx.fillText('R. ZHOU — ' + ZOOM_LABELS[currentLevel], W - 16, H - 16);
+  // Download
+  var link = document.createElement('a');
+  link.download = 'raul-zhou-' + ZOOM_LABELS[currentLevel] + '.png';
+  link.href = tempCanvas.toDataURL('image/png');
+  link.click();
+});
+
+// ─── CURSOR ───────────────────────────────────────────────────
 const cursorEl = document.getElementById('cursor');
 document.addEventListener('mousemove', function(e) {
   mouseX = e.clientX;
   mouseY = e.clientY;
   cursorEl.style.left = e.clientX + 'px';
-  cursorEl.style.top  = e.clientY + 'px';
-});
-document.addEventListener('mouseleave', function() {
-  cursorEl.classList.add('hidden');
-  mouseX = -999; mouseY = -999;
+  cursorEl.style.top = e.clientY + 'px';
 });
 document.addEventListener('mouseenter', function() { cursorEl.classList.remove('hidden'); });
+document.addEventListener('mouseleave', function() { cursorEl.classList.add('hidden'); mouseX = -999; mouseY = -999; });
 
-// ─── ILLUMINATION ────────────────────────────────────────────
+// ─── ILLUMINATION ─────────────────────────────────────────────
 document.getElementById('illum-slider').addEventListener('input', function(e) {
   illumination = parseInt(e.target.value);
 });
 
-// ─── KEYBOARD NAVIGATION ─────────────────────────────────────
-document.addEventListener('keydown', function(e) {
-  switch(e.key) {
-    case 'ArrowDown': case 'ArrowRight':
-      if (currentLevel < 4) setZoomLevel(currentLevel + 1); break;
-    case 'ArrowUp': case 'ArrowLeft':
-      if (currentLevel > 0) setZoomLevel(currentLevel - 1); break;
-    case '1': setZoomLevel(0); break;
-    case '2': setZoomLevel(1); break;
-    case '3': setZoomLevel(2); break;
-    case '4': setZoomLevel(3); break;
-    case '5': setZoomLevel(4); break;
-    case 'Escape': closeDetailPanel(); break;
-  }
-});
-
 // ─── ZOOM NAVIGATION ─────────────────────────────────────────
-const magValue   = document.getElementById('mag-value');
+const magValue = document.getElementById('mag-value');
 const magBarFill = document.getElementById('mag-bar-fill');
-const scaleText  = document.getElementById('scale-text');
-const navHint    = document.getElementById('nav-hint');
+const scaleText = document.getElementById('scale-text');
+const navHint = document.getElementById('nav-hint');
 const transFlash = document.getElementById('transition-flash');
-const zoomDots   = document.querySelectorAll('.zoom-dot');
+const zoomDots = document.querySelectorAll('.zoom-dot');
 
 function setZoomLevel(level) {
   if (level < 0 || level > 4 || level === currentLevel || isTransitioning) return;
   targetLevel = level;
   isTransitioning = true;
   zoomProgress = 0;
-
-  // Rack focus effect: blur at midpoint
-  canvas.classList.add('rack-focus');
-  setTimeout(function() { canvas.classList.remove('rack-focus'); }, 400);
-
   transFlash.classList.add('flash');
   setTimeout(function() { transFlash.classList.remove('flash'); }, 200);
-
-  playZoomClick();
   closeDetailPanel();
+  playClickSound(); // (#1)
+  updateHumPitch(level); // (#1)
 }
 
 function updateUI() {
   magValue.textContent = ZOOM_LABELS[currentLevel];
   magBarFill.style.width = MAG_FILLS[currentLevel] + '%';
-  scaleText.textContent  = SCALE_LABELS[currentLevel];
+  scaleText.textContent = SCALE_LABELS[currentLevel];
   zoomDots.forEach(function(dot, i) {
     dot.classList.toggle('active', i === currentLevel);
   });
-  if (currentLevel === 0) navHint.textContent = 'SCROLL TO ZOOM IN  \u2014  KEYS 1-5';
-  else if (currentLevel === 4) navHint.textContent = 'SCROLL TO ZOOM OUT  \u2014  KEYS 1-5';
-  else navHint.textContent = 'SCROLL TO CHANGE MAGNIFICATION';
+  var isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  if (currentLevel === 0) navHint.textContent = isMobile ? 'SWIPE UP TO ZOOM IN' : 'SCROLL TO ZOOM IN';
+  else if (currentLevel === 4) navHint.textContent = isMobile ? 'SWIPE DOWN TO ZOOM OUT' : 'SCROLL TO ZOOM OUT';
+  else navHint.textContent = isMobile ? 'SWIPE TO CHANGE MAGNIFICATION' : 'SCROLL TO CHANGE MAGNIFICATION';
 }
 
 window.addEventListener('wheel', function(e) {
@@ -862,26 +883,65 @@ window.addEventListener('wheel', function(e) {
   }
 }, { passive: false });
 
-// Mobile touch swipe
+// ─── TOUCH ────────────────────────────────────────────────────
 let touchStartY = 0;
-window.addEventListener('touchstart', function(e) { touchStartY = e.touches[0].clientY; }, { passive: true });
+let touchStartX = 0;
+let touchStartTime = 0;
+window.addEventListener('touchstart', function(e) {
+  touchStartY = e.touches[0].clientY;
+  touchStartX = e.touches[0].clientX;
+  touchStartTime = Date.now();
+  mouseX = e.touches[0].clientX;
+  mouseY = e.touches[0].clientY;
+}, { passive: true });
+window.addEventListener('touchmove', function(e) {
+  mouseX = e.touches[0].clientX;
+  mouseY = e.touches[0].clientY;
+}, { passive: true });
 window.addEventListener('touchend', function(e) {
   var dy = touchStartY - e.changedTouches[0].clientY;
-  if (Math.abs(dy) > 50) {
+  var dx = touchStartX - e.changedTouches[0].clientX;
+  var dt = Date.now() - touchStartTime;
+  if (dt < 300 && Math.abs(dy) < 15 && Math.abs(dx) < 15) {
+    mouseX = e.changedTouches[0].clientX;
+    mouseY = e.changedTouches[0].clientY;
+    if (currentLevel === 1 && hoveredOrganelle) { openDetailPanel(hoveredOrganelle.detail); }
+    else if (currentLevel === 3 && hoveredAtom) { openDetailPanel(hoveredAtom.detail); }
+    else if (currentLevel === 4 && hoveredContact && hoveredContact.href) { window.open(hoveredContact.href, '_blank'); }
+    return;
+  }
+  if (Math.abs(dy) > 40 && Math.abs(dy) > Math.abs(dx)) {
     if (dy > 0 && currentLevel < 4) setZoomLevel(currentLevel + 1);
     else if (dy < 0 && currentLevel > 0) setZoomLevel(currentLevel - 1);
   }
 }, { passive: true });
 
+// ═══════════════════════════════════════════════
+//  KEYBOARD NAVIGATION (#2)
+// ═══════════════════════════════════════════════
+window.addEventListener('keydown', function(e) {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+    e.preventDefault();
+    if (currentLevel < 4) setZoomLevel(currentLevel + 1);
+  } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+    e.preventDefault();
+    if (currentLevel > 0) setZoomLevel(currentLevel - 1);
+  } else if (e.key >= '1' && e.key <= '5') {
+    setZoomLevel(parseInt(e.key) - 1);
+  } else if (e.key === 'Escape') {
+    closeDetailPanel();
+  }
+});
+
 zoomDots.forEach(function(dot) {
   dot.addEventListener('click', function() { setZoomLevel(parseInt(dot.dataset.level)); });
 });
 
-// ─── DETAIL PANEL ────────────────────────────────────────────
-const detailPanel    = document.getElementById('detail-panel');
-const detailTitle    = document.getElementById('detail-title');
+// ─── DETAIL PANEL ─────────────────────────────────────────────
+const detailPanel = document.getElementById('detail-panel');
+const detailTitle = document.getElementById('detail-title');
 const detailSubtitle = document.getElementById('detail-subtitle');
-const detailBody     = document.getElementById('detail-body');
+const detailBody = document.getElementById('detail-body');
 
 function openDetailPanel(data) {
   detailTitle.textContent = data.title;
@@ -892,282 +952,202 @@ function openDetailPanel(data) {
   while (tmp.firstChild) detailBody.appendChild(tmp.firstChild);
   detailPanel.classList.add('open');
 }
-function closeDetailPanel() { detailPanel.classList.remove('open'); }
+function closeDetailPanel() {
+  detailPanel.classList.remove('open');
+}
 document.getElementById('detail-panel-close').addEventListener('click', closeDetailPanel);
 
-// ─── SCREENSHOT ──────────────────────────────────────────────
-document.getElementById('screenshot-btn').addEventListener('click', function() {
-  // Composite watermark onto canvas then download
-  var link = document.createElement('a');
-  // Draw watermark
-  ctx.save();
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-  ctx.font = '400 11px "JetBrains Mono", monospace';
-  ctx.fillStyle = 'rgba(42,42,62,0.4)';
-  ctx.textAlign = 'right';
-  ctx.fillText('R. ZHOU \u2014 rzhou.ai', W - 16, H - 12);
-  ctx.restore();
-  link.download = 'rzhou-specimen-' + ZOOM_LABELS[currentLevel] + '.png';
-  link.href = canvas.toDataURL('image/png');
-  link.click();
-});
-
-// ─── UTILITY ─────────────────────────────────────────────────
+// ─── UTILITY ──────────────────────────────────────────────────
 function lerp(a, b, t) { return a + (b - a) * t; }
-function easeInOutCubic(t) { return t < 0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
-function dist(x1,y1,x2,y2) { return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)); }
-function clamp(v,mn,mx) { return Math.max(mn,Math.min(mx,v)); }
-function rand(mn,mx) { return mn+Math.random()*(mx-mn); }
+function easeInOutCubic(t) { return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
+function dist(x1, y1, x2, y2) { return Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1)); }
+function clamp(v, mn, mx) { return Math.max(mn, Math.min(mx, v)); }
+function rand(mn, mx) { return mn + Math.random() * (mx - mn); }
 
-// Illumination-aware color
-function illumColor(r,g,b,a) {
-  // Light mode: use colors directly, no adjustment needed
-  // illum slider lightens/darkens the whole scene evenly
+function illumColor(r, g, b, a) {
   var f = illumination / 100;
-  var rf = Math.round(r * f);
-  var gf = Math.round(g * f);
-  var bf = Math.round(b * f);
-  return 'rgba('+rf+','+gf+','+bf+','+a+')';
+  return 'rgba(' + Math.round(r*f) + ',' + Math.round(g*f) + ',' + Math.round(b*f) + ',' + a + ')';
 }
 
-// H&E palette helpers
-const HE_BG      = '#f5f0e8';
-const HE_NUCL    = [106,76,140];  // hematoxylin purple
-const HE_CYTO    = [212,95,122];  // eosin pink
-const HE_CYTO_L  = [232,160,176]; // light eosin
-const HE_STROMA  = [200,180,160]; // stroma/connective
-const HE_SLIDE   = [245,240,232]; // background
-const C_TEAL     = [26,107,90];
-const C_AMBER    = [139,105,20];
-const C_CHARCOAL = [42,42,62];
+// ═══════════════════════════════════════════════
+//  ENHANCED PARTICLE REACTIVITY (#5)
+// ═══════════════════════════════════════════════
+function applyMouseForce(px, py, pvx, pvy) {
+  if (mouseX < 0) return { vx: pvx, vy: pvy };
+  var dx = px - mouseX;
+  var dy = py - mouseY;
+  var d = Math.sqrt(dx*dx + dy*dy);
+  if (d < 100 && d > 1) {
+    // Repulsion
+    var force = (100 - d) / 100 * 0.0008;
+    pvx += (dx / d) * force;
+    pvy += (dy / d) * force;
+  } else if (d < 200 && d >= 100) {
+    // Gentle attraction (swirl)
+    var force = (200 - d) / 200 * 0.0002;
+    pvx -= (dy / d) * force; // perpendicular = swirl
+    pvy += (dx / d) * force;
+  }
+  return { vx: pvx, vy: pvy };
+}
 
-function heColor(r,g,b,a) { return illumColor(r,g,b,a); }
 
-// ═══════════════════════════════════════════════════════════════
-//  LEVEL 0: MACRO (1x) — Cell in culture medium (brightfield)
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+//  LEVEL 0: MACRO (1x) — Cell in culture medium
+// ═══════════════════════════════════════════════
 
 var MEDIUM_PARTICLES = [];
 for (var i = 0; i < 80; i++) {
   MEDIUM_PARTICLES.push({
     x: rand(0,1), y: rand(0,1),
-    r: rand(1.5,4.5),
+    r: rand(1,4),
     vx: rand(-0.0002,0.0002), vy: rand(-0.0002,0.0002),
-    opacity: rand(0.06,0.22),
-    phase: rand(0,Math.PI*2),
-    cr: HE_NUCL[0] + rand(-20,20)|0,
-    cg: HE_NUCL[1] + rand(-20,20)|0,
-    cb: HE_NUCL[2] + rand(-20,20)|0
+    opacity: rand(0.05,0.25),
+    phase: rand(0, Math.PI*2)
   });
 }
 
 var CELL = { pulsePhase: 0 };
 
-// Easter egg — quote hover timer
-var easterEggTimer = 0;
-var easterEggActive = false;
-var easterEggLastMouseX = -1, easterEggLastMouseY = -1;
-
 function drawLevel0(alpha) {
   if (alpha <= 0) return;
   ctx.globalAlpha = alpha;
-  var minDim = Math.min(W,H);
+  var minDim = Math.min(W, H);
 
-  // Slide background — warm ivory
-  var bgGrad = ctx.createRadialGradient(CX, CY, 0, CX, CY, minDim);
-  bgGrad.addColorStop(0,   heColor(250,246,238,1));
-  bgGrad.addColorStop(0.6, heColor(245,240,230,1));
-  bgGrad.addColorStop(1,   heColor(235,228,215,1));
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = illumColor(8, 12, 22, 1);
+  ctx.fillRect(0, 0, W, H);
 
-  // Subtle linen texture lines
-  ctx.strokeStyle = heColor(200,185,160,0.04);
-  ctx.lineWidth = 0.5;
-  for (var x = 0; x < W; x += 28) {
-    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
-  }
-
-  // Floating debris / protein aggregates (Brownian)
   for (var i = 0; i < MEDIUM_PARTICLES.length; i++) {
     var p = MEDIUM_PARTICLES[i];
-    p.vx += rand(-0.00004,0.00004);
-    p.vy += rand(-0.00004,0.00004);
+    p.vx += rand(-0.00005, 0.00005);
+    p.vy += rand(-0.00005, 0.00005);
+    // (#5) Mouse force
+    var mf = applyMouseForce(p.x * W, p.y * H, p.vx, p.vy);
+    p.vx = mf.vx; p.vy = mf.vy;
     p.vx *= 0.99; p.vy *= 0.99;
     p.x += p.vx; p.y += p.vy;
     if (p.x < -0.05) p.x = 1.05;
-    if (p.x > 1.05)  p.x = -0.05;
+    if (p.x > 1.05) p.x = -0.05;
     if (p.y < -0.05) p.y = 1.05;
-    if (p.y > 1.05)  p.y = -0.05;
+    if (p.y > 1.05) p.y = -0.05;
 
-    // Enhanced reactivity: repel within 100px, swirl at 100-200px
-    var px2 = p.x * W, py2 = p.y * H;
-    var dm = dist(mouseX, mouseY, px2, py2);
-    if (dm < 100 && dm > 0) {
-      var repel = (100 - dm) / 100 * 0.0008;
-      p.vx += (px2 - mouseX) / dm * repel;
-      p.vy += (py2 - mouseY) / dm * repel;
-    } else if (dm < 200) {
-      // Gentle swirl
-      var swirl = (200 - dm) / 200 * 0.0002;
-      p.vx += -(py2 - mouseY) / dm * swirl;
-      p.vy +=  (px2 - mouseX) / dm * swirl;
-    }
-
-    var flicker = 0.7 + 0.3 * Math.sin(time * 0.4 + p.phase);
+    var flicker = 0.7 + 0.3 * Math.sin(time * 0.5 + p.phase);
     ctx.beginPath();
     ctx.arc(p.x * W, p.y * H, p.r, 0, Math.PI * 2);
-    ctx.fillStyle = heColor(p.cr, p.cg, p.cb, p.opacity * flicker);
+    ctx.fillStyle = illumColor(0, 212, 170, p.opacity * flicker);
     ctx.fill();
   }
 
-  // Main cell — eosin-stained cytoplasm
-  var cx2 = CX, cy2 = CY;
+  // Main cell
+  var cx = 0.5 * W, cy = 0.5 * H;
   var baseR = 0.15 * minDim;
   CELL.pulsePhase += 0.015;
-  var pulse = 1 + 0.025 * Math.sin(CELL.pulsePhase);
+  var pulse = 1 + 0.03 * Math.sin(CELL.pulsePhase);
   var r = baseR * pulse;
 
-  // Cytoplasm fill (eosin pink gradient)
   ctx.beginPath();
   for (var i = 0; i <= 64; i++) {
     var angle = (i / 64) * Math.PI * 2;
     var wobble = 1 + 0.04 * Math.sin(angle * 5 + time * 0.8)
                    + 0.02 * Math.sin(angle * 8 - time * 1.2)
                    + 0.015 * Math.sin(angle * 3 + time * 0.4);
-    var ppx = cx2 + Math.cos(angle) * r * wobble;
-    var ppy = cy2 + Math.sin(angle) * r * wobble;
-    if (i === 0) ctx.moveTo(ppx, ppy); else ctx.lineTo(ppx, ppy);
+    var px = cx + Math.cos(angle) * r * wobble;
+    var py = cy + Math.sin(angle) * r * wobble;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
   }
   ctx.closePath();
 
-  var cellGrad = ctx.createRadialGradient(cx2 - r*0.2, cy2 - r*0.2, 0, cx2, cy2, r * 1.1);
-  cellGrad.addColorStop(0,   heColor(HE_CYTO_L[0], HE_CYTO_L[1], HE_CYTO_L[2], 0.75));
-  cellGrad.addColorStop(0.5, heColor(HE_CYTO[0],   HE_CYTO[1],   HE_CYTO[2],   0.50));
-  cellGrad.addColorStop(1,   heColor(HE_CYTO[0]-20, HE_CYTO[1]-20, HE_CYTO[2], 0.25));
+  var cellGrad = ctx.createRadialGradient(cx - r*0.2, cy - r*0.2, 0, cx, cy, r * 1.1);
+  cellGrad.addColorStop(0, illumColor(20, 60, 55, 0.35));
+  cellGrad.addColorStop(0.5, illumColor(10, 45, 42, 0.25));
+  cellGrad.addColorStop(1, illumColor(5, 30, 28, 0.15));
   ctx.fillStyle = cellGrad;
   ctx.fill();
-  // Membrane — dark teal stroke
-  ctx.strokeStyle = heColor(C_TEAL[0], C_TEAL[1], C_TEAL[2], 0.7);
+  ctx.strokeStyle = illumColor(0, 212, 170, 0.6);
   ctx.lineWidth = 2;
   ctx.stroke();
-  ctx.strokeStyle = heColor(C_TEAL[0], C_TEAL[1], C_TEAL[2], 0.1);
-  ctx.lineWidth = 10;
+  ctx.strokeStyle = illumColor(0, 212, 170, 0.15);
+  ctx.lineWidth = 8;
   ctx.stroke();
 
-  // Nucleus (hematoxylin purple)
   var nR = 0.045 * minDim * pulse;
-  var nucGrad = ctx.createRadialGradient(cx2 + 5, cy2 - 5, 0, cx2, cy2, nR);
-  nucGrad.addColorStop(0,   heColor(HE_NUCL[0]+40, HE_NUCL[1]+20, HE_NUCL[2]+20, 0.85));
-  nucGrad.addColorStop(0.6, heColor(HE_NUCL[0],    HE_NUCL[1],    HE_NUCL[2],    0.60));
-  nucGrad.addColorStop(1,   heColor(HE_NUCL[0]-20, HE_NUCL[1]-20, HE_NUCL[2],    0.30));
+  var nucGrad = ctx.createRadialGradient(cx + 5, cy - 5, 0, cx, cy, nR);
+  nucGrad.addColorStop(0, illumColor(40, 90, 85, 0.6));
+  nucGrad.addColorStop(0.7, illumColor(20, 60, 55, 0.4));
+  nucGrad.addColorStop(1, illumColor(10, 40, 38, 0.2));
   ctx.beginPath();
-  ctx.arc(cx2, cy2, nR, 0, Math.PI * 2);
+  ctx.arc(cx, cy, nR, 0, Math.PI * 2);
   ctx.fillStyle = nucGrad;
   ctx.fill();
-  ctx.strokeStyle = heColor(HE_NUCL[0]-10, HE_NUCL[1]-10, HE_NUCL[2], 0.5);
+  ctx.strokeStyle = illumColor(0, 212, 170, 0.4);
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  // Chromatin condensations
-  for (var i = 0; i < 10; i++) {
-    var ang = (i/10)*Math.PI*2 + time * 0.08;
+  for (var i = 0; i < 12; i++) {
+    var ang = (i / 12) * Math.PI * 2 + time * 0.1;
     var dr = nR * (0.3 + 0.4 * Math.sin(i * 1.7 + time * 0.2));
     ctx.beginPath();
-    ctx.arc(cx2 + Math.cos(ang)*dr, cy2 + Math.sin(ang)*dr, 2.5, 0, Math.PI * 2);
-    ctx.fillStyle = heColor(HE_NUCL[0]-10, HE_NUCL[1], HE_NUCL[2], 0.5);
+    ctx.arc(cx + Math.cos(ang) * dr, cy + Math.sin(ang) * dr, 2, 0, Math.PI * 2);
+    ctx.fillStyle = illumColor(0, 212, 170, 0.3);
     ctx.fill();
   }
 
-  // Organelle hints
   for (var i = 0; i < 6; i++) {
-    var ang = (i/6)*Math.PI*2 + time * 0.05 + 0.5;
-    var ox2 = cx2 + Math.cos(ang) * r * 0.55;
-    var oy2 = cy2 + Math.sin(ang) * r * 0.55;
+    var ang = (i / 6) * Math.PI * 2 + time * 0.05 + 0.5;
+    var ox = cx + Math.cos(ang) * r * 0.55;
+    var oy = cy + Math.sin(ang) * r * 0.55;
     ctx.beginPath();
-    ctx.ellipse(ox2, oy2, 12, 6, ang, 0, Math.PI * 2);
-    ctx.fillStyle = heColor(HE_CYTO[0]-10, HE_CYTO[1]-20, HE_CYTO[2]+40, 0.18);
+    ctx.ellipse(ox, oy, 12, 6, ang, 0, Math.PI * 2);
+    ctx.fillStyle = illumColor(0, 180, 140, 0.15);
     ctx.fill();
-    ctx.strokeStyle = heColor(C_TEAL[0], C_TEAL[1], C_TEAL[2], 0.22);
+    ctx.strokeStyle = illumColor(0, 212, 170, 0.25);
     ctx.lineWidth = 0.8;
     ctx.stroke();
   }
 
-  // Nucleolus (dark dot in nucleus)
-  ctx.beginPath();
-  ctx.arc(cx2 + 4, cy2 - 4, nR * 0.3, 0, Math.PI*2);
-  ctx.fillStyle = heColor(HE_NUCL[0]-20, HE_NUCL[1]-10, HE_NUCL[2]+10, 0.7);
-  ctx.fill();
-
-  // Title text (dark charcoal)
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.font = '700 ' + clamp(minDim * 0.06, 32, 72) + 'px "Space Grotesk", sans-serif';
-  ctx.fillStyle = heColor(C_CHARCOAL[0], C_CHARCOAL[1], C_CHARCOAL[2], 0.92);
-  ctx.shadowColor = 'rgba(26,107,90,0.2)';
-  ctx.shadowBlur = 20;
+  ctx.fillStyle = illumColor(232, 232, 240, 0.95);
+  ctx.shadowColor = 'rgba(0,212,170,0.3)';
+  ctx.shadowBlur = 30;
   ctx.fillText('RAUL ZHOU', CX, CY - minDim * 0.22);
   ctx.shadowBlur = 0;
 
   ctx.font = '300 ' + clamp(minDim * 0.018, 12, 20) + 'px "JetBrains Mono", monospace';
-  ctx.fillStyle = heColor(C_TEAL[0], C_TEAL[1], C_TEAL[2], 0.75);
+  ctx.fillStyle = illumColor(0, 212, 170, 0.7);
   ctx.fillText('AI ARCHITECT  \u00b7  BIOTECH ENGINEER', CX, CY - minDim * 0.175);
-
-  // Easter egg: central quote hover for 3s reveals Chinese text
-  var quoteX = CX;
-  var quoteY = CY + minDim * 0.27;
-  var dQuote = dist(mouseX, mouseY, quoteX, quoteY);
-  if (dQuote < 180) {
-    easterEggTimer += 0.016;
-    if (easterEggTimer > 3) easterEggActive = true;
-  } else {
-    easterEggTimer = 0;
-    easterEggActive = false;
-  }
-
-  var quoteAlpha = 0.35 + 0.15 * Math.sin(time * 0.3);
-  ctx.font = 'italic 300 ' + clamp(minDim * 0.018, 12, 18) + 'px "Space Grotesk", sans-serif';
-  ctx.fillStyle = heColor(C_CHARCOAL[0], C_CHARCOAL[1], C_CHARCOAL[2], quoteAlpha);
-  if (easterEggActive) {
-    ctx.fillStyle = heColor(C_TEAL[0], C_TEAL[1], C_TEAL[2], 0.9);
-    ctx.fillText('\u4f60\u597d\u4e16\u754c', quoteX, quoteY);
-  } else {
-    ctx.fillText('"If I\'m already existing, why not at the maximum?"', quoteX, quoteY);
-  }
 
   ctx.globalAlpha = 1;
 }
 
-
-// ═══════════════════════════════════════════════════════════════
-//  LEVEL 1: ORGANELLE VIEW (10x) — H&E stained tissue section
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+//  LEVEL 1: ORGANELLE VIEW (10x)
+// ═══════════════════════════════════════════════
 
 var ORGANELLES = [
   { id:'nucleus', label:'NUCLEUS', sublabel:'Education',
-    x:0.5, y:0.45, radius:0.1, color:HE_NUCL,
+    x:0.5, y:0.45, radius:0.1, color:[0,212,170],
     detail:{ title:'Education', subtitle:'NUCLEUS // GENETIC INFORMATION CENTER',
-      body:'<strong>B.S. Biotechnology Engineering</strong><br>Tec de Monterrey, 2017\u20132022<br><br><strong>M.S. Applied Artificial Intelligence</strong><br>Tec de Monterrey, 2022\u20132024<br><br><strong>\u201cLeaders of Tomorrow\u201d</strong> full scholarship<br><br><strong>Exchange semesters:</strong><br>\u00b7 Colombia (2019)<br>\u00b7 Spain (2020)<br><br><em>The nucleus stores the fundamental blueprint \u2014 education encoded the instructions for everything that followed.</em>' }},
+      body:'<strong>B.S. Biotechnology Engineering</strong><br>Tec de Monterrey, 2017\u20132022<br><br><strong>M.S. Applied Artificial Intelligence</strong><br>Tec de Monterrey, 2022\u20132024<br><br><strong>\u201cLeaders of Tomorrow\u201d</strong> full scholarship<br><br><strong>Exchange semesters:</strong><br>\u00b7 Colombia (2019)<br>\u00b7 Spain (2020)<br><br><em style="color:var(--text-muted)">The nucleus stores the fundamental blueprint \u2014 education encoded the instructions for everything that followed.</em>' }},
   { id:'mitochondria', label:'MITOCHONDRIA', sublabel:'Work & Energy',
-    x:0.72, y:0.38, radius:0.065, color:[190,60,80],
+    x:0.72, y:0.38, radius:0.065, color:[255,68,102],
     detail:{ title:'Work & Energy', subtitle:'MITOCHONDRIA // POWERHOUSE',
-      body:'<strong>AI Consulting</strong> \u2014 $1,000/hr<br>Enterprise AI implementation & strategy<br><br><strong>Specializations:</strong><br>\u00b7 LLM integration & fine-tuning<br>\u00b7 AI workflow automation<br>\u00b7 Voice agent development<br>\u00b7 Full-stack AI products<br><br><em>The mitochondria powers the cell. Work generates the energy that drives everything forward.</em>' }},
+      body:'<strong>AI Consulting</strong> \u2014 $1,000/hr<br>Enterprise AI implementation & strategy<br><br><strong>Specializations:</strong><br>\u00b7 LLM integration & fine-tuning<br>\u00b7 AI workflow automation<br>\u00b7 Voice agent development<br>\u00b7 Full-stack AI products<br><br><em style="color:var(--text-muted)">The mitochondria powers the cell. Work generates the energy that drives everything forward.</em>' }},
   { id:'ribosome', label:'RIBOSOMES', sublabel:'Skills',
-    x:0.32, y:0.35, radius:0.05, color:C_STAIN_BLUE||[74,111,165],
+    x:0.32, y:0.35, radius:0.05, color:[68,136,255],
     detail:{ title:'Skills', subtitle:'RIBOSOMES // PROTEIN SYNTHESIS',
-      body:'<span class="tag">Python</span><span class="tag">ML/DL</span><span class="tag">NLP</span><span class="tag">Computer Vision</span><span class="tag">LLMs</span><span class="tag">TensorFlow</span><span class="tag">LangChain</span><span class="tag">n8n</span><span class="tag">GHL</span><span class="tag">Retell AI</span><span class="tag">OpenAI API</span><span class="tag">Anthropic API</span><span class="tag">React</span><span class="tag">Node.js</span><span class="tag">Supabase</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Vercel</span><br><br><em>Ribosomes translate genetic code into functional proteins. Skills translate knowledge into real output.</em>' }},
+      body:'<span class="tag">Python</span><span class="tag">ML/DL</span><span class="tag">NLP</span><span class="tag">Computer Vision</span><span class="tag">LLMs</span><span class="tag">TensorFlow</span><span class="tag">LangChain</span><span class="tag">n8n</span><span class="tag">GHL</span><span class="tag">Retell AI</span><span class="tag">OpenAI API</span><span class="tag">Anthropic API</span><span class="tag">React</span><span class="tag">Node.js</span><span class="tag">Supabase</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Vercel</span><br><br><em style="color:var(--text-muted)">Ribosomes translate genetic code into functional proteins. Skills translate knowledge into real output.</em>' }},
   { id:'er', label:'ENDOPLASMIC\nRETICULUM', sublabel:'Projects',
-    x:0.28, y:0.62, radius:0.07, color:[140,90,190],
+    x:0.28, y:0.6, radius:0.07, color:[170,102,255],
     detail:{ title:'Projects', subtitle:'ENDOPLASMIC RETICULUM // SYNTHESIS NETWORK',
-      body:'<strong>Eigen Atlas SaaS</strong><br>AI-powered knowledge management platform.<br><br><strong>Voice Agent Factory</strong><br>Production voice AI agents using Retell AI.<br><br><strong>GHL Integrations</strong><br>GoHighLevel automation workflows for agencies.<br><br><strong>AI Workflow Automation</strong><br>n8n-based automation connecting LLMs with business systems.<br><br><em>The ER is a vast synthesis network. Projects are the tangible outputs flowing through the system.</em>' }},
+      body:'<strong>Eigen Atlas SaaS</strong><br>AI-powered knowledge management platform.<br><br><strong>Voice Agent Factory</strong><br>Production voice AI agents using Retell AI.<br><br><strong>GHL Integrations</strong><br>GoHighLevel automation workflows for agencies.<br><br><strong>AI Workflow Automation</strong><br>n8n-based automation connecting LLMs with business systems.<br><br><em style="color:var(--text-muted)">The ER is a vast synthesis network. Projects are the tangible outputs flowing through the system.</em>' }},
   { id:'golgi', label:'GOLGI\nAPPARATUS', sublabel:'Achievements',
-    x:0.68, y:0.62, radius:0.06, color:C_AMBER,
+    x:0.68, y:0.62, radius:0.06, color:[196,164,74],
     detail:{ title:'Achievements', subtitle:'GOLGI APPARATUS // PACKAGING & DISTRIBUTION',
-      body:'<strong>\u201cLeaders of Tomorrow\u201d</strong> full scholarship<br>Tec de Monterrey recognition<br><br><strong>International Experience</strong><br>Exchange programs across 3 countries<br><br><strong>Chinese-Mexican Heritage</strong><br>Great-grandfather from Canton \u2014 a bridge between cultures<br><br><strong>Based in Guadalajara, Mexico</strong><br>At the intersection of LatAm innovation and global AI<br><br><em>The Golgi packages and ships. Achievements are polished outputs ready for the world.</em>' }}
+      body:'<strong>\u201cLeaders of Tomorrow\u201d</strong> full scholarship<br>Tec de Monterrey recognition<br><br><strong>International Experience</strong><br>Exchange programs across 3 countries<br><br><strong>Chinese-Mexican Heritage</strong><br>Great-grandfather from Canton \u2014 a bridge between cultures<br><br><strong>Based in Guadalajara, Mexico</strong><br>At the intersection of LatAm innovation and global AI<br><br><em style="color:var(--text-muted)">The Golgi packages and ships. Achievements are polished outputs ready for the world.</em>' }}
 ];
-
-// Fix ribosome color
-ORGANELLES[2].color = [74,111,165];
 
 var CYTO_PARTICLES = [];
 for (var i = 0; i < 60; i++) {
@@ -1175,8 +1155,8 @@ for (var i = 0; i < 60; i++) {
     x: rand(0.1,0.9), y: rand(0.1,0.9),
     r: rand(1,3),
     vx: rand(-0.0003,0.0003), vy: rand(-0.0003,0.0003),
-    opacity: rand(0.05,0.18),
-    phase: rand(0,Math.PI*2)
+    opacity: rand(0.05,0.2),
+    phase: rand(0, Math.PI*2)
   });
 }
 
@@ -1185,722 +1165,439 @@ var hoveredOrganelle = null;
 function drawLevel1(alpha) {
   if (alpha <= 0) return;
   ctx.globalAlpha = alpha;
-  var minDim = Math.min(W,H);
+  var minDim = Math.min(W, H);
 
-  // H&E slide background with gentle gradient
-  var bgGrad = ctx.createRadialGradient(CX, CY, 0, CX, CY, minDim * 0.65);
-  bgGrad.addColorStop(0,   heColor(250,244,238,1));
-  bgGrad.addColorStop(0.6, heColor(245,238,228,1));
-  bgGrad.addColorStop(1,   heColor(235,226,212,1));
+  var bgGrad = ctx.createRadialGradient(CX, CY, 0, CX, CY, minDim * 0.6);
+  bgGrad.addColorStop(0, illumColor(12, 20, 28, 1));
+  bgGrad.addColorStop(0.7, illumColor(8, 14, 22, 1));
+  bgGrad.addColorStop(1, illumColor(5, 8, 16, 1));
   ctx.fillStyle = bgGrad;
-  ctx.fillRect(0,0,W,H);
+  ctx.fillRect(0, 0, W, H);
 
-  // Cell boundary — eosin-stained membrane (organic wobble)
   ctx.beginPath();
   for (var i = 0; i <= 120; i++) {
-    var angle = (i/120)*Math.PI*2;
-    var wobble = 1 + 0.02 * Math.sin(angle*7 + time*0.6);
-    var ppx = CX + Math.cos(angle) * minDim * 0.54 * wobble;
-    var ppy = CY + Math.sin(angle) * minDim * 0.54 * wobble;
-    if (i===0) ctx.moveTo(ppx,ppy); else ctx.lineTo(ppx,ppy);
+    var angle = (i / 120) * Math.PI * 2;
+    var wobble = 1 + 0.02 * Math.sin(angle * 7 + time * 0.6);
+    var px = CX + Math.cos(angle) * minDim * 0.55 * wobble;
+    var py = CY + Math.sin(angle) * minDim * 0.55 * wobble;
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
   }
   ctx.closePath();
-  // Eosin cytoplasm fill
-  var cytoFill = ctx.createRadialGradient(CX, CY, 0, CX, CY, minDim*0.55);
-  cytoFill.addColorStop(0,   heColor(248,235,238,0.6));
-  cytoFill.addColorStop(0.6, heColor(235,210,218,0.4));
-  cytoFill.addColorStop(1,   heColor(220,190,200,0.2));
-  ctx.fillStyle = cytoFill;
-  ctx.fill();
-  ctx.strokeStyle = heColor(C_TEAL[0], C_TEAL[1], C_TEAL[2], 0.35);
-  ctx.lineWidth = 18;
-  ctx.stroke();
-  ctx.strokeStyle = heColor(C_TEAL[0], C_TEAL[1], C_TEAL[2], 0.5);
-  ctx.lineWidth = 2;
-  ctx.stroke();
+  ctx.strokeStyle = illumColor(0, 212, 170, 0.15); ctx.lineWidth = 20; ctx.stroke();
+  ctx.strokeStyle = illumColor(0, 212, 170, 0.3); ctx.lineWidth = 2; ctx.stroke();
 
-  // Cytoplasm particles (Brownian)
   for (var i = 0; i < CYTO_PARTICLES.length; i++) {
     var p = CYTO_PARTICLES[i];
-    p.vx += rand(-0.00003,0.00003);
-    p.vy += rand(-0.00003,0.00003);
+    p.vx += rand(-0.00003, 0.00003); p.vy += rand(-0.00003, 0.00003);
+    var mf = applyMouseForce(p.x * W, p.y * H, p.vx, p.vy);
+    p.vx = mf.vx; p.vy = mf.vy;
     p.vx *= 0.995; p.vy *= 0.995;
     p.x += p.vx; p.y += p.vy;
-    if (p.x < 0.05) p.x = 0.95;
-    if (p.x > 0.95) p.x = 0.05;
-    if (p.y < 0.05) p.y = 0.95;
-    if (p.y > 0.95) p.y = 0.05;
-
-    // Enhanced reactivity
-    var px3 = p.x*W, py3 = p.y*H;
-    var dm = dist(mouseX, mouseY, px3, py3);
-    if (dm < 100 && dm > 0) {
-      p.vx += (px3-mouseX)/dm * 0.0005;
-      p.vy += (py3-mouseY)/dm * 0.0005;
-    } else if (dm < 200) {
-      p.vx += -(py3-mouseY)/dm * 0.00015;
-      p.vy +=  (px3-mouseX)/dm * 0.00015;
-    }
-
+    if (p.x < 0.05) p.x = 0.95; if (p.x > 0.95) p.x = 0.05;
+    if (p.y < 0.05) p.y = 0.95; if (p.y > 0.95) p.y = 0.05;
     ctx.beginPath();
-    ctx.arc(p.x*W, p.y*H, p.r, 0, Math.PI*2);
-    ctx.fillStyle = heColor(HE_CYTO[0], HE_CYTO[1], HE_CYTO[2],
-      p.opacity * (0.7 + 0.3*Math.sin(time + p.phase)));
+    ctx.arc(p.x * W, p.y * H, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = illumColor(0, 212, 170, p.opacity * (0.7 + 0.3 * Math.sin(time + p.phase)));
     ctx.fill();
   }
 
-  // ER network (faint purple channels)
-  ctx.strokeStyle = heColor(140,90,190,0.07);
-  ctx.lineWidth = 2;
+  ctx.strokeStyle = illumColor(170, 102, 255, 0.06); ctx.lineWidth = 2;
   for (var i = 0; i < 12; i++) {
-    var sa = (i/12)*Math.PI*2 + time*0.02;
-    var sx2 = CX + Math.cos(sa)*minDim*0.15;
-    var sy2 = CY + Math.sin(sa)*minDim*0.15;
+    var sa = (i / 12) * Math.PI * 2 + time * 0.02;
+    var sx = CX + Math.cos(sa) * minDim * 0.15, sy = CY + Math.sin(sa) * minDim * 0.15;
     var ea = sa + 1.5;
-    var ex2 = CX + Math.cos(ea)*minDim*0.4;
-    var ey2 = CY + Math.sin(ea-0.3)*minDim*0.35;
-    ctx.beginPath();
-    ctx.moveTo(sx2,sy2);
-    ctx.bezierCurveTo(sx2+30*Math.sin(i), sy2-20*Math.cos(i), ex2-30*Math.cos(i), ey2+20*Math.sin(i), ex2, ey2);
+    var ex = CX + Math.cos(ea) * minDim * 0.4, ey = CY + Math.sin(ea - 0.3) * minDim * 0.35;
+    ctx.beginPath(); ctx.moveTo(sx, sy);
+    ctx.bezierCurveTo(sx + 30 * Math.sin(i), sy - 20 * Math.cos(i), ex - 30 * Math.cos(i), ey + 20 * Math.sin(i), ex, ey);
     ctx.stroke();
   }
 
-  // Organelles
   hoveredOrganelle = null;
   for (var oi = 0; oi < ORGANELLES.length; oi++) {
     var org = ORGANELLES[oi];
-    var ox3 = org.x * W;
-    var oy3 = org.y * H;
-    var or3 = org.radius * minDim;
+    var ox = org.x * W, oy = org.y * H, or2 = org.radius * minDim;
     var cr = org.color[0], cg = org.color[1], cb = org.color[2];
-    var d = dist(mouseX, mouseY, ox3, oy3);
-    var isHov = d < or3 * 1.3;
+    var d = dist(mouseX, mouseY, ox, oy);
+    var isHov = d < or2 * 1.3;
     if (isHov) hoveredOrganelle = org;
-    var hoverScale = isHov ? 1.12 : 1;
-    var drawR = or3 * hoverScale;
+    var drawR = or2 * (isHov ? 1.12 : 1);
 
-    // Glow / halo (warm shadow)
-    var glow = ctx.createRadialGradient(ox3, oy3, drawR * 0.4, ox3, oy3, drawR * 2.2);
-    glow.addColorStop(0, heColor(cr,cg,cb, isHov ? 0.3 : 0.12));
-    glow.addColorStop(1, heColor(cr,cg,cb, 0));
-    ctx.beginPath();
-    ctx.arc(ox3, oy3, drawR*2.2, 0, Math.PI*2);
-    ctx.fillStyle = glow;
-    ctx.fill();
+    var glow = ctx.createRadialGradient(ox, oy, drawR * 0.5, ox, oy, drawR * 2);
+    glow.addColorStop(0, illumColor(cr, cg, cb, (isHov ? 0.4 : 0.15)));
+    glow.addColorStop(1, illumColor(cr, cg, cb, 0));
+    ctx.beginPath(); ctx.arc(ox, oy, drawR * 2, 0, Math.PI * 2); ctx.fillStyle = glow; ctx.fill();
 
-    // Organelle body shape
     ctx.beginPath();
     if (org.id === 'mitochondria') {
-      ctx.ellipse(ox3, oy3, drawR*1.5, drawR*0.7, 0.3+Math.sin(time*0.3)*0.1, 0, Math.PI*2);
+      ctx.ellipse(ox, oy, drawR * 1.5, drawR * 0.7, 0.3 + Math.sin(time * 0.3) * 0.1, 0, Math.PI * 2);
     } else if (org.id === 'er') {
-      for (var si = 0; si <= 40; si++) {
-        var a3 = (si/40)*Math.PI*2;
-        var w3 = 1 + 0.15*Math.sin(a3*6+time);
-        var spx = ox3 + Math.cos(a3)*drawR*w3;
-        var spy = oy3 + Math.sin(a3)*drawR*w3*0.8;
-        if (si===0) ctx.moveTo(spx,spy); else ctx.lineTo(spx,spy);
-      }
-      ctx.closePath();
+      for (var si = 0; si <= 40; si++) { var a = (si/40)*Math.PI*2; var w = 1+0.15*Math.sin(a*6+time); var spx = ox+Math.cos(a)*drawR*w; var spy = oy+Math.sin(a)*drawR*w*0.8; if(si===0) ctx.moveTo(spx,spy); else ctx.lineTo(spx,spy); } ctx.closePath();
     } else if (org.id === 'golgi') {
-      for (var si = 0; si <= 40; si++) {
-        var a3 = (si/40)*Math.PI*2;
-        var w3 = 1 + 0.1*Math.sin(a3*4+time*0.5);
-        var spx = ox3 + Math.cos(a3)*drawR*1.3*w3;
-        var spy = oy3 + Math.sin(a3)*drawR*0.7*w3;
-        if (si===0) ctx.moveTo(spx,spy); else ctx.lineTo(spx,spy);
-      }
-      ctx.closePath();
-    } else {
-      ctx.arc(ox3, oy3, drawR, 0, Math.PI*2);
-    }
+      for (var si = 0; si <= 40; si++) { var a = (si/40)*Math.PI*2; var w = 1+0.1*Math.sin(a*4+time*0.5); var spx = ox+Math.cos(a)*drawR*1.3*w; var spy = oy+Math.sin(a)*drawR*0.7*w; if(si===0) ctx.moveTo(spx,spy); else ctx.lineTo(spx,spy); } ctx.closePath();
+    } else { ctx.arc(ox, oy, drawR, 0, Math.PI * 2); }
 
-    var bodyGrad = ctx.createRadialGradient(ox3-drawR*0.2, oy3-drawR*0.2, 0, ox3, oy3, drawR*1.2);
-    bodyGrad.addColorStop(0, heColor(cr,cg,cb, 0.45));
-    bodyGrad.addColorStop(0.6, heColor(cr,cg,cb, 0.22));
-    bodyGrad.addColorStop(1, heColor(cr,cg,cb, 0.06));
-    ctx.fillStyle = bodyGrad;
-    ctx.fill();
-    ctx.strokeStyle = heColor(cr,cg,cb, isHov ? 0.75 : 0.4);
-    ctx.lineWidth = isHov ? 2 : 1.2;
-    ctx.stroke();
+    var bodyGrad = ctx.createRadialGradient(ox-drawR*0.2, oy-drawR*0.2, 0, ox, oy, drawR*1.2);
+    bodyGrad.addColorStop(0, illumColor(cr,cg,cb,0.4)); bodyGrad.addColorStop(0.6, illumColor(cr,cg,cb,0.2)); bodyGrad.addColorStop(1, illumColor(cr,cg,cb,0.05));
+    ctx.fillStyle = bodyGrad; ctx.fill();
+    ctx.strokeStyle = illumColor(cr,cg,cb, isHov?0.8:0.4); ctx.lineWidth = isHov?2:1; ctx.stroke();
 
-    // Internal details
-    if (org.id === 'ribosome') {
-      for (var ri = 0; ri < 8; ri++) {
-        var ra = (ri/8)*Math.PI*2 + time*0.2;
-        var rd = drawR*0.6;
-        ctx.beginPath();
-        ctx.arc(ox3+Math.cos(ra)*rd, oy3+Math.sin(ra)*rd, 4, 0, Math.PI*2);
-        ctx.fillStyle = heColor(cr,cg,cb, 0.5);
-        ctx.fill();
-      }
-    }
-    if (org.id === 'golgi') {
-      for (var j = -2; j <= 2; j++) {
-        ctx.beginPath();
-        var cy3 = oy3 + j*drawR*0.22;
-        ctx.moveTo(ox3-drawR*0.85, cy3);
-        ctx.bezierCurveTo(ox3-drawR*0.3, cy3+Math.sin(time+j)*5, ox3+drawR*0.3, cy3-Math.sin(time+j)*5, ox3+drawR*0.85, cy3);
-        ctx.strokeStyle = heColor(cr,cg,cb, 0.25);
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-    }
-    if (org.id === 'mitochondria') {
-      for (var ci2 = 0; ci2 < 5; ci2++) {
-        var cxp = ox3 + (ci2-2)*drawR*0.5;
-        ctx.beginPath();
-        ctx.moveTo(cxp, oy3-drawR*0.35);
-        ctx.bezierCurveTo(cxp+8, oy3, cxp-8, oy3, cxp, oy3+drawR*0.35);
-        ctx.strokeStyle = heColor(cr,cg,cb, 0.22);
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
-    }
+    if (org.id === 'ribosome') { for (var ri=0;ri<8;ri++){var ra=(ri/8)*Math.PI*2+time*0.2;var rd=drawR*0.6;ctx.beginPath();ctx.arc(ox+Math.cos(ra)*rd,oy+Math.sin(ra)*rd,4,0,Math.PI*2);ctx.fillStyle=illumColor(cr,cg,cb,0.5);ctx.fill();} }
+    if (org.id === 'golgi') { for(var j=-2;j<=2;j++){ctx.beginPath();var cy2=oy+j*drawR*0.25;ctx.moveTo(ox-drawR*0.9,cy2);ctx.bezierCurveTo(ox-drawR*0.3,cy2+Math.sin(time+j)*5,ox+drawR*0.3,cy2-Math.sin(time+j)*5,ox+drawR*0.9,cy2);ctx.strokeStyle=illumColor(cr,cg,cb,0.2);ctx.lineWidth=1;ctx.stroke();} }
+    if (org.id === 'mitochondria') { for(var ci=0;ci<5;ci++){var cxp=ox+(ci-2)*drawR*0.5;ctx.beginPath();ctx.moveTo(cxp,oy-drawR*0.4);ctx.bezierCurveTo(cxp+8,oy,cxp-8,oy,cxp,oy+drawR*0.4);ctx.strokeStyle=illumColor(cr,cg,cb,0.2);ctx.lineWidth=1;ctx.stroke();} }
 
-    // Labels — dark on light
-    var labelAlpha = isHov ? 1 : 0.65;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = (isHov?'600 13':'600 11') + 'px "JetBrains Mono", monospace';
-    ctx.fillStyle = heColor(cr,cg,cb, labelAlpha);
-    var lines = org.label.split('\n');
-    var labelY = oy3 + drawR + 18;
-    for (var li = 0; li < lines.length; li++) {
-      ctx.fillText(lines[li], ox3, labelY + li*15);
-    }
+    var labelAlpha = isHov ? 1 : 0.6;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = (isHov?'600 13':'600 11')+'px "JetBrains Mono", monospace';
+    ctx.fillStyle = illumColor(cr,cg,cb,labelAlpha);
+    var lines = org.label.split('\n'); var labelY = oy + drawR + 18;
+    for (var li=0;li<lines.length;li++) ctx.fillText(lines[li], ox, labelY+li*15);
     ctx.font = '400 9px "Inter", sans-serif';
-    ctx.fillStyle = heColor(C_CHARCOAL[0], C_CHARCOAL[1], C_CHARCOAL[2], labelAlpha * 0.55);
-    ctx.fillText(org.sublabel, ox3, labelY + lines.length*15 + 4);
+    ctx.fillStyle = illumColor(232,232,240,labelAlpha*0.6);
+    ctx.fillText(org.sublabel, ox, labelY+lines.length*15+4);
   }
-
   ctx.globalAlpha = 1;
 }
 
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  LEVEL 2: MOLECULAR TIMELINE (100x)
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 
 var TIMELINE_EVENTS = [
-  { year:2017,   text:'Started Biotech Engineering', sub:'Tec de Monterrey',              color:[26,107,90]   },
-  { year:2019,   text:'Exchange Semester',            sub:'Colombia',                      color:[74,111,165]  },
-  { year:2020,   text:'Exchange Semester',            sub:'Spain',                         color:[74,111,165]  },
-  { year:2022,   text:'B.S. Completed',               sub:'"Leaders of Tomorrow" Scholarship', color:C_AMBER  },
-  { year:2022.5, text:'Started M.S. in AI',           sub:'Applied Artificial Intelligence', color:[140,90,190]},
-  { year:2024,   text:'M.S. Completed',               sub:'Tec de Monterrey',              color:[140,90,190]  },
-  { year:2024.5, text:'Founded Consulting',           sub:'AI Consulting at $1000/hr',     color:[190,60,80]   },
-  { year:2025,   text:'Eigen Atlas SaaS',             sub:'AI Knowledge Platform',         color:[26,107,90]   },
-  { year:2026,   text:'AI at Scale',                  sub:'Voice Agent Factory & Beyond',  color:C_AMBER       }
+  { year: 2017, text: 'Started Biotech Engineering', sub: 'Tec de Monterrey', color: [0,212,170] },
+  { year: 2019, text: 'Exchange Semester', sub: 'Colombia', color: [68,136,255] },
+  { year: 2020, text: 'Exchange Semester', sub: 'Spain', color: [68,136,255] },
+  { year: 2022, text: 'B.S. Completed', sub: '\u201cLeaders of Tomorrow\u201d Scholarship', color: [196,164,74] },
+  { year: 2022.5, text: 'Started M.S. in AI', sub: 'Applied Artificial Intelligence', color: [170,102,255] },
+  { year: 2024, text: 'M.S. Completed', sub: 'Tec de Monterrey', color: [170,102,255] },
+  { year: 2024.5, text: 'Founded Consulting', sub: 'AI Consulting at $1000/hr', color: [255,68,102] },
+  { year: 2025, text: 'Eigen Atlas SaaS', sub: 'AI Knowledge Platform', color: [0,212,170] },
+  { year: 2026, text: 'AI at Scale', sub: 'Voice Agent Factory & Beyond', color: [196,164,74] }
 ];
-
 var timelineHovered = -1;
 
 function drawLevel2(alpha) {
   if (alpha <= 0) return;
   ctx.globalAlpha = alpha;
-  var minDim = Math.min(W,H);
+  var minDim = Math.min(W, H);
+  ctx.fillStyle = illumColor(6, 8, 16, 1); ctx.fillRect(0, 0, W, H);
 
-  // Slide background
-  ctx.fillStyle = heColor(248,243,235,1);
-  ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle = illumColor(0, 212, 170, 0.03); ctx.lineWidth = 0.5;
+  for (var x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for (var y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
 
-  // Fine grid (lab notebook lines)
-  ctx.strokeStyle = heColor(180,165,140,0.08);
-  ctx.lineWidth = 0.5;
-  for (var x = 0; x < W; x += 40) {
-    ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.font='600 '+clamp(minDim*0.025,14,24)+'px "Space Grotesk", sans-serif';
+  ctx.fillStyle=illumColor(232,232,240,0.8); ctx.fillText('MOLECULAR TIMELINE',CX,H*0.08);
+  ctx.font='400 '+clamp(minDim*0.013,9,13)+'px "JetBrains Mono", monospace';
+  ctx.fillStyle=illumColor(0,212,170,0.5); ctx.fillText('PROTEIN FOLDING  //  CAREER SEQUENCE',CX,H*0.08+24);
+
+  var chainLen=TIMELINE_EVENTS.length, startX=W*0.08, endX=W*0.92, midY=H*0.5, amplitude=H*0.12, points=[];
+  timelineHovered=-1;
+  for(var i=0;i<chainLen;i++){var t=i/(chainLen-1);var x=lerp(startX,endX,t);var fold=Math.sin(t*Math.PI*2.5+time*0.15)*amplitude*(0.5+0.5*t);var y=midY+fold;points.push({x:x,y:y});if(dist(mouseX,mouseY,x,y)<35)timelineHovered=i;}
+
+  ctx.beginPath();ctx.moveTo(points[0].x,points[0].y);
+  for(var i=1;i<points.length;i++){var prev=points[i-1],curr=points[i];ctx.quadraticCurveTo(prev.x,prev.y,(prev.x+curr.x)/2,(prev.y+curr.y)/2);}
+  ctx.lineTo(points[points.length-1].x,points[points.length-1].y);
+  ctx.strokeStyle=illumColor(0,212,170,0.2);ctx.lineWidth=3;ctx.stroke();
+
+  for(var i=0;i<chainLen;i++){
+    var ev=TIMELINE_EVENTS[i],px=points[i].x,py=points[i].y;
+    var cr=ev.color[0],cg=ev.color[1],cb=ev.color[2];
+    var isHov=timelineHovered===i, beadR=isHov?22:16;
+    var bob=Math.sin(time*0.5+i*0.8)*3;
+
+    var glow=ctx.createRadialGradient(px,py+bob,0,px,py+bob,beadR*3);
+    glow.addColorStop(0,illumColor(cr,cg,cb,isHov?0.3:0.1));glow.addColorStop(1,illumColor(cr,cg,cb,0));
+    ctx.beginPath();ctx.arc(px,py+bob,beadR*3,0,Math.PI*2);ctx.fillStyle=glow;ctx.fill();
+
+    var beadGrad=ctx.createRadialGradient(px-3,py+bob-3,0,px,py+bob,beadR);
+    beadGrad.addColorStop(0,illumColor(cr,cg,cb,0.9));beadGrad.addColorStop(0.7,illumColor(cr,cg,cb,0.5));beadGrad.addColorStop(1,illumColor(cr,cg,cb,0.2));
+    ctx.beginPath();ctx.arc(px,py+bob,beadR,0,Math.PI*2);ctx.fillStyle=beadGrad;ctx.fill();
+    ctx.strokeStyle=illumColor(cr,cg,cb,0.7);ctx.lineWidth=1;ctx.stroke();
+
+    ctx.textAlign='center';ctx.font='600 10px "JetBrains Mono", monospace';
+    ctx.fillStyle=illumColor(232,232,240,0.9);
+    var yearStr=ev.year===Math.floor(ev.year)?ev.year.toString():'';
+    if(yearStr)ctx.fillText(yearStr,px,py+bob+1);
+
+    var descAlpha=isHov?1:0.55, descY=py+bob+beadR+18;
+    ctx.font=(isHov?'500 13':'500 11')+'px "Space Grotesk", sans-serif';
+    ctx.fillStyle=illumColor(232,232,240,descAlpha);ctx.fillText(ev.text,px,descY);
+    ctx.font=(isHov?'400 11':'400 9')+'px "Inter", sans-serif';
+    ctx.fillStyle=illumColor(cr,cg,cb,descAlpha*0.7);ctx.fillText(ev.sub,px,descY+16);
+
+    if(isHov){for(var j=0;j<3;j++){var angle=(j/3)*Math.PI*2+time;var sLen=beadR*2.5;var sx=px+Math.cos(angle)*sLen;var sy=py+bob+Math.sin(angle)*sLen;ctx.beginPath();ctx.setLineDash([3,3]);ctx.moveTo(px,py+bob);ctx.lineTo(sx,sy);ctx.strokeStyle=illumColor(cr,cg,cb,0.3);ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);ctx.beginPath();ctx.arc(sx,sy,4,0,Math.PI*2);ctx.fillStyle=illumColor(cr,cg,cb,0.4);ctx.fill();}}
   }
-  for (var y = 0; y < H; y += 40) {
-    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke();
-  }
-
-  // Title
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.font = '600 ' + clamp(minDim*0.025,14,24) + 'px "Space Grotesk", sans-serif';
-  ctx.fillStyle = heColor(C_CHARCOAL[0],C_CHARCOAL[1],C_CHARCOAL[2], 0.8);
-  ctx.fillText('MOLECULAR TIMELINE', CX, H*0.08);
-  ctx.font = '400 ' + clamp(minDim*0.013,9,13) + 'px "JetBrains Mono", monospace';
-  ctx.fillStyle = heColor(C_TEAL[0],C_TEAL[1],C_TEAL[2], 0.5);
-  ctx.fillText('PROTEIN FOLDING  //  CAREER SEQUENCE', CX, H*0.08+24);
-
-  var chainLen = TIMELINE_EVENTS.length;
-  var startX = W * 0.08;
-  var endX   = W * 0.92;
-  var midY   = H * 0.50;
-  var amplitude = H * 0.12;
-  var points = [];
-  timelineHovered = -1;
-
-  for (var i = 0; i < chainLen; i++) {
-    var t = i / (chainLen-1);
-    var x2 = lerp(startX, endX, t);
-    var fold = Math.sin(t*Math.PI*2.5 + time*0.15) * amplitude * (0.5 + 0.5*t);
-    var y2 = midY + fold;
-    points.push({ x:x2, y:y2 });
-    if (dist(mouseX,mouseY,x2,y2) < 35) timelineHovered = i;
-  }
-
-  // Peptide backbone
-  ctx.beginPath();
-  ctx.moveTo(points[0].x, points[0].y);
-  for (var i = 1; i < points.length; i++) {
-    var prev = points[i-1], curr = points[i];
-    var cpx = (prev.x+curr.x)/2;
-    var cpy = (prev.y+curr.y)/2;
-    ctx.quadraticCurveTo(prev.x, prev.y, cpx, cpy);
-  }
-  ctx.lineTo(points[points.length-1].x, points[points.length-1].y);
-  ctx.strokeStyle = heColor(C_TEAL[0],C_TEAL[1],C_TEAL[2], 0.25);
-  ctx.lineWidth = 3;
-  ctx.stroke();
-
-  // Amino acid beads
-  for (var i = 0; i < chainLen; i++) {
-    var ev = TIMELINE_EVENTS[i];
-    var px4 = points[i].x, py4 = points[i].y;
-    var cr = ev.color[0], cg = ev.color[1], cb = ev.color[2];
-    var isHov = timelineHovered === i;
-    var beadR = isHov ? 22 : 16;
-    var bob = Math.sin(time*0.5 + i*0.8) * 3;
-
-    var glow = ctx.createRadialGradient(px4, py4+bob, 0, px4, py4+bob, beadR*3);
-    glow.addColorStop(0, heColor(cr,cg,cb, isHov ? 0.25 : 0.08));
-    glow.addColorStop(1, heColor(cr,cg,cb, 0));
-    ctx.beginPath();
-    ctx.arc(px4, py4+bob, beadR*3, 0, Math.PI*2);
-    ctx.fillStyle = glow;
-    ctx.fill();
-
-    var beadGrad = ctx.createRadialGradient(px4-3, py4+bob-3, 0, px4, py4+bob, beadR);
-    beadGrad.addColorStop(0, heColor(cr,cg,cb, 0.95));
-    beadGrad.addColorStop(0.6, heColor(cr,cg,cb, 0.55));
-    beadGrad.addColorStop(1, heColor(cr,cg,cb, 0.15));
-    ctx.beginPath();
-    ctx.arc(px4, py4+bob, beadR, 0, Math.PI*2);
-    ctx.fillStyle = beadGrad;
-    ctx.fill();
-    // Warm shadow border
-    ctx.strokeStyle = heColor(cr-20,cg-20,cb-20, isHov ? 0.5 : 0.25);
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    // Year label
-    ctx.textAlign = 'center';
-    ctx.font = '700 9px "JetBrains Mono", monospace';
-    ctx.fillStyle = heColor(255,250,245, 0.95);
-    var yearStr = ev.year === Math.floor(ev.year) ? ev.year.toString() : '';
-    if (yearStr) ctx.fillText(yearStr, px4, py4+bob+1);
-
-    var descAlpha = isHov ? 1 : 0.6;
-    var descY = py4+bob+beadR+18;
-    ctx.font = (isHov?'500 13':'500 11') + 'px "Space Grotesk", sans-serif';
-    ctx.fillStyle = heColor(C_CHARCOAL[0],C_CHARCOAL[1],C_CHARCOAL[2], descAlpha);
-    ctx.fillText(ev.text, px4, descY);
-    ctx.font = (isHov?'400 11':'400 9') + 'px "Inter", sans-serif';
-    ctx.fillStyle = heColor(cr,cg,cb, descAlpha*0.8);
-    ctx.fillText(ev.sub, px4, descY+16);
-
-    if (isHov) {
-      for (var j = 0; j < 3; j++) {
-        var angle2 = (j/3)*Math.PI*2 + time;
-        var sLen = beadR*2.5;
-        var sx3 = px4+Math.cos(angle2)*sLen;
-        var sy3 = py4+bob+Math.sin(angle2)*sLen;
-        ctx.beginPath();
-        ctx.setLineDash([3,3]);
-        ctx.moveTo(px4, py4+bob);
-        ctx.lineTo(sx3, sy3);
-        ctx.strokeStyle = heColor(cr,cg,cb, 0.35);
-        ctx.lineWidth = 1;
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.beginPath();
-        ctx.arc(sx3, sy3, 4, 0, Math.PI*2);
-        ctx.fillStyle = heColor(cr,cg,cb, 0.45);
-        ctx.fill();
-      }
-    }
-  }
-
-  ctx.globalAlpha = 1;
+  ctx.globalAlpha=1;
 }
 
 
-// ═══════════════════════════════════════════════════════════════
-//  LEVEL 3: ATOMIC DETAIL (1000x) — Tech Stack
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+//  LEVEL 3: ATOMIC DETAIL (1000x)
+// ═══════════════════════════════════════════════
 
 var ATOMS = [
-  { name:'Python',    symbol:'Py', shells:[2,4],     color:[26,107,90],   x:0.2,  y:0.3,
-    detail:{ title:'Python', subtitle:'ELEMENT // CORE LANGUAGE',
-      body:'Primary language for ML/DL, data science, API development, and automation. The foundation of all AI work.' }},
-  { name:'TensorFlow',symbol:'Tf', shells:[2,6],     color:[200,100,30],  x:0.4,  y:0.25,
-    detail:{ title:'TensorFlow', subtitle:'ELEMENT // NEURAL FRAMEWORK',
-      body:'Deep learning framework for building and training neural networks. Computer vision and NLP models.' }},
-  { name:'LangChain', symbol:'Lc', shells:[2,4,2],   color:[40,160,80],   x:0.6,  y:0.3,
-    detail:{ title:'LangChain', subtitle:'ELEMENT // LLM ORCHESTRATION',
-      body:'Framework for LLM-powered applications. Chains, agents, RAG systems, and memory management.' }},
-  { name:'n8n',       symbol:'N8', shells:[2,3],     color:[190,60,80],   x:0.8,  y:0.25,
-    detail:{ title:'n8n', subtitle:'ELEMENT // WORKFLOW AUTOMATION',
-      body:'Visual workflow automation. Connects AI models with business systems, APIs, and databases.' }},
-  { name:'GHL',       symbol:'Gh', shells:[2,5,1],   color:[74,111,165],  x:0.25, y:0.65,
-    detail:{ title:'GoHighLevel', subtitle:'ELEMENT // CRM PLATFORM',
-      body:'All-in-one marketing platform. AI-enhanced CRM, funnels, automation, and client management.' }},
-  { name:'Retell',    symbol:'Rt', shells:[2,4,2],   color:[140,90,190],  x:0.5,  y:0.7,
-    detail:{ title:'Retell AI', subtitle:'ELEMENT // VOICE AGENTS',
-      body:'Voice AI platform for production-grade conversational agents. Phone automation and customer service.' }},
-  { name:'OpenAI',    symbol:'Oa', shells:[2,6,2],   color:[26,107,90],   x:0.75, y:0.65,
-    detail:{ title:'OpenAI', subtitle:'ELEMENT // GPT MODELS',
-      body:'GPT-4, DALL-E, Whisper integration. API-first development for text, image, and audio generation.' }},
-  { name:'Anthropic', symbol:'An', shells:[2,5,3],   color:C_AMBER,       x:0.5,  y:0.45,
-    detail:{ title:'Anthropic', subtitle:'ELEMENT // CLAUDE MODELS',
-      body:'Claude API integration. Advanced reasoning, analysis, and code generation. This portfolio was built with Claude.' }}
+  { name:'Python', symbol:'Py', shells:[2,4], color:[0,212,170], x:0.2, y:0.3, detail:{ title:'Python', subtitle:'ELEMENT // CORE LANGUAGE', body:'Primary language for ML/DL, data science, API development, and automation. The foundation of all AI work.' }},
+  { name:'TensorFlow', symbol:'Tf', shells:[2,6], color:[255,136,0], x:0.4, y:0.25, detail:{ title:'TensorFlow', subtitle:'ELEMENT // NEURAL FRAMEWORK', body:'Deep learning framework for building and training neural networks. Computer vision and NLP models.' }},
+  { name:'LangChain', symbol:'Lc', shells:[2,4,2], color:[68,255,136], x:0.6, y:0.3, detail:{ title:'LangChain', subtitle:'ELEMENT // LLM ORCHESTRATION', body:'Framework for LLM-powered applications. Chains, agents, RAG systems, and memory management.' }},
+  { name:'n8n', symbol:'N8', shells:[2,3], color:[255,68,102], x:0.8, y:0.25, detail:{ title:'n8n', subtitle:'ELEMENT // WORKFLOW AUTOMATION', body:'Visual workflow automation. Connects AI models with business systems, APIs, and databases.' }},
+  { name:'GHL', symbol:'Gh', shells:[2,5,1], color:[68,136,255], x:0.25, y:0.65, detail:{ title:'GoHighLevel', subtitle:'ELEMENT // CRM PLATFORM', body:'All-in-one marketing platform. AI-enhanced CRM, funnels, automation, and client management.' }},
+  { name:'Retell', symbol:'Rt', shells:[2,4,2], color:[170,102,255], x:0.5, y:0.7, detail:{ title:'Retell AI', subtitle:'ELEMENT // VOICE AGENTS', body:'Voice AI platform for production-grade conversational agents. Phone automation and customer service.' }},
+  { name:'OpenAI', symbol:'Oa', shells:[2,6,2], color:[0,212,170], x:0.75, y:0.65, detail:{ title:'OpenAI', subtitle:'ELEMENT // GPT MODELS', body:'GPT-4, DALL-E, Whisper integration. API-first development for text, image, and audio generation.' }},
+  { name:'Anthropic', symbol:'An', shells:[2,5,3], color:[196,164,74], x:0.5, y:0.45, detail:{ title:'Anthropic', subtitle:'ELEMENT // CLAUDE MODELS', body:'Claude API integration. Advanced reasoning, analysis, and code generation. This portfolio was built with Claude.' }}
 ];
-
 var hoveredAtom = null;
 
 function drawLevel3(alpha) {
   if (alpha <= 0) return;
   ctx.globalAlpha = alpha;
-  var minDim = Math.min(W,H);
+  var minDim = Math.min(W, H);
+  ctx.fillStyle = illumColor(4, 4, 12, 1); ctx.fillRect(0, 0, W, H);
 
-  // Warm cream background with grid
-  ctx.fillStyle = heColor(246,241,233,1);
-  ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle = illumColor(0,212,170,0.02); ctx.lineWidth = 0.5;
+  for (var r=50;r<Math.max(W,H);r+=100){ctx.beginPath();ctx.arc(CX,CY,r,0,Math.PI*2);ctx.stroke();}
 
-  ctx.strokeStyle = heColor(C_TEAL[0],C_TEAL[1],C_TEAL[2], 0.04);
-  ctx.lineWidth = 0.5;
-  for (var r = 60; r < Math.max(W,H); r += 100) {
-    ctx.beginPath();
-    ctx.arc(CX, CY, r, 0, Math.PI*2);
-    ctx.stroke();
-  }
-
-  ctx.textAlign = 'center';
-  ctx.font = '600 ' + clamp(minDim*0.022,12,22) + 'px "Space Grotesk", sans-serif';
-  ctx.fillStyle = heColor(C_CHARCOAL[0],C_CHARCOAL[1],C_CHARCOAL[2], 0.7);
-  ctx.fillText('ATOMIC DETAIL', CX, H*0.06);
-  ctx.font = '400 ' + clamp(minDim*0.012,8,12) + 'px "JetBrains Mono", monospace';
-  ctx.fillStyle = heColor(C_TEAL[0],C_TEAL[1],C_TEAL[2], 0.4);
-  ctx.fillText('TECHNOLOGY STACK  //  ELECTRON CONFIGURATION', CX, H*0.06+20);
+  ctx.textAlign='center';
+  ctx.font='600 '+clamp(minDim*0.022,12,22)+'px "Space Grotesk", sans-serif';
+  ctx.fillStyle=illumColor(232,232,240,0.7);ctx.fillText('ATOMIC DETAIL',CX,H*0.06);
+  ctx.font='400 '+clamp(minDim*0.012,8,12)+'px "JetBrains Mono", monospace';
+  ctx.fillStyle=illumColor(0,212,170,0.4);ctx.fillText('TECHNOLOGY STACK  //  ELECTRON CONFIGURATION',CX,H*0.06+20);
 
   hoveredAtom = null;
+  for (var ai=0;ai<ATOMS.length;ai++) {
+    var atom=ATOMS[ai], ax=atom.x*W, ay=atom.y*H;
+    var cr=atom.color[0],cg=atom.color[1],cb=atom.color[2];
+    var nucleusR=22, d=dist(mouseX,mouseY,ax,ay);
+    var maxShellR=atom.shells.length*30+30, isHov=d<maxShellR;
+    if(isHov)hoveredAtom=atom;
 
-  for (var ai = 0; ai < ATOMS.length; ai++) {
-    var atom = ATOMS[ai];
-    var ax2 = atom.x*W, ay2 = atom.y*H;
-    var cr = atom.color[0], cg = atom.color[1], cb = atom.color[2];
-    var nucleusR = 22;
-    var d = dist(mouseX, mouseY, ax2, ay2);
-    var maxShellR = atom.shells.length*30+30;
-    var isHov = d < maxShellR;
-    if (isHov) hoveredAtom = atom;
-
-    for (var s = 0; s < atom.shells.length; s++) {
-      var shellR = (s+1)*30+12;
-      var electrons = atom.shells[s];
-
-      ctx.beginPath();
-      ctx.arc(ax2, ay2, shellR, 0, Math.PI*2);
-      ctx.strokeStyle = heColor(cr,cg,cb, isHov ? 0.22 : 0.1);
-      ctx.lineWidth = 0.8;
-      ctx.stroke();
-
-      for (var e = 0; e < electrons; e++) {
-        var eAngle = (e/electrons)*Math.PI*2 + time*(0.5+s*0.3)*(s%2===0?1:-1);
-        var ex3 = ax2 + Math.cos(eAngle)*shellR;
-        var ey3 = ay2 + Math.sin(eAngle)*shellR;
-
-        var eGlow = ctx.createRadialGradient(ex3,ey3,0,ex3,ey3,8);
-        eGlow.addColorStop(0, heColor(cr,cg,cb, 0.85));
-        eGlow.addColorStop(1, heColor(cr,cg,cb, 0));
-        ctx.beginPath();
-        ctx.arc(ex3, ey3, 8, 0, Math.PI*2);
-        ctx.fillStyle = eGlow;
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(ex3, ey3, 2.5, 0, Math.PI*2);
-        ctx.fillStyle = heColor(cr,cg,cb, 0.95);
-        ctx.fill();
+    for(var s=0;s<atom.shells.length;s++){
+      var shellR=(s+1)*30+12, electrons=atom.shells[s];
+      ctx.beginPath();ctx.arc(ax,ay,shellR,0,Math.PI*2);
+      ctx.strokeStyle=illumColor(cr,cg,cb,isHov?0.2:0.08);ctx.lineWidth=0.8;ctx.stroke();
+      for(var e=0;e<electrons;e++){
+        var eAngle=(e/electrons)*Math.PI*2+time*(0.5+s*0.3)*(s%2===0?1:-1);
+        var ex2=ax+Math.cos(eAngle)*shellR, ey2=ay+Math.sin(eAngle)*shellR;
+        var eGlow=ctx.createRadialGradient(ex2,ey2,0,ex2,ey2,8);
+        eGlow.addColorStop(0,illumColor(cr,cg,cb,0.8));eGlow.addColorStop(1,illumColor(cr,cg,cb,0));
+        ctx.beginPath();ctx.arc(ex2,ey2,8,0,Math.PI*2);ctx.fillStyle=eGlow;ctx.fill();
+        ctx.beginPath();ctx.arc(ex2,ey2,2.5,0,Math.PI*2);ctx.fillStyle=illumColor(cr,cg,cb,0.9);ctx.fill();
       }
     }
 
-    var nucGrad = ctx.createRadialGradient(ax2-4, ay2-4, 0, ax2, ay2, nucleusR);
-    nucGrad.addColorStop(0, heColor(cr,cg,cb, isHov ? 0.85 : 0.55));
-    nucGrad.addColorStop(0.6, heColor(cr,cg,cb, isHov ? 0.45 : 0.25));
-    nucGrad.addColorStop(1, heColor(cr,cg,cb, 0.06));
-    ctx.beginPath();
-    ctx.arc(ax2, ay2, nucleusR, 0, Math.PI*2);
-    ctx.fillStyle = nucGrad;
-    ctx.fill();
-    // Warm white highlight
-    ctx.beginPath();
-    ctx.arc(ax2-5, ay2-5, nucleusR*0.35, 0, Math.PI*2);
-    ctx.fillStyle = heColor(255,252,245, isHov ? 0.25 : 0.12);
-    ctx.fill();
-    ctx.strokeStyle = heColor(cr-20,cg-20,cb-20, isHov ? 0.5 : 0.28);
-    ctx.lineWidth = 1.2;
-    ctx.stroke();
+    var nucGrad=ctx.createRadialGradient(ax-4,ay-4,0,ax,ay,nucleusR);
+    nucGrad.addColorStop(0,illumColor(cr,cg,cb,isHov?0.8:0.5));nucGrad.addColorStop(0.7,illumColor(cr,cg,cb,isHov?0.4:0.2));nucGrad.addColorStop(1,illumColor(cr,cg,cb,0.05));
+    ctx.beginPath();ctx.arc(ax,ay,nucleusR,0,Math.PI*2);ctx.fillStyle=nucGrad;ctx.fill();
+    ctx.strokeStyle=illumColor(cr,cg,cb,isHov?0.6:0.3);ctx.lineWidth=1;ctx.stroke();
 
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = '700 14px "Space Grotesk", sans-serif';
-    ctx.fillStyle = heColor(255,252,245, isHov ? 1 : 0.85);
-    ctx.fillText(atom.symbol, ax2, ay2);
-
-    ctx.font = '400 10px "JetBrains Mono", monospace';
-    ctx.fillStyle = heColor(cr,cg,cb, isHov ? 0.9 : 0.55);
-    ctx.fillText(atom.name, ax2, ay2+nucleusR+atom.shells.length*30+22);
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='700 14px "Space Grotesk", sans-serif';ctx.fillStyle=illumColor(232,232,240,isHov?1:0.7);ctx.fillText(atom.symbol,ax,ay);
+    ctx.font='400 10px "JetBrains Mono", monospace';ctx.fillStyle=illumColor(cr,cg,cb,isHov?0.9:0.5);
+    ctx.fillText(atom.name,ax,ay+nucleusR+atom.shells.length*30+22);
   }
-
-  ctx.globalAlpha = 1;
+  ctx.globalAlpha=1;
 }
 
 
-// ═══════════════════════════════════════════════════════════════
-//  LEVEL 4: QUANTUM LEVEL (10000x) — Wave function + social
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+//  LEVEL 4: QUANTUM LEVEL (10000x)
+// ═══════════════════════════════════════════════
 
 var QUANTUM_PARTICLES = [];
 for (var i = 0; i < 200; i++) {
-  // Light mode: muted warm tones with occasional teal/purple
-  var qtype = Math.random();
-  var qcr, qcg, qcb;
-  if (qtype < 0.4) { qcr=26;  qcg=107; qcb=90;  }  // teal
-  else if (qtype < 0.7) { qcr=139; qcg=105; qcb=20;  }  // amber
-  else { qcr=140; qcg=90;  qcb=190; }  // purple
   QUANTUM_PARTICLES.push({
     x: rand(0,1), y: rand(0,1),
-    vx: rand(-0.0008,0.0008), vy: rand(-0.0008,0.0008),
-    r: rand(0.5,2.5),
-    opacity: rand(0.04,0.25),
-    phase: rand(0,Math.PI*2),
-    waveFreq: rand(2,8),
-    cr: qcr, cg: qcg, cb: qcb
+    vx: rand(-0.001,0.001), vy: rand(-0.001,0.001),
+    r: rand(0.5,2), opacity: rand(0.05,0.3),
+    phase: rand(0, Math.PI*2), waveFreq: rand(2,8),
+    cr: rand(0,30), cg: rand(180,230), cb: rand(150,200)
   });
 }
 
 var EQUATIONS = [
-  { text:'Av = \u03bbv',             label:'Eigenvalue Equation',  x:0.25, y:0.30 },
-  { text:'i\u210f \u2202\u03a8/\u2202t = \u0124\u03a8', label:'Schr\u00f6dinger Equation', x:0.70, y:0.28 },
-  { text:'H = -\u03a3 p log p',      label:'Shannon Entropy',      x:0.50, y:0.65 }
+  { text: 'Av = \u03bbv', label: 'Eigenvalue Equation', x: 0.25, y: 0.3 },
+  { text: 'i\u210f \u2202\u03a8/\u2202t = \u0124\u03a8', label: 'Schr\u00f6dinger Equation', x: 0.7, y: 0.28 },
+  { text: 'H = -\u03a3 p log p', label: 'Shannon Entropy', x: 0.5, y: 0.65 }
 ];
 
+// (#6) Social links added
 var CONTACT_LINKS = [
-  { text:'github.com/Theovia',        label:'GITHUB',   x:0.25, y:0.82, href:'https://github.com/Theovia' },
-  { text:'linkedin.com/in/raulzhou',  label:'LINKEDIN', x:0.42, y:0.82, href:'https://linkedin.com/in/raulzhou' },
-  { text:'raul.chio.leon@gmail.com',  label:'EMAIL',    x:0.62, y:0.82, href:'mailto:raul.chio.leon@gmail.com' },
-  { text:'Guadalajara, MX',           label:'LOCATION', x:0.78, y:0.82, href:null }
+  { text: 'raul.chio.leon@gmail.com', label: 'EMAIL', x: 0.2, y: 0.82, href: 'mailto:raul.chio.leon@gmail.com' },
+  { text: 'github.com/Theovia', label: 'GITHUB', x: 0.4, y: 0.82, href: 'https://github.com/Theovia' },
+  /* Replace with actual LinkedIn URL */
+  { text: 'linkedin.com/in/raulzhou', label: 'LINKEDIN', x: 0.6, y: 0.82, href: 'https://linkedin.com/in/raulzhou' },
+  { text: 'Guadalajara, MX', label: 'LOCATION', x: 0.8, y: 0.82, href: null }
 ];
-
 var hoveredContact = null;
+
+// (#10) Easter egg state
+var quoteHoverStart = 0;
+var easterEggActive = false;
+var easterEggReveal = 0;
+var EASTER_EGG_TEXT = '\u4f60\u597d\u4e16\u754c'; // 你好世界
+var easterEggFadeout = 0;
 
 function drawLevel4(alpha) {
   if (alpha <= 0) return;
   ctx.globalAlpha = alpha;
-  var minDim = Math.min(W,H);
+  var minDim = Math.min(W, H);
+  ctx.fillStyle = illumColor(2, 2, 8, 1); ctx.fillRect(0, 0, W, H);
 
-  // Ultra-light background
-  var qBg = ctx.createRadialGradient(CX, CY, 0, CX, CY, minDim*0.8);
-  qBg.addColorStop(0, heColor(252,248,242,1));
-  qBg.addColorStop(0.7, heColor(247,242,234,1));
-  qBg.addColorStop(1, heColor(240,234,224,1));
-  ctx.fillStyle = qBg;
-  ctx.fillRect(0,0,W,H);
-
-  // Quantum particles with enhanced reactivity
+  // Quantum particles with mouse reactivity (#5)
   for (var i = 0; i < QUANTUM_PARTICLES.length; i++) {
     var p = QUANTUM_PARTICLES[i];
-    p.x += p.vx + Math.sin(time*p.waveFreq + p.phase)*0.0004;
-    p.y += p.vy + Math.cos(time*p.waveFreq + p.phase)*0.0004;
-    if (p.x < -0.1) p.x = 1.1;
-    if (p.x > 1.1)  p.x = -0.1;
-    if (p.y < -0.1) p.y = 1.1;
-    if (p.y > 1.1)  p.y = -0.1;
+    p.x += p.vx + Math.sin(time * p.waveFreq + p.phase) * 0.0005;
+    p.y += p.vy + Math.cos(time * p.waveFreq + p.phase) * 0.0005;
+    if (p.x < -0.1) p.x = 1.1; if (p.x > 1.1) p.x = -0.1;
+    if (p.y < -0.1) p.y = 1.1; if (p.y > 1.1) p.y = -0.1;
 
-    var px5 = p.x*W, py5 = p.y*H;
-    var dMouse = dist(mouseX, mouseY, px5, py5);
-
-    // Repel within 100px, swirl at 100-200px
-    if (dMouse < 100 && dMouse > 0) {
-      p.vx += (px5-mouseX)/dMouse * 0.0008;
-      p.vy += (py5-mouseY)/dMouse * 0.0008;
-    } else if (dMouse < 200) {
-      p.vx += -(py5-mouseY)/dMouse * 0.0003;
-      p.vy +=  (px5-mouseX)/dMouse * 0.0003;
-    }
-    p.vx *= 0.995; p.vy *= 0.995;
-
+    var px = p.x * W, py = p.y * H;
+    var dMouse = dist(mouseX, mouseY, px, py);
     var collapseRadius = 150;
-    var collapseFactor = dMouse < collapseRadius ? (1-dMouse/collapseRadius) : 0;
-    var drawR2 = p.r + collapseFactor*3;
-    var drawOpacity = p.opacity + collapseFactor*0.4;
-    var shimmer = 0.5 + 0.5*Math.sin(time*2+p.phase);
+    var collapseFactor = dMouse < collapseRadius ? (1 - dMouse / collapseRadius) : 0;
 
-    ctx.beginPath();
-    ctx.arc(px5, py5, drawR2, 0, Math.PI*2);
-    ctx.fillStyle = heColor(p.cr, p.cg, p.cb, drawOpacity * shimmer);
-    ctx.fill();
+    // (#5) Enhanced repulsion
+    if (dMouse < 120 && dMouse > 1) {
+      var force = (120 - dMouse) / 120 * 0.002;
+      p.vx += ((px - mouseX) / dMouse) * force;
+      p.vy += ((py - mouseY) / dMouse) * force;
+      p.vx *= 0.98; p.vy *= 0.98;
+    }
+
+    var drawR = p.r + collapseFactor * 3;
+    var drawOpacity = p.opacity + collapseFactor * 0.5;
+    var shimmer = 0.5 + 0.5 * Math.sin(time * 2 + p.phase);
+
+    ctx.beginPath(); ctx.arc(px, py, drawR, 0, Math.PI * 2);
+    ctx.fillStyle = illumColor(p.cr, p.cg, p.cb, drawOpacity * shimmer); ctx.fill();
 
     if (collapseFactor > 0.3) {
-      ctx.beginPath();
-      ctx.arc(px5, py5, drawR2*3, 0, Math.PI*2);
-      ctx.fillStyle = heColor(p.cr, p.cg, p.cb, collapseFactor*0.08);
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(px, py, drawR * 3, 0, Math.PI * 2);
+      ctx.fillStyle = illumColor(p.cr, p.cg, p.cb, collapseFactor * 0.1); ctx.fill();
     }
   }
 
-  // Wave function overlay (subtle)
-  ctx.beginPath();
-  ctx.strokeStyle = heColor(C_TEAL[0],C_TEAL[1],C_TEAL[2], 0.07);
-  ctx.lineWidth = 1;
+  // Wave function
+  ctx.beginPath(); ctx.strokeStyle = illumColor(0, 212, 170, 0.08); ctx.lineWidth = 1;
   for (var x = 0; x < W; x += 2) {
-    var ywave = CY + Math.sin(x*0.02+time*0.5)*30 * Math.sin(x*0.005+time*0.2);
-    if (x===0) ctx.moveTo(x,ywave); else ctx.lineTo(x,ywave);
+    var y = CY + Math.sin(x * 0.02 + time * 0.5) * 30 * Math.sin(x * 0.005 + time * 0.2);
+    if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
   }
   ctx.stroke();
 
-  // Equations (reveal on hover)
+  // Equations
   for (var i = 0; i < EQUATIONS.length; i++) {
-    var eq = EQUATIONS[i];
-    var ex4 = eq.x*W, ey4 = eq.y*H;
-    var d = dist(mouseX, mouseY, ex4, ey4);
-    var revealFactor = clamp(1-d/200, 0, 1);
-
+    var eq = EQUATIONS[i], ex = eq.x * W, ey = eq.y * H;
+    var d = dist(mouseX, mouseY, ex, ey);
+    var revealFactor = clamp(1 - d / 200, 0, 1);
     if (revealFactor > 0) {
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.font = '300 ' + clamp(minDim*0.04,24,48) + 'px "Space Grotesk", sans-serif';
-      ctx.fillStyle = heColor(C_TEAL[0],C_TEAL[1],C_TEAL[2], revealFactor*0.9);
-      ctx.shadowColor = heColor(C_TEAL[0],C_TEAL[1],C_TEAL[2], revealFactor*0.3);
-      ctx.shadowBlur = 15*revealFactor;
-      ctx.fillText(eq.text, ex4, ey4);
-      ctx.shadowBlur = 0;
-      ctx.font = '400 10px "JetBrains Mono", monospace';
-      ctx.fillStyle = heColor(C_AMBER[0],C_AMBER[1],C_AMBER[2], revealFactor*0.7);
-      ctx.fillText(eq.label, ex4, ey4+30);
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.font='300 '+clamp(minDim*0.04,24,48)+'px "Space Grotesk", sans-serif';
+      ctx.fillStyle=illumColor(0,212,170,revealFactor*0.9);
+      ctx.shadowColor='rgba(0,212,170,'+(revealFactor*0.5)+')';ctx.shadowBlur=20*revealFactor;
+      ctx.fillText(eq.text,ex,ey);ctx.shadowBlur=0;
+      ctx.font='400 10px "JetBrains Mono", monospace';
+      ctx.fillStyle=illumColor(196,164,74,revealFactor*0.7);ctx.fillText(eq.label,ex,ey+30);
     } else {
-      var hintGrad = ctx.createRadialGradient(ex4,ey4,0,ex4,ey4,35);
-      hintGrad.addColorStop(0, heColor(C_TEAL[0],C_TEAL[1],C_TEAL[2], 0.08));
-      hintGrad.addColorStop(1, heColor(C_TEAL[0],C_TEAL[1],C_TEAL[2], 0));
-      ctx.beginPath();
-      ctx.arc(ex4, ey4, 35, 0, Math.PI*2);
-      ctx.fillStyle = hintGrad;
-      ctx.fill();
+      var hintGrad=ctx.createRadialGradient(ex,ey,0,ex,ey,30);
+      hintGrad.addColorStop(0,illumColor(0,212,170,0.06));hintGrad.addColorStop(1,illumColor(0,212,170,0));
+      ctx.beginPath();ctx.arc(ex,ey,30,0,Math.PI*2);ctx.fillStyle=hintGrad;ctx.fill();
     }
   }
 
-  // Central quote
-  var quoteAlpha = 0.55 + 0.2*Math.sin(time*0.3);
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.font = 'italic 300 ' + clamp(minDim*0.02,14,22) + 'px "Space Grotesk", sans-serif';
-  ctx.fillStyle = heColor(C_CHARCOAL[0],C_CHARCOAL[1],C_CHARCOAL[2], quoteAlpha);
-  ctx.fillText('"If I\'m already existing, why not at the maximum?"', CX, CY);
-  ctx.font = '400 10px "JetBrains Mono", monospace';
-  ctx.fillStyle = heColor(C_AMBER[0],C_AMBER[1],C_AMBER[2], quoteAlpha*0.7);
-  ctx.fillText('\u2014 R. Zhou', CX, CY+28);
+  // Central quote + Easter Egg (#10)
+  var quoteAlpha = 0.5 + 0.3 * Math.sin(time * 0.3);
+  var quoteDist = dist(mouseX, mouseY, CX, CY);
 
-  // Social links — quantum superposition, dark-on-light
+  // Track hover time on quote
+  if (quoteDist < 120 && currentLevel === 4) {
+    if (quoteHoverStart === 0) quoteHoverStart = time;
+    if (time - quoteHoverStart > 3 && !easterEggActive) {
+      easterEggActive = true;
+      easterEggReveal = 0;
+    }
+  } else {
+    quoteHoverStart = 0;
+  }
+
+  if (easterEggActive) {
+    easterEggReveal = Math.min(easterEggReveal + 0.008, 1);
+    if (easterEggReveal >= 1) easterEggFadeout += 0.005;
+    if (easterEggFadeout >= 1) { easterEggActive = false; easterEggFadeout = 0; easterEggReveal = 0; }
+
+    var eeAlpha = easterEggReveal * (1 - easterEggFadeout);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '300 ' + clamp(minDim * 0.06, 36, 72) + 'px "Space Grotesk", sans-serif';
+    ctx.fillStyle = illumColor(196, 164, 74, eeAlpha * 0.8);
+    ctx.shadowColor = 'rgba(196,164,74,' + (eeAlpha * 0.4) + ')';
+    ctx.shadowBlur = 30;
+    ctx.fillText(EASTER_EGG_TEXT, CX, CY - 50);
+    ctx.shadowBlur = 0;
+    ctx.font = '400 11px "JetBrains Mono", monospace';
+    ctx.fillStyle = illumColor(0, 212, 170, eeAlpha * 0.6);
+    ctx.fillText('Canton \u2192 Guadalajara', CX, CY - 15);
+    quoteAlpha *= (1 - eeAlpha * 0.7);
+  }
+
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.font='italic 300 '+clamp(minDim*0.02,14,22)+'px "Space Grotesk", sans-serif';
+  ctx.fillStyle=illumColor(232,232,240,quoteAlpha);
+  ctx.fillText('"If I\'m already existing, why not at the maximum?"',CX,CY);
+  ctx.font='400 10px "JetBrains Mono", monospace';
+  ctx.fillStyle=illumColor(196,164,74,quoteAlpha*0.6);
+  ctx.fillText('\u2014 R. Zhou',CX,CY+28);
+
+  // Contact links (#6 expanded)
   hoveredContact = null;
   for (var i = 0; i < CONTACT_LINKS.length; i++) {
-    var link = CONTACT_LINKS[i];
-    var lx = link.x*W, ly = link.y*H;
+    var link = CONTACT_LINKS[i], lx = link.x * W, ly = link.y * H;
     var d = dist(mouseX, mouseY, lx, ly);
     var isHov = d < 80;
     if (isHov && link.href) hoveredContact = link;
 
     if (!isHov) {
-      // Superposition — slightly blurred/scattered
-      ctx.font = '400 13px "JetBrains Mono", monospace';
-      ctx.textAlign = 'center';
-      for (var j = 0; j < 3; j++) {
-        ctx.fillStyle = heColor(C_TEAL[0],C_TEAL[1],C_TEAL[2],
-          0.12 + 0.06*Math.sin(time + link.x*10 + j));
-        ctx.fillText(link.text, lx+(Math.random()-0.5)*5, ly+(Math.random()-0.5)*5);
-      }
+      ctx.font='400 '+clamp(minDim*0.014,11,14)+'px "JetBrains Mono", monospace';
+      ctx.textAlign='center';ctx.fillStyle=illumColor(0,212,170,0.15+0.1*Math.sin(time+link.x*10));
+      for(var j=0;j<3;j++) ctx.fillText(link.text,lx+(Math.random()-0.5)*4,ly+(Math.random()-0.5)*4);
     } else {
-      // Collapsed / observed
-      ctx.font = '500 13px "JetBrains Mono", monospace';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = heColor(C_TEAL[0],C_TEAL[1],C_TEAL[2], 0.9);
-      ctx.shadowColor = heColor(C_TEAL[0],C_TEAL[1],C_TEAL[2], 0.3);
-      ctx.shadowBlur = 8;
-      ctx.fillText(link.text, lx, ly);
-      ctx.shadowBlur = 0;
-      if (link.href) {
-        var tw = ctx.measureText(link.text).width;
-        ctx.beginPath();
-        ctx.moveTo(lx-tw/2, ly+10);
-        ctx.lineTo(lx+tw/2, ly+10);
-        ctx.strokeStyle = heColor(C_TEAL[0],C_TEAL[1],C_TEAL[2], 0.5);
-        ctx.lineWidth = 1;
-        ctx.stroke();
-      }
+      ctx.font='500 '+clamp(minDim*0.014,11,14)+'px "JetBrains Mono", monospace';
+      ctx.textAlign='center';ctx.fillStyle=illumColor(0,212,170,0.9);
+      ctx.shadowColor='rgba(0,212,170,0.4)';ctx.shadowBlur=15;
+      ctx.fillText(link.text,lx,ly);ctx.shadowBlur=0;
+      if(link.href){var tw=ctx.measureText(link.text).width;ctx.beginPath();ctx.moveTo(lx-tw/2,ly+10);ctx.lineTo(lx+tw/2,ly+10);ctx.strokeStyle=illumColor(0,212,170,0.5);ctx.lineWidth=1;ctx.stroke();}
     }
-
-    ctx.font = '400 9px "JetBrains Mono", monospace';
-    ctx.fillStyle = heColor(C_AMBER[0],C_AMBER[1],C_AMBER[2], isHov ? 0.85 : 0.35);
-    ctx.fillText(link.label, lx, ly-18);
-
-    // Subtle orbital ring when hovered
-    if (isHov) {
-      ctx.beginPath();
-      ctx.arc(lx, ly, 40+Math.sin(time*2)*3, 0, Math.PI*2);
-      ctx.strokeStyle = heColor(C_TEAL[0],C_TEAL[1],C_TEAL[2], 0.15);
-      ctx.lineWidth = 1;
-      ctx.stroke();
-    }
+    ctx.font='400 9px "JetBrains Mono", monospace';
+    ctx.fillStyle=illumColor(196,164,74,isHov?0.8:0.3);ctx.fillText(link.label,lx,ly-18);
   }
 
-  // Section title
-  ctx.textAlign = 'center';
-  ctx.font = '600 ' + clamp(minDim*0.022,12,20) + 'px "Space Grotesk", sans-serif';
-  ctx.fillStyle = heColor(C_CHARCOAL[0],C_CHARCOAL[1],C_CHARCOAL[2], 0.5);
-  ctx.fillText('QUANTUM LEVEL', CX, H*0.06);
-  ctx.font = '400 ' + clamp(minDim*0.011,8,11) + 'px "JetBrains Mono", monospace';
-  ctx.fillStyle = heColor(140,90,190, 0.4);
-  ctx.fillText('OBSERVE TO COLLAPSE  //  HOVER TO REVEAL', CX, H*0.06+18);
+  ctx.textAlign='center';
+  ctx.font='600 '+clamp(minDim*0.022,12,20)+'px "Space Grotesk", sans-serif';
+  ctx.fillStyle=illumColor(232,232,240,0.5);ctx.fillText('QUANTUM LEVEL',CX,H*0.06);
+  ctx.font='400 '+clamp(minDim*0.011,8,11)+'px "JetBrains Mono", monospace';
+  ctx.fillStyle=illumColor(170,102,255,0.4);ctx.fillText('OBSERVE TO COLLAPSE  //  HOVER TO REVEAL',CX,H*0.06+18);
 
   ctx.globalAlpha = 1;
 }
 
 
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 //  CLICK HANDLING
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 
 canvas.addEventListener('click', function() {
-  if (currentLevel === 1 && hoveredOrganelle) {
-    openDetailPanel(hoveredOrganelle.detail);
-  }
-  if (currentLevel === 3 && hoveredAtom) {
-    openDetailPanel(hoveredAtom.detail);
-  }
-  if (currentLevel === 4 && hoveredContact && hoveredContact.href) {
-    window.open(hoveredContact.href, '_blank');
-  }
-});
-
-// Mobile tap to open detail
-canvas.addEventListener('touchend', function(e) {
-  if (Math.abs(touchStartY - e.changedTouches[0].clientY) < 15) {
-    // It's a tap, not a swipe
-    if (currentLevel === 1 && hoveredOrganelle) openDetailPanel(hoveredOrganelle.detail);
-    if (currentLevel === 3 && hoveredAtom) openDetailPanel(hoveredAtom.detail);
-    if (currentLevel === 4 && hoveredContact && hoveredContact.href) window.open(hoveredContact.href, '_blank');
-  }
+  if (currentLevel === 1 && hoveredOrganelle) openDetailPanel(hoveredOrganelle.detail);
+  if (currentLevel === 3 && hoveredAtom) openDetailPanel(hoveredAtom.detail);
+  if (currentLevel === 4 && hoveredContact && hoveredContact.href) window.open(hoveredContact.href, '_blank');
 });
 
 
-// ═══════════════════════════════════════════════════════════════
-//  MAIN RENDER LOOP
-// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
+//  MAIN RENDER LOOP with Rack Focus (#7)
+// ═══════════════════════════════════════════════
 
-var TRANSITION_DURATION = 0.7;
-var lastFrameTime = performance.now();
+var TRANSITION_DURATION = 0.8;
+var lastTime = performance.now();
 
 function drawLevel(level, alpha) {
   switch(level) {
@@ -1912,12 +1609,16 @@ function drawLevel(level, alpha) {
   }
 }
 
+// (#7) Rack focus using CSS filter on canvas
+var canvasBlur = 0;
+
 function frame(now) {
-  checkPerf(now);
-  var dt = (now - lastFrameTime) / 1000;
-  lastFrameTime = now;
-  if (dt > 0.1) dt = 0.1; // cap large dt
+  var dt = (now - lastTime) / 1000;
+  lastTime = now;
   time += dt;
+
+  // (#9) Performance check
+  checkPerformance(dt);
 
   if (isTransitioning) {
     zoomProgress += dt / TRANSITION_DURATION;
@@ -1929,25 +1630,34 @@ function frame(now) {
     }
   }
 
-  ctx.clearRect(0,0,W,H);
+  // (#7) Rack focus blur
+  if (isTransitioning && !perfMode) {
+    var blurPeak = 0.5; // peak at midpoint
+    var blurAmount = Math.sin(zoomProgress * Math.PI) * 3; // max 3px blur at midpoint
+    canvas.style.filter = 'blur(' + blurAmount.toFixed(1) + 'px)';
+  } else {
+    canvas.style.filter = '';
+  }
+
+  ctx.clearRect(0, 0, W, H);
 
   if (isTransitioning) {
     var ease = easeInOutCubic(zoomProgress);
 
     ctx.save();
     if (targetLevel > currentLevel) {
-      var s = 1 + ease*2;
+      var s = 1 + ease * 2;
       ctx.translate(CX, CY); ctx.scale(s, s); ctx.translate(-CX, -CY);
     } else {
-      var s = 1 - ease*0.5;
+      var s = 1 - ease * 0.5;
       ctx.translate(CX, CY); ctx.scale(s, s); ctx.translate(-CX, -CY);
     }
-    drawLevel(currentLevel, 1-ease);
+    drawLevel(currentLevel, 1 - ease);
     ctx.restore();
 
     ctx.save();
     if (targetLevel > currentLevel) {
-      var s = 0.3 + ease*0.7;
+      var s = 0.3 + ease * 0.7;
       ctx.translate(CX, CY); ctx.scale(s, s); ctx.translate(-CX, -CY);
     } else {
       var s = 2 - ease;
