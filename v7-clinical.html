@@ -27,6 +27,9 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 #loading-text { margin-top: 24px; font-family: var(--font-mono); font-size: 10px; color: rgba(80,220,192,0.5); letter-spacing: 0.2em; }
 #cursor { position: fixed; pointer-events: none; z-index: 100000; width: 50px; height: 50px; transform: translate(-50%,-50%); opacity: 0.8; }
 #scene-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+#sketchfab-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; transition: opacity 0.8s ease-out; }
+#sketchfab-container.hidden { opacity: 0; pointer-events: none; }
+#sketchfab-container iframe { width: 100%; height: 100%; border: none; }
 #grid-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 40; opacity: 0.012;
   background-image: linear-gradient(rgba(80,220,192,1) 1px, transparent 1px), linear-gradient(90deg, rgba(80,220,192,1) 1px, transparent 1px);
   background-size: 60px 60px; }
@@ -101,6 +104,11 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 </div>
 <div id="detail-panel"><button id="detail-panel-close">×</button><div id="detail-title"></div><div id="detail-subtitle"></div><div id="detail-body"></div></div>
 
+<div id="sketchfab-container">
+  <iframe id="sketchfab-frame" allow="autoplay; fullscreen; xr-spatial-tracking"></iframe>
+</div>
+<script src="https://static.sketchfab.com/api/sketchfab-viewer-1.12.1.js"></script>
+
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"}}</script>
 <script type="module">
 import * as THREE from 'three';
@@ -110,7 +118,73 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 const loadingEl = document.getElementById('loading');
-window.addEventListener('load', () => { setTimeout(() => { loadingEl.classList.add('hidden'); setTimeout(() => loadingEl.style.display = 'none', 1200); }, 1200); });
+
+// Initialize Sketchfab Viewer for Level 0
+let sketchfabApi = null;
+const sketchfabContainer = document.getElementById('sketchfab-container');
+const sketchfabFrame = document.getElementById('sketchfab-frame');
+const SKETCHFAB_MODEL_UID = '60ef7d2515b0403986ff9e8b7f234a66'; // Human Cell by markdragan
+
+function initSketchfab() {
+  const client = new Sketchfab('1.12.1', sketchfabFrame);
+  client.init(SKETCHFAB_MODEL_UID, {
+    success: function(api) {
+      sketchfabApi = api;
+      api.start();
+      api.addEventListener('viewerready', function() {
+        // Dark background matching our theme
+        api.setBackground({ color: [0.024, 0.031, 0.063, 1] });
+        // Hide all UI
+        api.setAnnotationsVisible(false);
+        // Camera auto-rotate
+        api.setAutoRotate(true, { speed: 0.15 });
+        // Post-processing for fluorescence look
+        api.setPostProcessing({
+          enable: true,
+          bloomEnabled: true,
+          bloomIntensity: 0.15,
+          bloomThreshold: 0.8,
+          vignetteEnable: false,
+          toneMappingEnabled: true,
+        });
+        // Dismiss loading once Sketchfab is ready
+        setTimeout(() => {
+          loadingEl.classList.add('hidden');
+          setTimeout(() => loadingEl.style.display = 'none', 1200);
+        }, 500);
+      });
+    },
+    error: function() {
+      console.warn('Sketchfab failed, falling back to Three.js');
+      sketchfabContainer.classList.add('hidden');
+      setTimeout(() => { loadingEl.classList.add('hidden'); setTimeout(() => loadingEl.style.display = 'none', 1200); }, 1200);
+    },
+    ui_stop: 0,
+    ui_infos: 0,
+    ui_inspector: 0,
+    ui_settings: 0,
+    ui_watermark: 0,
+    ui_annotations: 0,
+    ui_color: '50dcc0',
+    ui_fadeout: 0,
+    transparent: 0,
+    autospin: 0.15,
+    autostart: 1,
+    camera: 0,
+    preload: 1,
+    ui_hint: 0,
+    ui_help: 0,
+    ui_vr: 0,
+    ui_fullscreen: 0,
+    ui_controls: 0,
+    scrollwheel: 0,
+    double_click: 0,
+  });
+}
+
+window.addEventListener('load', () => {
+  initSketchfab();
+});
 
 let currentLevel = 0, targetLevel = 0, isTransitioning = false, scrollAccum = 0;
 const SCROLL_THRESHOLD = 140;
@@ -323,6 +397,12 @@ for (let i = 0; i < 5; i++) { const g = new THREE.Group(); g.position.z = LEVEL_
   const ss = createTextSprite('AI ARCHITECT  ·  BIOTECH ENGINEER', { fontSize:24, fontWeight:'300', color:'rgba(80,220,192,0.4)', shadowBlur:25, opacity:0.7 });
   ss.position.set(0,9,22); ss.scale.set(38,4,1); g.add(ss);
 
+  // Hide procedural cell geometry — Sketchfab viewer provides the cell model
+  cellMesh.visible = false; wireMesh.visible = false; rimMesh.visible = false;
+  nucMesh.visible = false; nucGlow.visible = false; nucleolus.visible = false;
+  chromatinMeshes.forEach(cm => cm.visible = false);
+  mitoMeshes.forEach(mm => mm.visible = false);
+
   g.userData = { cellMesh, wireMesh, nucMesh, nucleolus, particles, nucGlow, chromatinMeshes, mitoMeshes };
 })();
 
@@ -435,6 +515,9 @@ function transitionToLevel(n) {
   isTransitioning=true; targetLevel=n;
   const flash=document.getElementById('transition-flash'); flash.classList.add('flash'); setTimeout(()=>flash.classList.remove('flash'),200);
   levelGroups[n].visible=true;
+  // Show/hide Sketchfab viewer
+  if(n===0) { sketchfabContainer.classList.remove('hidden'); if(sketchfabApi) sketchfabApi.setAutoRotate(true, {speed:0.15}); }
+  else { sketchfabContainer.classList.add('hidden'); if(sketchfabApi) sketchfabApi.setAutoRotate(false); }
   const startZ=camera.position.z, endZ=LEVEL_Z[n]+55, dur=1200, start=performance.now();
   (function anim(now){
     const t=Math.min((now-start)/dur,1), e=t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
