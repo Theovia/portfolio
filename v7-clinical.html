@@ -140,6 +140,17 @@ const backLight = new THREE.PointLight(0xff4466, 0.8, 250); backLight.position.s
 const topLight = new THREE.PointLight(0x50dc78, 0.6, 250); topLight.position.set(0, 40, 20); scene.add(topLight);
 const rimTopLight = new THREE.PointLight(0xffffff, 0.5, 300); rimTopLight.position.set(-30, 30, -40); scene.add(rimTopLight);
 
+// Procedural environment map for realistic PBR materials
+const pmremGen = new THREE.PMREMGenerator(renderer);
+const envScene = new THREE.Scene();
+envScene.background = new THREE.Color(0x080c14);
+const envLight1 = new THREE.PointLight(0x50dcc0, 8, 100); envLight1.position.set(10, 10, 10); envScene.add(envLight1);
+const envLight2 = new THREE.PointLight(0x4488ff, 5, 100); envLight2.position.set(-10, 5, -10); envScene.add(envLight2);
+const envLight3 = new THREE.PointLight(0xff4466, 3, 100); envLight3.position.set(0, -10, 5); envScene.add(envLight3);
+envScene.add(new THREE.AmbientLight(0x101828, 1.0));
+const envRT = pmremGen.fromScene(envScene, 0.04);
+scene.environment = envRT.texture;
+
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.8, 0.4, 0.2);
