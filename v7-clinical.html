@@ -184,6 +184,8 @@ function initSketchfab() {
 
 window.addEventListener('load', () => {
   initSketchfab();
+  // Fallback: dismiss loading after 6s regardless
+  setTimeout(() => { loadingEl.classList.add('hidden'); setTimeout(() => loadingEl.style.display = 'none', 1200); }, 6000);
 });
 
 let currentLevel = 0, targetLevel = 0, isTransitioning = false, scrollAccum = 0;
