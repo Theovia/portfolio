@@ -298,8 +298,7 @@ var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setClearColor(0x0a0c10, 1);
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.0;
+renderer.toneMapping = THREE.NoToneMapping;
 container.appendChild(renderer.domElement);
 
 var scene = new THREE.Scene();
@@ -370,16 +369,16 @@ for (var i = 0; i < 5; i++) {
   cellGeo.computeVertexNormals();
 
   var cellMat = new THREE.MeshBasicMaterial({
-    color: 0x1a5848,
+    color: 0x30a888,
     transparent: true,
-    opacity: 0.15,
+    opacity: 0.12,
     side: THREE.DoubleSide,
   });
   var cellMesh = new THREE.Mesh(cellGeo, cellMat);
   g.add(cellMesh);
 
   // Cell membrane stroke — visible edge
-  var strokeMat = new THREE.MeshBasicMaterial({ color: 0x50dcc0, transparent: true, opacity: 0.35, wireframe: false, side: THREE.BackSide });
+  var strokeMat = new THREE.MeshBasicMaterial({ color: 0x50dcc0, transparent: true, opacity: 0.5, wireframe: false, side: THREE.BackSide });
   var strokeMesh = new THREE.Mesh(cellGeo.clone(), strokeMat);
   strokeMesh.scale.set(1.01, 1.01, 1.01);
   g.add(strokeMesh);
@@ -403,9 +402,9 @@ for (var i = 0; i < 5; i++) {
   }
   nucGeo.computeVertexNormals();
   var nucMat = new THREE.MeshBasicMaterial({
-    color: 0x4488ff,
+    color: 0x6699ff,
     transparent: true,
-    opacity: 0.45,
+    opacity: 0.55,
   });
   var nucMesh = new THREE.Mesh(nucGeo, nucMat);
   g.add(nucMesh);
@@ -418,7 +417,7 @@ for (var i = 0; i < 5; i++) {
 
   // Chromatin dots inside nucleus
   var chromatinGeo = new THREE.SphereGeometry(0.25, 6, 6);
-  var chromatinMat = new THREE.MeshBasicMaterial({ color: 0x88bbff, transparent: true, opacity: 0.5 });
+  var chromatinMat = new THREE.MeshBasicMaterial({ color: 0xaaddff, transparent: true, opacity: 0.7 });
   for (var i = 0; i < 25; i++) {
     var cm = new THREE.Mesh(chromatinGeo, chromatinMat.clone());
     var a = rand(0, Math.PI*2), b = rand(-1, 1), r = rand(1, 4.5);
@@ -1033,7 +1032,6 @@ zoomDots.forEach(function(d) { d.addEventListener('click', function() { setZoomL
 // Illumination
 document.getElementById('illum-slider').addEventListener('input', function(e) {
   illumination = parseInt(e.target.value);
-  renderer.toneMappingExposure = illumination / 100;
 });
 
 // ═══════════════════════════════════════
