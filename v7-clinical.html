@@ -233,8 +233,8 @@ for (let i = 0; i < 5; i++) { const g = new THREE.Group(); g.position.z = LEVEL_
   }
   nucGeo.computeVertexNormals();
   const nucMesh = new THREE.Mesh(nucGeo, new THREE.MeshPhysicalMaterial({
-    color: 0x3366cc, emissive: 0x1144ff, emissiveIntensity: 0.25,
-    transparent: true, opacity: 0.75, roughness: 0.4, clearcoat: 0.4, side: THREE.DoubleSide
+    color: 0x4477ee, emissive: 0x1155dd, emissiveIntensity: 0.35,
+    transparent: true, opacity: 0.78, roughness: 0.35, clearcoat: 0.5, side: THREE.DoubleSide
   }));
   g.add(nucMesh);
 
@@ -244,7 +244,7 @@ for (let i = 0; i < 5; i++) { const g = new THREE.Group(); g.position.z = LEVEL_
 
   // Nucleolus
   const nucleolus = new THREE.Mesh(new THREE.SphereGeometry(1.8,24,24), new THREE.MeshPhysicalMaterial({
-    color: 0x5588dd, emissive: 0x2255aa, emissiveIntensity: 0.3, transparent: true, opacity: 0.85, roughness: 0.3
+    color: 0x6699ff, emissive: 0x3366cc, emissiveIntensity: 0.4, transparent: true, opacity: 0.9, roughness: 0.25
   }));
   nucleolus.position.set(0.5, 0.8, -0.3); g.add(nucleolus);
 
@@ -271,8 +271,8 @@ for (let i = 0; i < 5; i++) { const g = new THREE.Group(); g.position.z = LEVEL_
   ];
   mitoData.forEach(md => {
     const mm = new THREE.Mesh(new THREE.CapsuleGeometry(1,2,12,16), new THREE.MeshPhysicalMaterial({
-      color: 0xcc3344, emissive: 0xaa2233, emissiveIntensity: 0.22,
-      transparent: true, opacity: 0.65, roughness: 0.4, clearcoat: 0.4
+      color: 0xdd3344, emissive: 0xbb2233, emissiveIntensity: 0.28,
+      transparent: true, opacity: 0.7, roughness: 0.35, clearcoat: 0.5
     }));
     mm.position.set(...md.pos); mm.rotation.set(...md.rot); mm.scale.set(...md.s);
     g.add(mm); mitoMeshes.push(mm);
