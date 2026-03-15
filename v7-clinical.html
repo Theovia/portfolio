@@ -4,1245 +4,532 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>R. Zhou — Specimen Analysis</title>
-<meta name="description" content="Portfolio of Raul Zhou — AI Architect & Biotech Engineer. View through the microscope.">
-<meta property="og:title" content="Raul Zhou — AI Architect & Biotech Engineer">
-<meta property="og:description" content="Interactive microscope portfolio. Zoom from macro to quantum to explore skills, experience, and vision.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://theovia.github.io/portfolio/">
-<meta property="og:image" content="https://theovia.github.io/portfolio/og-image.png">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="theme-color" content="#0a0c10">
+<meta name="description" content="Portfolio of Raul Zhou — AI Architect & Biotech Engineer.">
+<meta name="theme-color" content="#060810">
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
-  --bg: #0a0c10;
-  --dapi: #4488ff;
-  --dapi-dim: rgba(68,136,255,0.4);
-  --rhodamine: #ff4466;
-  --rhodamine-dim: rgba(255,68,102,0.4);
-  --fitc: #50dc78;
-  --fitc-dim: rgba(80,220,120,0.4);
+  --bg: #060810;
   --cyan: #50dcc0;
-  --cyan-dim: rgba(80,220,192,0.4);
-  --gold: #c4a44a;
-  --gold-dim: rgba(196,164,74,0.4);
-  --white: #e0e0f0;
-  --muted: #3a3a52;
-  --font-display: 'Helvetica Neue', 'Arial', sans-serif;
-  --font-mono: 'Courier New', monospace;
+  --font-display: 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'SF Mono', 'Fira Code', 'Courier New', monospace;
 }
-html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: var(--white); font-family: var(--font-display); cursor: none; }
-
-/* Loading */
-#loading { position: fixed; inset: 0; z-index: 200000; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 1s ease-out; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); color: #e0e0f0; font-family: var(--font-display); cursor: none; }
+#loading { position: fixed; inset: 0; z-index: 200000; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 1.2s ease-out; }
 #loading.hidden { opacity: 0; pointer-events: none; }
 .focus-rings { position: relative; width: 120px; height: 120px; }
-.focus-ring { position: absolute; border: 1px solid var(--cyan-dim); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%,-50%); animation: fpulse 2s ease-in-out infinite; }
+.focus-ring { position: absolute; border: 1px solid rgba(80,220,192,0.3); border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%,-50%); animation: fpulse 2s ease-in-out infinite; }
 .focus-ring:nth-child(1) { width: 30px; height: 30px; }
 .focus-ring:nth-child(2) { width: 55px; height: 55px; animation-delay: 0.15s; }
 .focus-ring:nth-child(3) { width: 80px; height: 80px; animation-delay: 0.3s; }
 .focus-ring:nth-child(4) { width: 105px; height: 105px; animation-delay: 0.45s; }
 @keyframes fpulse { 0%,100%{ opacity:0.15; transform:translate(-50%,-50%) scale(1); } 50%{ opacity:0.7; transform:translate(-50%,-50%) scale(0.92); } }
-#loading-text { margin-top: 24px; font-family: var(--font-mono); font-size: 10px; color: var(--cyan-dim); letter-spacing: 0.2em; }
-
-/* Cursor */
+#loading-text { margin-top: 24px; font-family: var(--font-mono); font-size: 10px; color: rgba(80,220,192,0.5); letter-spacing: 0.2em; }
 #cursor { position: fixed; pointer-events: none; z-index: 100000; width: 50px; height: 50px; transform: translate(-50%,-50%); opacity: 0.8; }
-#cursor.hidden { opacity: 0; }
-
-/* Three.js canvas */
 #scene-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-
-/* Overlays */
-#grid-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 40; opacity: 0.015;
+#grid-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 40; opacity: 0.012;
   background-image: linear-gradient(rgba(80,220,192,1) 1px, transparent 1px), linear-gradient(90deg, rgba(80,220,192,1) 1px, transparent 1px);
   background-size: 60px 60px; }
-#crosshair-h { position: fixed; width: 100%; height: 1px; top: 50%; background: rgba(80,220,192,0.03); pointer-events: none; z-index: 42; }
-#crosshair-v { position: fixed; width: 1px; height: 100%; left: 50%; background: rgba(80,220,192,0.03); pointer-events: none; z-index: 42; }
+#crosshair-h { position: fixed; width: 100%; height: 1px; top: 50%; background: rgba(80,220,192,0.02); pointer-events: none; z-index: 42; }
+#crosshair-v { position: fixed; width: 1px; height: 100%; left: 50%; background: rgba(80,220,192,0.02); pointer-events: none; z-index: 42; }
 #lens-ring { position: fixed; inset: 0; pointer-events: none; z-index: 45; display: flex; align-items: center; justify-content: center; }
-#lens-ring::after { content: ''; width: min(70vh, 70vw); height: min(70vh, 70vw); border-radius: 50%; border: 1px solid rgba(80,220,192,0.08); box-shadow: 0 0 120px 40px rgba(0,0,0,0.6), inset 0 0 60px rgba(0,0,0,0.2); }
+#lens-ring::after { content: ''; width: min(72vh,72vw); height: min(72vh,72vw); border-radius: 50%; border: 1px solid rgba(80,220,192,0.06); box-shadow: 0 0 150px 60px rgba(0,0,0,0.7), inset 0 0 80px rgba(0,0,0,0.15); }
 #vignette { position: fixed; inset: 0; pointer-events: none; z-index: 50;
-  background: radial-gradient(ellipse 55% 55% at 50% 50%, transparent 0%, transparent 55%, rgba(10,12,16,0.4) 70%, rgba(10,12,16,0.88) 90%, #0a0c10 100%); }
-
-/* UI Layer */
+  background: radial-gradient(ellipse 58% 58% at 50% 50%, transparent 0%, transparent 50%, rgba(6,8,16,0.35) 65%, rgba(6,8,16,0.85) 85%, #060810 100%); }
+#transition-flash { position: fixed; inset: 0; background: white; opacity: 0; z-index: 55; pointer-events: none; transition: opacity 0.15s ease-out; }
+#transition-flash.flash { opacity: 0.06; }
 #ui { position: fixed; inset: 0; z-index: 60; pointer-events: none; font-family: var(--font-mono); }
 #ui > * { pointer-events: auto; }
-
 #toolbar { position: absolute; top: 20px; left: 20px; display: flex; gap: 8px; z-index: 80; }
-.toolbar-btn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--cyan-dim); background: rgba(10,12,16,0.5); color: var(--cyan); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; backdrop-filter: blur(4px); }
-.toolbar-btn:hover { background: rgba(80,220,192,0.08); box-shadow: 0 0 10px var(--cyan-dim); }
-.toolbar-btn.muted { opacity: 0.35; }
-.toolbar-btn.active { border-color: var(--cyan); }
-
-#specimen { position: absolute; top: 20px; right: 28px; font-size: 9px; color: rgba(80,220,192,0.25); letter-spacing: 0.12em; text-align: right; line-height: 2; }
-#stain-info { opacity: 0.5; font-size: 8px; }
-
+.toolbar-btn { width: 30px; height: 30px; border-radius: 50%; border: 1px solid rgba(80,220,192,0.25); background: rgba(6,8,16,0.6); color: var(--cyan); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s; backdrop-filter: blur(4px); }
+.toolbar-btn:hover { background: rgba(80,220,192,0.08); }
+#specimen { position: absolute; top: 20px; right: 28px; font-size: 9px; color: rgba(80,220,192,0.2); letter-spacing: 0.12em; text-align: right; line-height: 2; }
 #mag { position: absolute; bottom: 28px; left: 28px; }
-#mag .label { font-size: 8px; color: rgba(80,220,192,0.35); letter-spacing: 0.2em; }
-#mag-value { font-size: 44px; font-weight: 200; color: rgba(80,220,192,0.6); letter-spacing: 0.02em; }
+#mag .label { font-size: 8px; color: rgba(80,220,192,0.3); letter-spacing: 0.2em; }
+#mag-value { font-size: 44px; font-weight: 200; color: rgba(80,220,192,0.5); }
 #mag .bar { width: 80px; height: 1px; background: rgba(80,220,192,0.1); margin-top: 8px; }
-#mag-bar-fill { width: 5%; height: 100%; background: rgba(80,220,192,0.4); transition: width 0.6s cubic-bezier(0.16,1,0.3,1); }
-
-#scale-bar { position: absolute; bottom: 28px; right: 28px; text-align: right; font-size: 9px; color: var(--cyan-dim); letter-spacing: 0.05em; }
-#scale-line { width: 70px; height: 1px; background: var(--cyan-dim); margin-top: 6px; margin-left: auto; position: relative; }
-#scale-line::before, #scale-line::after { content: ''; position: absolute; width: 1px; height: 6px; background: var(--cyan-dim); top: -2.5px; }
+#mag-bar-fill { width: 5%; height: 100%; background: rgba(80,220,192,0.35); transition: width 0.6s cubic-bezier(0.16,1,0.3,1); }
+#scale-bar { position: absolute; bottom: 28px; right: 28px; text-align: right; font-size: 9px; color: rgba(80,220,192,0.25); }
+#scale-line { width: 70px; height: 1px; background: rgba(80,220,192,0.25); margin-top: 6px; margin-left: auto; position: relative; }
+#scale-line::before, #scale-line::after { content: ''; position: absolute; width: 1px; height: 6px; background: rgba(80,220,192,0.25); top: -2.5px; }
 #scale-line::before { left: 0; } #scale-line::after { right: 0; }
-
 #zoom-steps { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; }
 .zoom-dot { width: 7px; height: 7px; border-radius: 50%; border: 1px solid rgba(80,220,192,0.2); background: transparent; transition: all 0.4s; cursor: pointer; }
-.zoom-dot.active { background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 8px var(--cyan-dim); transform: scale(1.3); }
-.zoom-connector { width: 16px; height: 1px; background: rgba(80,220,192,0.1); }
-
-#nav-hint { position: absolute; bottom: 68px; left: 50%; transform: translateX(-50%); font-size: 9px; color: rgba(255,255,255,0.15); letter-spacing: 0.2em; animation: hintpulse 2.5s ease-in-out infinite; text-align: center; }
-@keyframes hintpulse { 0%,100%{ opacity:0.15; } 50%{ opacity:0.4; } }
-
-#eco-badge { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 8px; color: var(--gold-dim); letter-spacing: 0.15em; opacity: 0; transition: opacity 0.5s; }
-#eco-badge.visible { opacity: 1; }
-
-#kbd-hints { position: absolute; top: 58px; left: 50%; transform: translateX(-50%); font-size: 8px; color: var(--muted); letter-spacing: 0.08em; opacity: 0; transition: opacity 0.5s; }
-#kbd-hints.visible { opacity: 0.4; }
-
+.zoom-dot.active { background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 8px rgba(80,220,192,0.4); transform: scale(1.3); }
+.zoom-connector { width: 16px; height: 1px; background: rgba(80,220,192,0.08); }
+#nav-hint { position: absolute; bottom: 68px; left: 50%; transform: translateX(-50%); font-size: 9px; color: rgba(255,255,255,0.12); letter-spacing: 0.2em; animation: hp 2.5s ease-in-out infinite; text-align: center; }
+@keyframes hp { 0%,100%{ opacity:0.12; } 50%{ opacity:0.35; } }
 #illumination { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; }
-#illumination label { font-size: 8px; color: rgba(80,220,192,0.2); letter-spacing: 0.15em; writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); }
-#illum-slider { -webkit-appearance: none; appearance: none; width: 70px; height: 2px; background: rgba(80,220,192,0.1); border-radius: 1px; outline: none; transform: rotate(-90deg); cursor: pointer; }
-#illum-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 6px var(--cyan-dim); cursor: pointer; }
-
-#focus-knob { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 16px; display: flex; flex-direction: column; align-items: center; gap: 2px; opacity: 0.2; pointer-events: none; }
-.knob-groove { width: 12px; height: 1px; background: var(--cyan-dim); border-radius: 1px; }
-
-/* Detail Panel */
-#detail-panel { position: fixed; right: -420px; top: 0; width: 400px; height: 100%; background: linear-gradient(135deg, rgba(10,12,16,0.96), rgba(6,8,12,0.98)); border-left: 1px solid var(--cyan-dim); z-index: 70; padding: 60px 32px 32px; transition: right 0.5s cubic-bezier(0.16,1,0.3,1); overflow-y: auto; font-family: var(--font-display); backdrop-filter: blur(20px); }
+#illumination label { font-size: 8px; color: rgba(80,220,192,0.18); letter-spacing: 0.15em; writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); }
+#illum-slider { -webkit-appearance: none; appearance: none; width: 70px; height: 2px; background: rgba(80,220,192,0.08); outline: none; transform: rotate(-90deg); cursor: pointer; }
+#illum-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 6px rgba(80,220,192,0.3); cursor: pointer; }
+#detail-panel { position: fixed; right: -420px; top: 0; width: 400px; height: 100%; background: linear-gradient(135deg, rgba(6,8,16,0.97), rgba(4,6,10,0.98)); border-left: 1px solid rgba(80,220,192,0.12); z-index: 70; padding: 60px 32px 32px; transition: right 0.5s cubic-bezier(0.16,1,0.3,1); overflow-y: auto; backdrop-filter: blur(20px); }
 #detail-panel.open { right: 0; }
-#detail-panel-close { position: absolute; top: 20px; right: 20px; background: none; border: 1px solid var(--cyan-dim); color: var(--cyan); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.3s; }
-#detail-panel-close:hover { background: rgba(80,220,192,0.08); }
+#detail-panel-close { position: absolute; top: 20px; right: 20px; background: none; border: 1px solid rgba(80,220,192,0.2); color: var(--cyan); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
 #detail-title { font-size: 22px; font-weight: 300; color: var(--cyan); margin-bottom: 6px; letter-spacing: 0.05em; }
-#detail-subtitle { font-size: 10px; color: var(--gold); letter-spacing: 0.1em; margin-bottom: 24px; }
-#detail-body { font-size: 13px; line-height: 1.7; color: rgba(224,224,240,0.6); }
+#detail-subtitle { font-size: 10px; color: #c4a44a; letter-spacing: 0.1em; margin-bottom: 24px; font-family: var(--font-mono); }
+#detail-body { font-size: 13px; line-height: 1.7; color: rgba(224,224,240,0.55); }
 #detail-body strong { color: var(--cyan); font-weight: 500; }
-#detail-body .tag { display: inline-block; padding: 2px 8px; margin: 2px 3px 2px 0; border: 1px solid var(--cyan-dim); border-radius: 10px; font-family: var(--font-mono); font-size: 10px; color: var(--cyan); }
-
-/* Transition flash */
-#transition-flash { position: fixed; inset: 0; background: white; opacity: 0; z-index: 55; pointer-events: none; transition: opacity 0.15s ease-out; }
-#transition-flash.flash { opacity: 0.08; }
-
-/* Print */
-@media print {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
-  body { background: white !important; color: #111 !important; cursor: auto !important; overflow: visible !important; height: auto !important; }
-  #scene-container, #vignette, #transition-flash, #cursor, #ui, #detail-panel, #loading, #toolbar,
-  #eco-badge, #kbd-hints, #grid-overlay, #crosshair-h, #crosshair-v, #lens-ring { display: none !important; }
-  #print-cv { display: block !important; }
-}
-#print-cv { display: none; max-width: 700px; margin: 0 auto; padding: 40px 20px; font-family: 'Helvetica Neue', sans-serif; color: #111; line-height: 1.6; }
-#print-cv h1 { font-size: 28px; margin-bottom: 4px; font-weight: 300; }
-#print-cv .print-subtitle { font-size: 14px; color: #555; margin-bottom: 24px; }
-#print-cv h2 { font-size: 16px; text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin: 20px 0 12px; }
-#print-cv p, #print-cv li { font-size: 13px; }
-#print-cv ul { padding-left: 20px; }
-#print-cv .print-tags { font-size: 12px; color: #555; }
-#print-cv .print-contact { font-size: 12px; color: #555; margin-top: 24px; border-top: 1px solid #ccc; padding-top: 12px; }
-
-/* Mobile */
+#detail-body .tag { display: inline-block; padding: 2px 8px; margin: 2px 3px 2px 0; border: 1px solid rgba(80,220,192,0.2); border-radius: 10px; font-family: var(--font-mono); font-size: 10px; color: var(--cyan); }
 @media (max-width: 768px) {
-  #cursor { display: none; }
-  body { cursor: default; -webkit-tap-highlight-color: transparent; }
-  #mag { bottom: 14px; left: 10px; }
-  #mag-value { font-size: 28px; }
+  #cursor { display: none; } body { cursor: default; }
+  #mag { bottom: 14px; left: 10px; } #mag-value { font-size: 28px; }
   #scale-bar { bottom: 14px; right: 10px; font-size: 8px; }
   #specimen { top: 10px; right: 10px; font-size: 7px; }
-  #illumination, #focus-knob { display: none; }
-  #zoom-steps { bottom: 14px; gap: 6px; }
-  .zoom-dot { width: 10px; height: 10px; }
-  .zoom-connector { width: 10px; }
+  #illumination { display: none; }
+  #zoom-steps { bottom: 14px; gap: 6px; } .zoom-dot { width: 10px; height: 10px; }
   #nav-hint { bottom: 48px; font-size: 8px; }
-  #detail-panel { width: 100%; right: -100%; padding: 48px 20px 20px; border-left: none; border-top: 1px solid var(--cyan-dim); }
-  #detail-panel.open { right: 0; }
+  #detail-panel { width: 100%; right: -100%; border-left: none; } #detail-panel.open { right: 0; }
   #toolbar { top: auto; bottom: 55px; left: auto; right: 10px; flex-direction: column; }
-  #kbd-hints { display: none; }
   #lens-ring { display: none; }
-  #grid-overlay { opacity: 0.008; }
-}
-@media (max-width: 480px) {
-  #mag { bottom: 10px; left: 6px; }
-  #mag-value { font-size: 22px; }
-  #specimen { font-size: 6px; }
 }
 </style>
 </head>
 <body>
-
-<!-- Loading -->
-<div id="loading">
-  <div class="focus-rings"><div class="focus-ring"></div><div class="focus-ring"></div><div class="focus-ring"></div><div class="focus-ring"></div></div>
-  <div id="loading-text">FOCUSING...</div>
-</div>
-
-<!-- Cursor -->
-<svg id="cursor" viewBox="0 0 50 50">
-  <circle cx="25" cy="25" r="20" fill="none" stroke="rgba(80,220,192,0.2)" stroke-width="0.5" stroke-dasharray="3 5"/>
-  <circle cx="25" cy="25" r="10" fill="none" stroke="rgba(80,220,192,0.1)" stroke-width="0.5"/>
-  <circle cx="25" cy="25" r="1" fill="rgba(80,220,192,0.5)"/>
-  <line x1="25" y1="1" x2="25" y2="14" stroke="rgba(80,220,192,0.12)" stroke-width="0.5"/>
-  <line x1="25" y1="36" x2="25" y2="49" stroke="rgba(80,220,192,0.12)" stroke-width="0.5"/>
-  <line x1="1" y1="25" x2="14" y2="25" stroke="rgba(80,220,192,0.12)" stroke-width="0.5"/>
-  <line x1="36" y1="25" x2="49" y2="25" stroke="rgba(80,220,192,0.12)" stroke-width="0.5"/>
-</svg>
-
-<!-- Three.js container -->
+<div id="loading"><div class="focus-rings"><div class="focus-ring"></div><div class="focus-ring"></div><div class="focus-ring"></div><div class="focus-ring"></div></div><div id="loading-text">FOCUSING...</div></div>
+<svg id="cursor" viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="none" stroke="rgba(80,220,192,0.15)" stroke-width="0.5" stroke-dasharray="3 5"/><circle cx="25" cy="25" r="10" fill="none" stroke="rgba(80,220,192,0.08)" stroke-width="0.5"/><circle cx="25" cy="25" r="1" fill="rgba(80,220,192,0.4)"/><line x1="25" y1="1" x2="25" y2="14" stroke="rgba(80,220,192,0.1)" stroke-width="0.5"/><line x1="25" y1="36" x2="25" y2="49" stroke="rgba(80,220,192,0.1)" stroke-width="0.5"/><line x1="1" y1="25" x2="14" y2="25" stroke="rgba(80,220,192,0.1)" stroke-width="0.5"/><line x1="36" y1="25" x2="49" y2="25" stroke="rgba(80,220,192,0.1)" stroke-width="0.5"/></svg>
 <div id="scene-container"></div>
-
-<!-- Overlays -->
-<div id="grid-overlay"></div>
-<div id="crosshair-h"></div>
-<div id="crosshair-v"></div>
-<div id="lens-ring"></div>
-<div id="vignette"></div>
-<div id="transition-flash"></div>
-
-<!-- UI -->
+<div id="grid-overlay"></div><div id="crosshair-h"></div><div id="crosshair-v"></div><div id="lens-ring"></div><div id="vignette"></div><div id="transition-flash"></div>
 <div id="ui">
-  <div id="toolbar">
-    <button class="toolbar-btn muted" id="sound-btn" title="Toggle Sound">🔇</button>
-    <button class="toolbar-btn" id="screenshot-btn" title="Screenshot">📷</button>
-  </div>
-  <div id="eco-badge">⚡ ECO MODE</div>
-  <div id="kbd-hints">↑↓ ZOOM · 1-5 LEVELS · ESC CLOSE</div>
-  <div id="specimen">SPECIMEN: R. ZHOU<br><em style="opacity:0.6">Homo sapiens artificialis</em><br><span style="opacity:0.4">SLIDE 001 — PREP. 2024</span><br><span id="stain-info">STAIN: FLUORESCENT</span></div>
-  <div id="mag">
-    <div class="label">MAGNIFICATION</div>
-    <div id="mag-value">1×</div>
-    <div class="bar"><div id="mag-bar-fill"></div></div>
-  </div>
+  <div id="toolbar"><button class="toolbar-btn" id="screenshot-btn" title="Screenshot">📷</button></div>
+  <div id="specimen">SPECIMEN: R. ZHOU<br><em style="opacity:0.5">Homo sapiens artificialis</em><br><span style="opacity:0.35">SLIDE 001 — PREP. 2024</span><br><span style="opacity:0.3;font-size:8px">STAIN: FLUORESCENT MULTI-CHANNEL</span></div>
+  <div id="mag"><div class="label">MAGNIFICATION</div><div id="mag-value">1×</div><div class="bar"><div id="mag-bar-fill"></div></div></div>
   <div id="scale-bar"><span id="scale-text">500 µm</span><div id="scale-line"></div></div>
   <div id="illumination"><label>ILLUM</label><input type="range" id="illum-slider" min="30" max="150" value="100"></div>
-  <div id="focus-knob"><div class="knob-groove"></div><div class="knob-groove"></div><div class="knob-groove"></div><div class="knob-groove"></div><div class="knob-groove"></div><div class="knob-groove"></div><div class="knob-groove"></div><div class="knob-groove"></div><div class="knob-groove"></div><div class="knob-groove"></div></div>
-  <div id="zoom-steps">
-    <div class="zoom-dot active" data-level="0"></div><div class="zoom-connector"></div>
-    <div class="zoom-dot" data-level="1"></div><div class="zoom-connector"></div>
-    <div class="zoom-dot" data-level="2"></div><div class="zoom-connector"></div>
-    <div class="zoom-dot" data-level="3"></div><div class="zoom-connector"></div>
-    <div class="zoom-dot" data-level="4"></div>
-  </div>
+  <div id="zoom-steps"><div class="zoom-dot active" data-level="0"></div><div class="zoom-connector"></div><div class="zoom-dot" data-level="1"></div><div class="zoom-connector"></div><div class="zoom-dot" data-level="2"></div><div class="zoom-connector"></div><div class="zoom-dot" data-level="3"></div><div class="zoom-connector"></div><div class="zoom-dot" data-level="4"></div></div>
   <div id="nav-hint">SCROLL TO ENTER THE CELL</div>
 </div>
+<div id="detail-panel"><button id="detail-panel-close">×</button><div id="detail-title"></div><div id="detail-subtitle"></div><div id="detail-body"></div></div>
 
-<!-- Detail Panel -->
-<div id="detail-panel">
-  <button id="detail-panel-close">×</button>
-  <div id="detail-title"></div>
-  <div id="detail-subtitle"></div>
-  <div id="detail-body"></div>
-</div>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.162.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.162.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
-<!-- Print CV -->
-<div id="print-cv">
-  <h1>Raul Zhou</h1>
-  <div class="print-subtitle">AI Architect · Biotech Engineer · Guadalajara, MX</div>
-  <h2>Education</h2>
-  <p><strong>M.S. Applied Artificial Intelligence</strong> — Tec de Monterrey, 2022–2024</p>
-  <p><strong>B.S. Biotechnology Engineering</strong> — Tec de Monterrey, 2017–2022</p>
-  <p>"Leaders of Tomorrow" full scholarship · Exchange: Colombia (2019), Spain (2020)</p>
-  <h2>Experience</h2>
-  <p><strong>AI Consulting</strong> — Enterprise AI implementation & strategy</p>
-  <ul><li>LLM integration & fine-tuning</li><li>AI workflow automation (n8n, LangChain)</li><li>Voice agent development (Retell AI)</li><li>Full-stack AI products</li></ul>
-  <h2>Projects</h2>
-  <p><strong>Eigen Atlas SaaS</strong> — AI-powered knowledge management platform</p>
-  <p><strong>Voice Agent Factory</strong> — Production voice AI agents</p>
-  <p><strong>GHL Integrations</strong> — GoHighLevel automation workflows</p>
-  <h2>Skills</h2>
-  <p class="print-tags">Python · ML/DL · NLP · Computer Vision · LLMs · TensorFlow · LangChain · n8n · GHL · Retell AI · OpenAI API · Anthropic API · React · Node.js · Supabase · Docker · Git · Vercel</p>
-  <h2>Achievements</h2>
-  <ul><li>"Leaders of Tomorrow" full scholarship</li><li>International experience across 3 countries</li><li>Chinese-Mexican heritage — bridging cultures</li></ul>
-  <div class="print-contact">raul.chio.leon@gmail.com · github.com/Theovia · Guadalajara, MX</div>
-</div>
+const loadingEl = document.getElementById('loading');
+window.addEventListener('load', () => { setTimeout(() => { loadingEl.classList.add('hidden'); setTimeout(() => loadingEl.style.display = 'none', 1200); }, 1200); });
 
-<!-- Three.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-<script>
-(function(){
-'use strict';
+let currentLevel = 0, targetLevel = 0, isTransitioning = false, scrollAccum = 0;
+const SCROLL_THRESHOLD = 140;
+let mouseNX = 0, mouseNY = 0, time = 0;
+const ZOOM_LABELS = ['1×','10×','100×','1000×','10000×'];
+const SCALE_LABELS = ['500 µm','50 µm','5 µm','500 nm','50 nm'];
+const MAG_FILLS = [5,25,50,75,100];
+const LEVEL_Z = [0, -80, -200, -350, -550];
 
-// ═══════════════════════════════════════
-// LOADING
-// ═══════════════════════════════════════
-var loadingEl = document.getElementById('loading');
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    loadingEl.classList.add('hidden');
-    setTimeout(function() { loadingEl.style.display = 'none'; }, 1000);
-    if (!('ontouchstart' in window)) {
-      var h = document.getElementById('kbd-hints');
-      h.classList.add('visible');
-      setTimeout(function() { h.classList.remove('visible'); }, 5000);
-    }
-  }, 800);
-});
-
-// ═══════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════
-var currentLevel = 0, targetLevel = 0, zoomProgress = 0, isTransitioning = false;
-var scrollAccum = 0, SCROLL_THRESHOLD = 120;
-var mouseX = 0, mouseY = 0, mouseNX = 0, mouseNY = 0; // mouseNX/NY = normalized -1 to 1
-var illumination = 100, time = 0;
-var ZOOM_LABELS = ['1×','10×','100×','1000×','10000×'];
-var SCALE_LABELS = ['500 µm','50 µm','5 µm','500 nm','50 nm'];
-var MAG_FILLS = [5,25,50,75,100];
-var LEVEL_Z = [0, -80, -200, -350, -550]; // Camera Z positions per level
-var isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-// ═══════════════════════════════════════
-// THREE.JS SETUP
-// ═══════════════════════════════════════
-var container = document.getElementById('scene-container');
-var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+const container = document.getElementById('scene-container');
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setClearColor(0x0a0c10, 1);
-renderer.toneMapping = THREE.NoToneMapping;
+renderer.setClearColor(0x060810, 1);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
 container.appendChild(renderer.domElement);
 
-var scene = new THREE.Scene();
-// No fog — fluorescence microscopy is dark field, not foggy
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 2000);
+camera.position.set(0, 0, 55);
 
-var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 2000);
-camera.position.set(0, 0, 60);
+scene.add(new THREE.AmbientLight(0x101828, 0.8));
+const keyLight = new THREE.PointLight(0x50dcc0, 3.0, 400); keyLight.position.set(15, 25, 60); scene.add(keyLight);
+const fillLight = new THREE.PointLight(0x4488ff, 1.5, 350); fillLight.position.set(-25, -15, 50); scene.add(fillLight);
+const backLight = new THREE.PointLight(0xff4466, 0.8, 250); backLight.position.set(0, -20, -40); scene.add(backLight);
+scene.add(new THREE.PointLight(0x50dc78, 0.4, 200).position.set(0, 40, 20) && new THREE.PointLight(0x50dc78, 0.4, 200));
 
-// Ambient light
-var ambientLight = new THREE.AmbientLight(0x405060, 1.2);
-scene.add(ambientLight);
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.8, 0.4, 0.2);
+composer.addPass(bloomPass);
+composer.addPass(new OutputPass());
 
-// Point lights for fluorescence feel
-var keyLight = new THREE.PointLight(0x50dcc0, 2.0, 500);
-keyLight.position.set(20, 30, 80);
-scene.add(keyLight);
-
-var fillLight = new THREE.PointLight(0x4488ff, 1.0, 400);
-fillLight.position.set(-30, -10, 70);
-scene.add(fillLight);
-
-var backLight = new THREE.PointLight(0xff4466, 0.5, 300);
-backLight.position.set(0, -20, -30);
-scene.add(backLight);
-
-// ═══════════════════════════════════════
-// HELPERS
-// ═══════════════════════════════════════
 function lerp(a, b, t) { return a + (b - a) * t; }
-function easeInOutCubic(t) { return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
 function rand(a, b) { return a + Math.random() * (b - a); }
+function noise3(x, y, z) { return Math.sin(x*1.1+z*0.7)*0.5 + Math.sin(y*1.3-x*0.5)*0.3 + Math.sin(z*0.9+y*0.8)*0.2; }
 
-// Simple 3D Perlin-ish noise via sin
-function noise3(x, y, z) {
-  return Math.sin(x*1.1+z*0.7)*0.5 + Math.sin(y*1.3-x*0.5)*0.3 + Math.sin(z*0.9+y*0.8)*0.2;
+function createParticleTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const ctx = c.getContext('2d'), ctr = 32;
+  const g = ctx.createRadialGradient(ctr,ctr,0,ctr,ctr,ctr);
+  g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.3, 'rgba(255,255,255,0.8)');
+  g.addColorStop(0.6, 'rgba(255,255,255,0.2)'); g.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = g; ctx.fillRect(0,0,64,64);
+  const t = new THREE.CanvasTexture(c); t.needsUpdate = true; return t;
 }
 
-// ═══════════════════════════════════════
-// LEVEL GROUPS
-// ═══════════════════════════════════════
-var levelGroups = [];
-for (var i = 0; i < 5; i++) {
-  var g = new THREE.Group();
-  g.position.z = LEVEL_Z[i];
-  g.visible = (i === 0);
-  scene.add(g);
-  levelGroups.push(g);
+function generateGlowTexture(color) {
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const ctx = c.getContext('2d'), ctr = 128;
+  const r = (color>>16)&255, g2 = (color>>8)&255, b = color&255;
+  const g = ctx.createRadialGradient(ctr,ctr,0,ctr,ctr,ctr);
+  g.addColorStop(0, `rgba(${r},${g2},${b},0.6)`); g.addColorStop(0.2, `rgba(${r},${g2},${b},0.3)`);
+  g.addColorStop(0.5, `rgba(${r},${g2},${b},0.08)`); g.addColorStop(1, `rgba(${r},${g2},${b},0)`);
+  ctx.fillStyle = g; ctx.fillRect(0,0,256,256);
+  return new THREE.CanvasTexture(c);
 }
 
-// ═══════════════════════════════════════
-// LEVEL 0: CELL (1x) — Fluorescence
-// ═══════════════════════════════════════
-(function buildLevel0() {
-  var g = levelGroups[0];
+function createTextSprite(text, opts = {}) {
+  const c = document.createElement('canvas'); const s = 4;
+  c.width = 1024*s; c.height = 256*s;
+  const ctx = c.getContext('2d');
+  ctx.font = `${opts.fontWeight||'300'} ${(opts.fontSize||48)*s}px 'Helvetica Neue',Arial,sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  if (opts.shadowBlur) { ctx.shadowColor = opts.shadowColor||'rgba(80,220,192,0.2)'; ctx.shadowBlur = opts.shadowBlur*s; }
+  ctx.fillStyle = opts.color||'#e0e0f0';
+  ctx.fillText(text, c.width/2, c.height/2);
+  const t = new THREE.CanvasTexture(c); t.minFilter = THREE.LinearFilter;
+  return new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, opacity: opts.opacity||0.9, depthWrite: false }));
+}
 
-  // Cell membrane — irregular sphere with vertex displacement
-  var cellGeo = new THREE.IcosahedronGeometry(18, 5);
-  var posAttr = cellGeo.getAttribute('position');
-  var cellDisplacements = [];
-  for (var i = 0; i < posAttr.count; i++) {
-    var x = posAttr.getX(i), y = posAttr.getY(i), z = posAttr.getZ(i);
-    var d = noise3(x*0.15, y*0.15, z*0.15) * 1.8;
-    cellDisplacements.push({ x: x, y: y, z: z, d: d });
-    var len = Math.sqrt(x*x + y*y + z*z);
-    var scale = (18 + d) / len;
-    posAttr.setXYZ(i, x*scale, y*scale, z*scale);
+const particleTex = createParticleTexture();
+
+const levelGroups = [];
+for (let i = 0; i < 5; i++) { const g = new THREE.Group(); g.position.z = LEVEL_Z[i]; g.visible = (i===0); scene.add(g); levelGroups.push(g); }
+
+// ═══════════════════════════════════════
+// LEVEL 0: CELL (1×)
+// ═══════════════════════════════════════
+(function() {
+  const g = levelGroups[0];
+
+  // Cell membrane — glass-like with MeshPhysicalMaterial
+  const cellGeo = new THREE.IcosahedronGeometry(18, 6);
+  const pa = cellGeo.getAttribute('position');
+  for (let i = 0; i < pa.count; i++) {
+    const x = pa.getX(i), y = pa.getY(i), z = pa.getZ(i);
+    const d = noise3(x*0.12, y*0.12, z*0.12) * 2.2;
+    const len = Math.sqrt(x*x+y*y+z*z);
+    const s = (18+d)/len;
+    pa.setXYZ(i, x*s, y*s, z*s);
   }
   cellGeo.computeVertexNormals();
 
-  var cellMat = new THREE.MeshBasicMaterial({
-    color: 0x30a888,
-    transparent: true,
-    opacity: 0.12,
-    side: THREE.DoubleSide,
-  });
-  var cellMesh = new THREE.Mesh(cellGeo, cellMat);
+  const cellMesh = new THREE.Mesh(cellGeo, new THREE.MeshPhysicalMaterial({
+    color: 0x1a6858, transparent: true, opacity: 0.12, transmission: 0.85,
+    roughness: 0.15, clearcoat: 1.0, clearcoatRoughness: 0.1, ior: 1.33,
+    thickness: 2.0, side: THREE.DoubleSide, envMapIntensity: 0.3
+  }));
   g.add(cellMesh);
 
-  // Cell membrane stroke — visible edge
-  var strokeMat = new THREE.MeshBasicMaterial({ color: 0x50dcc0, transparent: true, opacity: 0.5, wireframe: false, side: THREE.BackSide });
-  var strokeMesh = new THREE.Mesh(cellGeo.clone(), strokeMat);
-  strokeMesh.scale.set(1.01, 1.01, 1.01);
-  g.add(strokeMesh);
+  // Very subtle wireframe
+  const wireMesh = new THREE.Mesh(cellGeo.clone(), new THREE.MeshBasicMaterial({ color: 0x50dcc0, transparent: true, opacity: 0.03, wireframe: true }));
+  wireMesh.scale.setScalar(1.005); g.add(wireMesh);
 
-  // Membrane edge glow — slightly larger wireframe
-  var glowGeo = cellGeo.clone();
-  var glowMat = new THREE.MeshBasicMaterial({ color: 0x50dcc0, transparent: true, opacity: 0.2, wireframe: true });
-  var glowMesh = new THREE.Mesh(glowGeo, glowMat);
-  glowMesh.scale.set(1.02, 1.02, 1.02);
-  g.add(glowMesh);
+  // Rim glow
+  g.add(new THREE.Mesh(cellGeo.clone(), new THREE.MeshBasicMaterial({ color: 0x50dcc0, transparent: true, opacity: 0.06, side: THREE.BackSide })).scale.setScalar(1.03) || g.children[g.children.length-1]);
+  const rimMesh = new THREE.Mesh(cellGeo.clone(), new THREE.MeshBasicMaterial({ color: 0x50dcc0, transparent: true, opacity: 0.06, side: THREE.BackSide }));
+  rimMesh.scale.setScalar(1.03); g.add(rimMesh);
 
-  // Nucleus — DAPI blue
-  var nucGeo = new THREE.IcosahedronGeometry(5.5, 4);
-  var nucPosAttr = nucGeo.getAttribute('position');
-  for (var i = 0; i < nucPosAttr.count; i++) {
-    var x = nucPosAttr.getX(i), y = nucPosAttr.getY(i), z = nucPosAttr.getZ(i);
-    var d = noise3(x*0.3, y*0.3, z*0.3) * 0.6;
-    var len = Math.sqrt(x*x+y*y+z*z);
-    var s = (5.5+d)/len;
-    nucPosAttr.setXYZ(i, x*s, y*s, z*s);
+  // Nucleus — DAPI blue, glowing
+  const nucGeo = new THREE.IcosahedronGeometry(5.5, 5);
+  const np = nucGeo.getAttribute('position');
+  for (let i = 0; i < np.count; i++) {
+    const x = np.getX(i), y = np.getY(i), z = np.getZ(i);
+    const d = noise3(x*0.25, y*0.25, z*0.25) * 0.8;
+    const len = Math.sqrt(x*x+y*y+z*z); const s = (5.5+d)/len;
+    np.setXYZ(i, x*s, y*s, z*s);
   }
   nucGeo.computeVertexNormals();
-  var nucMat = new THREE.MeshBasicMaterial({
-    color: 0x6699ff,
-    transparent: true,
-    opacity: 0.55,
-  });
-  var nucMesh = new THREE.Mesh(nucGeo, nucMat);
+  const nucMesh = new THREE.Mesh(nucGeo, new THREE.MeshPhysicalMaterial({
+    color: 0x4488ff, emissive: 0x1133aa, emissiveIntensity: 0.6,
+    transparent: true, opacity: 0.7, roughness: 0.3, clearcoat: 0.5, transmission: 0.3, side: THREE.DoubleSide
+  }));
   g.add(nucMesh);
 
   // Nucleus glow sprite
-  var nucGlowTex = generateGlowTexture(0x4488ff);
-  var nucGlowSprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: nucGlowTex, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending }));
-  nucGlowSprite.scale.set(22, 22, 1);
-  g.add(nucGlowSprite);
+  const nucGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: generateGlowTexture(0x4488ff), transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false }));
+  nucGlow.scale.set(24,24,1); g.add(nucGlow);
 
-  // Chromatin dots inside nucleus
-  var chromatinGeo = new THREE.SphereGeometry(0.25, 6, 6);
-  var chromatinMat = new THREE.MeshBasicMaterial({ color: 0xaaddff, transparent: true, opacity: 0.7 });
-  for (var i = 0; i < 25; i++) {
-    var cm = new THREE.Mesh(chromatinGeo, chromatinMat.clone());
-    var a = rand(0, Math.PI*2), b = rand(-1, 1), r = rand(1, 4.5);
+  // Nucleolus
+  const nucleolus = new THREE.Mesh(new THREE.SphereGeometry(1.8,24,24), new THREE.MeshPhysicalMaterial({
+    color: 0x6699ff, emissive: 0x3366cc, emissiveIntensity: 0.8, transparent: true, opacity: 0.8, roughness: 0.2
+  }));
+  nucleolus.position.set(0.5, 0.8, -0.3); g.add(nucleolus);
+
+  // Chromatin
+  const chromatinMeshes = [];
+  const cGeo = new THREE.SphereGeometry(0.2, 8, 8);
+  for (let i = 0; i < 30; i++) {
+    const cm = new THREE.Mesh(cGeo, new THREE.MeshBasicMaterial({ color: 0x88bbff, transparent: true, opacity: rand(0.3,0.7) }));
+    const a = rand(0,Math.PI*2), b = rand(-1,1), r = rand(1.5,4.8);
     cm.position.set(Math.cos(a)*Math.sqrt(1-b*b)*r, b*r, Math.sin(a)*Math.sqrt(1-b*b)*r);
-    cm.userData = { phase: rand(0, 6.28), speed: rand(0.3, 1.2), baseR: r, a: a, b: b };
-    g.add(cm);
+    cm.userData = { phase: rand(0,6.28), speed: rand(0.3,1), baseR: r, a, b };
+    g.add(cm); chromatinMeshes.push(cm);
   }
 
-  // Mitochondria — Rhodamine red
-  var mitoData = [
-    { pos: [9, 3, 5], rot: [0.3, 0.5, 0], sx: 3.5, sy: 1.2, sz: 1.2 },
-    { pos: [-7, -4, -6], rot: [-0.4, 1.2, 0], sx: 3, sy: 1, sz: 1 },
-    { pos: [5, -8, 3], rot: [0.8, 0.3, 0.5], sx: 2.8, sy: 1.1, sz: 1 },
-    { pos: [-10, 5, -3], rot: [0.1, -0.6, 0.4], sx: 3.2, sy: 1.1, sz: 1.1 },
-    { pos: [3, 7, -8], rot: [-0.5, 0.8, -0.3], sx: 2.6, sy: 1, sz: 1 },
+  // Mitochondria — Rhodamine
+  const mitoMeshes = [];
+  const mitoData = [
+    { pos:[9,3,5], rot:[0.3,0.5,0], s:[3.8,1.3,1.3] },
+    { pos:[-7,-4,-6], rot:[-0.4,1.2,0], s:[3.2,1.1,1] },
+    { pos:[5,-8,3], rot:[0.8,0.3,0.5], s:[3,1.2,1.1] },
+    { pos:[-10,5,-3], rot:[0.1,-0.6,0.4], s:[3.5,1.1,1.1] },
+    { pos:[3,7,-8], rot:[-0.5,0.8,-0.3], s:[2.8,1,1] },
+    { pos:[-4,-9,7], rot:[0.6,-0.3,0.2], s:[2.5,1,0.9] },
   ];
-  var mitoMat = new THREE.MeshBasicMaterial({
-    color: 0xff4466,
-    transparent: true,
-    opacity: 0.35,
-  });
-  mitoData.forEach(function(md) {
-    var mg = new THREE.SphereGeometry(1, 12, 12);
-    var mm = new THREE.Mesh(mg, mitoMat.clone());
-    mm.position.set(md.pos[0], md.pos[1], md.pos[2]);
-    mm.rotation.set(md.rot[0], md.rot[1], md.rot[2]);
-    mm.scale.set(md.sx, md.sy, md.sz);
-    g.add(mm);
-    // Cristae lines inside
-    var cristaeMat = new THREE.LineBasicMaterial({ color: 0xff4466, transparent: true, opacity: 0.2 });
-    for (var c = -1; c <= 1; c++) {
-      var pts = [];
-      for (var j = 0; j <= 10; j++) {
-        pts.push(new THREE.Vector3(c * 0.4, -1.25 + j * 0.25, Math.sin(j * 0.8) * 0.3));
-      }
-      var line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), cristaeMat);
-      mm.add(line);
+  mitoData.forEach(md => {
+    const mm = new THREE.Mesh(new THREE.CapsuleGeometry(1,2,12,16), new THREE.MeshPhysicalMaterial({
+      color: 0xff4466, emissive: 0xaa1133, emissiveIntensity: 0.5,
+      transparent: true, opacity: 0.55, roughness: 0.4, clearcoat: 0.3
+    }));
+    mm.position.set(...md.pos); mm.rotation.set(...md.rot); mm.scale.set(...md.s);
+    g.add(mm); mitoMeshes.push(mm);
+    // Cristae
+    for (let c = -1; c <= 1; c++) {
+      const pts = []; for (let j = 0; j <= 12; j++) pts.push(new THREE.Vector3(c*0.35, -1.5+j*0.25, Math.sin(j*0.7+c)*0.25));
+      mm.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineBasicMaterial({ color: 0xff6688, transparent: true, opacity: 0.15 })));
     }
-  });
-
-  // ER — FITC green network
-  var erMat = new THREE.LineBasicMaterial({ color: 0x50dc78, transparent: true, opacity: 0.12 });
-  for (var i = 0; i < 15; i++) {
-    var pts = [];
-    var a0 = rand(0, Math.PI*2);
-    var r0 = rand(7, 15);
-    var sx = Math.cos(a0)*r0, sy = rand(-8, 8), sz = Math.sin(a0)*r0;
-    for (var j = 0; j <= 8; j++) {
-      pts.push(new THREE.Vector3(
-        sx + rand(-3, 3), sy + rand(-2, 2), sz + rand(-3, 3)
-      ));
-      sx += rand(-2, 2); sy += rand(-1, 1); sz += rand(-2, 2);
-    }
-    var curve = new THREE.CatmullRomCurve3(pts);
-    var lineGeo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(30));
-    g.add(new THREE.Line(lineGeo, erMat));
-  }
-
-  // Floating fluorescent particles — multiple depth layers
-  var particleCount = 300;
-  var pGeo = new THREE.BufferGeometry();
-  var pPositions = new Float32Array(particleCount * 3);
-  var pColors = new Float32Array(particleCount * 3);
-  var pSizes = new Float32Array(particleCount);
-  var fluColors = [
-    [0.27, 0.53, 1.0],   // DAPI blue
-    [1.0, 0.27, 0.4],    // Rhodamine red
-    [0.31, 0.86, 0.47],  // FITC green
-    [0.31, 0.86, 0.75],  // CFP cyan
-  ];
-  for (var i = 0; i < particleCount; i++) {
-    pPositions[i*3] = rand(-50, 50);
-    pPositions[i*3+1] = rand(-35, 35);
-    pPositions[i*3+2] = rand(-40, 40);
-    var c = fluColors[Math.floor(Math.random()*fluColors.length)];
-    pColors[i*3] = c[0]; pColors[i*3+1] = c[1]; pColors[i*3+2] = c[2];
-    pSizes[i] = rand(0.3, 1.8);
-  }
-  pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
-  pGeo.setAttribute('color', new THREE.BufferAttribute(pColors, 3));
-  pGeo.setAttribute('size', new THREE.BufferAttribute(pSizes, 1));
-
-  var pMat = new THREE.PointsMaterial({
-    size: 1.2,
-    vertexColors: true,
-    transparent: true,
-    opacity: 0.8,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    sizeAttenuation: true,
-  });
-  var particles0 = new THREE.Points(pGeo, pMat);
-  g.add(particles0);
-
-  // Title text — using sprite (canvas-rendered)
-  var titleSprite = createTextSprite('RAUL ZHOU', {
-    fontSize: 72, fontWeight: '200', color: '#e0e0f0',
-    shadowColor: 'rgba(80,220,192,0.15)', shadowBlur: 40
-  });
-  titleSprite.position.set(0, 12, 20);
-  titleSprite.scale.set(40, 10, 1);
-  g.add(titleSprite);
-
-  var subSprite = createTextSprite('AI ARCHITECT  ·  BIOTECH ENGINEER', {
-    fontSize: 24, fontWeight: '300', color: 'rgba(80,220,192,0.5)',
-    shadowColor: 'rgba(80,220,192,0.1)', shadowBlur: 20
-  });
-  subSprite.position.set(0, 8, 20);
-  subSprite.scale.set(36, 4, 1);
-  g.add(subSprite);
-
-  // Store references for animation
-  g.userData = {
-    cellMesh: cellMesh, glowMesh: glowMesh, nucMesh: nucMesh,
-    particles: particles0, cellDisplacements: cellDisplacements,
-    nucGlowSprite: nucGlowSprite,
-  };
-})();
-
-// ═══════════════════════════════════════
-// LEVEL 1: ORGANELLES (10x)
-// ═══════════════════════════════════════
-(function buildLevel1() {
-  var g = levelGroups[1];
-
-  var ORGANELLES = [
-    { id:'nucleus', label:'NUCLEUS', sublabel:'Education', x:0, y:0, z:0, radius:6, color:0x4488ff, emissive:0x2244aa,
-      detail:{ title:'Education', subtitle:'NUCLEUS // GENETIC INFORMATION CENTER',
-        body:'<strong>B.S. Biotechnology Engineering</strong><br>Tec de Monterrey, 2017\u20132022<br><br><strong>M.S. Applied Artificial Intelligence</strong><br>Tec de Monterrey, 2022\u20132024<br><br><strong>\u201cLeaders of Tomorrow\u201d</strong> full scholarship<br><br><strong>Exchange semesters:</strong><br>\u00b7 Colombia (2019)<br>\u00b7 Spain (2020)<br><br><em style="color:var(--muted)">The nucleus stores the fundamental blueprint \u2014 education encoded the instructions for everything that followed.</em>' }},
-    { id:'mitochondria', label:'MITOCHONDRIA', sublabel:'Work & Energy', x:18, y:5, z:-8, radius:4, color:0xff4466, emissive:0xaa2233, isCapsule:true,
-      detail:{ title:'Work & Energy', subtitle:'MITOCHONDRIA // POWERHOUSE',
-        body:'<strong>AI Consulting</strong> \u2014 $1,000/hr<br>Enterprise AI implementation & strategy<br><br><strong>Specializations:</strong><br>\u00b7 LLM integration & fine-tuning<br>\u00b7 AI workflow automation<br>\u00b7 Voice agent development<br>\u00b7 Full-stack AI products<br><br><em style="color:var(--muted)">The mitochondria powers the cell. Work generates the energy that drives everything forward.</em>' }},
-    { id:'ribosome', label:'RIBOSOMES', sublabel:'Skills', x:-15, y:-6, z:5, radius:3, color:0x50dc78, emissive:0x228844,
-      detail:{ title:'Skills', subtitle:'RIBOSOMES // PROTEIN SYNTHESIS',
-        body:'<span class="tag">Python</span><span class="tag">ML/DL</span><span class="tag">NLP</span><span class="tag">Computer Vision</span><span class="tag">LLMs</span><span class="tag">TensorFlow</span><span class="tag">LangChain</span><span class="tag">n8n</span><span class="tag">GHL</span><span class="tag">Retell AI</span><span class="tag">OpenAI API</span><span class="tag">Anthropic API</span><span class="tag">React</span><span class="tag">Node.js</span><span class="tag">Supabase</span><span class="tag">Docker</span><span class="tag">Git</span><span class="tag">Vercel</span><br><br><em style="color:var(--muted)">Ribosomes translate genetic code into functional proteins. Skills translate knowledge into real output.</em>' }},
-    { id:'er', label:'ENDOPLASMIC RETICULUM', sublabel:'Projects', x:-12, y:10, z:-10, radius:4.5, color:0x50dc78, emissive:0x228844,
-      detail:{ title:'Projects', subtitle:'ENDOPLASMIC RETICULUM // SYNTHESIS NETWORK',
-        body:'<strong>Eigen Atlas SaaS</strong><br>AI-powered knowledge management platform.<br><br><strong>Voice Agent Factory</strong><br>Production voice AI agents using Retell AI.<br><br><strong>GHL Integrations</strong><br>GoHighLevel automation workflows for agencies.<br><br><strong>AI Workflow Automation</strong><br>n8n-based automation connecting LLMs with business systems.<br><br><em style="color:var(--muted)">The ER is a vast synthesis network. Projects are the tangible outputs flowing through the system.</em>' }},
-    { id:'golgi', label:'GOLGI APPARATUS', sublabel:'Achievements', x:14, y:-8, z:6, radius:3.5, color:0xc4a44a, emissive:0x886622,
-      detail:{ title:'Achievements', subtitle:'GOLGI APPARATUS // PACKAGING & DISTRIBUTION',
-        body:'<strong>\u201cLeaders of Tomorrow\u201d</strong> full scholarship<br>Tec de Monterrey recognition<br><br><strong>International Experience</strong><br>Exchange programs across 3 countries<br><br><strong>Chinese-Mexican Heritage</strong><br>Great-grandfather from Canton \u2014 a bridge between cultures<br><br><strong>Based in Guadalajara, Mexico</strong><br>At the intersection of LatAm innovation and global AI<br><br><em style="color:var(--muted)">The Golgi packages and ships. Achievements are polished outputs ready for the world.</em>' }},
-  ];
-
-  var organelleMeshes = [];
-  ORGANELLES.forEach(function(org) {
-    var geo = org.isCapsule ? new THREE.SphereGeometry(org.radius, 12, 12) : new THREE.IcosahedronGeometry(org.radius, 3);
-    // Scale capsule-like organelles to be elongated
-    var isCapsuleShape = org.isCapsule;
-    var mat = new THREE.MeshBasicMaterial({
-      color: org.color,
-      transparent: true, opacity: 0.4,
-    });
-    var mesh = new THREE.Mesh(geo, mat);
-    mesh.position.set(org.x, org.y, org.z);
-    mesh.userData = { detail: org.detail, id: org.id, baseEmissive: 0.4 };
-    g.add(mesh);
-    organelleMeshes.push(mesh);
-
-    // Label sprite
-    var labelSp = createTextSprite(org.label, { fontSize: 18, color: '#' + org.color.toString(16).padStart(6,'0'), fontWeight: '600' });
-    labelSp.position.set(org.x, org.y - org.radius - 2.5, org.z);
-    labelSp.scale.set(12, 2, 1);
-    g.add(labelSp);
-
-    var subSp = createTextSprite(org.sublabel, { fontSize: 14, color: 'rgba(224,224,240,0.4)' });
-    subSp.position.set(org.x, org.y - org.radius - 4, org.z);
-    subSp.scale.set(10, 1.5, 1);
-    g.add(subSp);
-
     // Glow
-    var glowTex = generateGlowTexture(org.color);
-    var glowSp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, transparent: true, opacity: 0.12, blending: THREE.AdditiveBlending }));
-    glowSp.position.copy(mesh.position);
-    glowSp.scale.set(org.radius*4, org.radius*4, 1);
-    g.add(glowSp);
+    const gs = new THREE.Sprite(new THREE.SpriteMaterial({ map: generateGlowTexture(0xff4466), transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending, depthWrite: false }));
+    gs.position.copy(mm.position); gs.scale.set(md.s[0]*4, md.s[1]*4, 1); g.add(gs);
   });
 
-  // Cell boundary wireframe
-  var boundaryGeo = new THREE.IcosahedronGeometry(32, 3);
-  var boundaryMat = new THREE.MeshBasicMaterial({ color: 0x50dcc0, transparent: true, opacity: 0.04, wireframe: true });
-  g.add(new THREE.Mesh(boundaryGeo, boundaryMat));
-
-  // Cytoplasm particles
-  var cpCount = 150;
-  var cpGeo = new THREE.BufferGeometry();
-  var cpPos = new Float32Array(cpCount*3);
-  for (var i = 0; i < cpCount; i++) {
-    cpPos[i*3] = rand(-30,30); cpPos[i*3+1] = rand(-25,25); cpPos[i*3+2] = rand(-25,25);
-  }
-  cpGeo.setAttribute('position', new THREE.BufferAttribute(cpPos, 3));
-  var cpMat = new THREE.PointsMaterial({ color: 0x50dcc0, size: 0.4, transparent: true, opacity: 0.3, blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true });
-  g.add(new THREE.Points(cpGeo, cpMat));
-
-  g.userData = { organelleMeshes: organelleMeshes };
-})();
-
-// ═══════════════════════════════════════
-// LEVEL 2: MOLECULAR TIMELINE (100x)
-// ═══════════════════════════════════════
-(function buildLevel2() {
-  var g = levelGroups[2];
-
-  var EVENTS = [
-    { year: 2017, text: 'Started Biotech Engineering', sub: 'Tec de Monterrey', color: 0x50dcc0 },
-    { year: 2019, text: 'Exchange Semester', sub: 'Colombia', color: 0x4488ff },
-    { year: 2020, text: 'Exchange Semester', sub: 'Spain', color: 0x4488ff },
-    { year: 2022, text: 'B.S. Completed', sub: '"Leaders of Tomorrow"', color: 0xc4a44a },
-    { year: 2022.5, text: 'Started M.S. in AI', sub: 'Applied AI', color: 0xaa66ff },
-    { year: 2024, text: 'M.S. Completed', sub: 'Tec de Monterrey', color: 0xaa66ff },
-    { year: 2024.5, text: 'Founded Consulting', sub: 'AI at $1000/hr', color: 0xff4466 },
-    { year: 2025, text: 'Eigen Atlas SaaS', sub: 'AI Knowledge Platform', color: 0x50dcc0 },
-    { year: 2026, text: 'AI at Scale', sub: 'Voice Agent Factory', color: 0xc4a44a },
-  ];
-
-  // DNA double helix
-  var helixPoints1 = [], helixPoints2 = [];
-  var helixLen = 80, helixR = 8;
-  for (var i = 0; i <= 200; i++) {
-    var t2 = i / 200;
-    var y = -helixLen/2 + t2 * helixLen;
-    var angle = t2 * Math.PI * 6;
-    helixPoints1.push(new THREE.Vector3(Math.cos(angle)*helixR, y, Math.sin(angle)*helixR));
-    helixPoints2.push(new THREE.Vector3(Math.cos(angle+Math.PI)*helixR, y, Math.sin(angle+Math.PI)*helixR));
-  }
-  var helixMat = new THREE.LineBasicMaterial({ color: 0x50dcc0, transparent: true, opacity: 0.15 });
-  g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(helixPoints1), helixMat));
-  g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(helixPoints2), helixMat.clone()));
-
-  // Rungs
-  var rungMat = new THREE.LineBasicMaterial({ color: 0x50dcc0, transparent: true, opacity: 0.06 });
-  for (var i = 0; i <= 200; i += 5) {
-    var p1 = helixPoints1[i], p2 = helixPoints2[i];
-    g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([p1, p2]), rungMat));
+  // ER network
+  for (let i = 0; i < 18; i++) {
+    const pts = []; let sx = Math.cos(rand(0,Math.PI*2))*rand(7,16), sy = rand(-10,10), sz = Math.sin(rand(0,Math.PI*2))*rand(7,16);
+    for (let j = 0; j <= 10; j++) { pts.push(new THREE.Vector3(sx+rand(-3,3),sy+rand(-2,2),sz+rand(-3,3))); sx+=rand(-2,2); sy+=rand(-1,1); sz+=rand(-2,2); }
+    g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(new THREE.CatmullRomCurve3(pts).getPoints(35)), new THREE.LineBasicMaterial({ color: 0x50dc78, transparent: true, opacity: 0.08 })));
   }
 
-  // Event nodes along helix
-  EVENTS.forEach(function(ev, idx) {
-    var t2 = idx / (EVENTS.length - 1);
-    var y = -helixLen/2 + t2 * helixLen;
-    var angle = t2 * Math.PI * 6;
-    var x = Math.cos(angle) * helixR;
-    var z = Math.sin(angle) * helixR;
+  // Vesicles
+  for (let i = 0; i < 12; i++) {
+    const c = [0x50dcc0,0xc4a44a,0x50dc78][Math.floor(Math.random()*3)];
+    const vm = new THREE.Mesh(new THREE.SphereGeometry(rand(0.3,0.8),12,12), new THREE.MeshPhysicalMaterial({ color:c, emissive:c, emissiveIntensity: 0.4, transparent: true, opacity: rand(0.3,0.6), roughness: 0.2 }));
+    const a = rand(0,Math.PI*2), r = rand(8,16);
+    vm.position.set(Math.cos(a)*r, rand(-12,12), Math.sin(a)*r); g.add(vm);
+  }
 
-    var nodeGeo = new THREE.SphereGeometry(1.5, 12, 12);
-    var nodeMat = new THREE.MeshBasicMaterial({ color: ev.color, transparent: true, opacity: 0.8 });
-    var nodeMesh = new THREE.Mesh(nodeGeo, nodeMat);
-    nodeMesh.position.set(x, y, z);
-    g.add(nodeMesh);
-
-    // Glow
-    var glowTex = generateGlowTexture(ev.color);
-    var glowSp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending }));
-    glowSp.position.copy(nodeMesh.position);
-    glowSp.scale.set(8, 8, 1);
-    g.add(glowSp);
-
-    // Labels
-    var yearStr = ev.year === Math.floor(ev.year) ? ev.year.toString() : '';
-    if (yearStr) {
-      var ySp = createTextSprite(yearStr, { fontSize: 22, color: '#fff', fontWeight: '600' });
-      ySp.position.set(x + 5, y + 1.5, z);
-      ySp.scale.set(6, 1.5, 1);
-      g.add(ySp);
-    }
-    var tSp = createTextSprite(ev.text, { fontSize: 16, color: '#ccc' });
-    tSp.position.set(x + 5, y - 0.5, z);
-    tSp.scale.set(12, 1.5, 1);
-    g.add(tSp);
-    var sSp = createTextSprite(ev.sub, { fontSize: 13, color: '#' + ev.color.toString(16).padStart(6,'0') });
-    sSp.position.set(x + 5, y - 2, z);
-    sSp.scale.set(10, 1.2, 1);
-    g.add(sSp);
-  });
+  // Particles — CIRCULAR
+  const pCount = 400, pp = new Float32Array(pCount*3), pc = new Float32Array(pCount*3);
+  const fluC = [[0.27,0.53,1],[1,0.27,0.4],[0.31,0.86,0.47],[0.31,0.86,0.75],[0.77,0.64,0.29]];
+  for (let i = 0; i < pCount; i++) {
+    pp[i*3]=rand(-55,55); pp[i*3+1]=rand(-40,40); pp[i*3+2]=rand(-45,45);
+    const c = fluC[Math.floor(Math.random()*5)]; pc[i*3]=c[0]; pc[i*3+1]=c[1]; pc[i*3+2]=c[2];
+  }
+  const pGeo = new THREE.BufferGeometry();
+  pGeo.setAttribute('position', new THREE.BufferAttribute(pp, 3));
+  pGeo.setAttribute('color', new THREE.BufferAttribute(pc, 3));
+  const particles = new THREE.Points(pGeo, new THREE.PointsMaterial({
+    size: 1.0, map: particleTex, vertexColors: true, transparent: true, opacity: 0.7,
+    blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true
+  }));
+  g.add(particles);
 
   // Title
-  var titleSp = createTextSprite('MOLECULAR TIMELINE', { fontSize: 28, color: '#e0e0f0', fontWeight: '300' });
-  titleSp.position.set(0, helixLen/2 + 8, 0);
-  titleSp.scale.set(30, 4, 1);
-  g.add(titleSp);
-  var subSp = createTextSprite('PROTEIN FOLDING // CAREER SEQUENCE', { fontSize: 14, color: 'rgba(80,220,192,0.4)' });
-  subSp.position.set(0, helixLen/2 + 4, 0);
-  subSp.scale.set(28, 2, 1);
-  g.add(subSp);
+  const ts = createTextSprite('RAUL ZHOU', { fontSize:72, fontWeight:'200', color:'#e0e0f0', shadowColor:'rgba(80,220,192,0.12)', shadowBlur:50, opacity:0.95 });
+  ts.position.set(0,14,22); ts.scale.set(42,10,1); g.add(ts);
+  const ss = createTextSprite('AI ARCHITECT  ·  BIOTECH ENGINEER', { fontSize:24, fontWeight:'300', color:'rgba(80,220,192,0.4)', shadowBlur:25, opacity:0.7 });
+  ss.position.set(0,9,22); ss.scale.set(38,4,1); g.add(ss);
 
-  // Background molecules
-  var bgCount = 80;
-  var bgGeo = new THREE.BufferGeometry();
-  var bgPos = new Float32Array(bgCount*3);
-  for (var i = 0; i < bgCount; i++) {
-    bgPos[i*3] = rand(-40,40); bgPos[i*3+1] = rand(-50,50); bgPos[i*3+2] = rand(-40,40);
-  }
-  bgGeo.setAttribute('position', new THREE.BufferAttribute(bgPos, 3));
-  g.add(new THREE.Points(bgGeo, new THREE.PointsMaterial({ color: 0x50dcc0, size: 0.3, transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false })));
+  g.userData = { cellMesh, wireMesh, nucMesh, nucleolus, particles, nucGlow, chromatinMeshes, mitoMeshes };
 })();
 
 // ═══════════════════════════════════════
-// LEVEL 3: ATOMIC (1000x)
+// LEVEL 1: ORGANELLES (10×)
 // ═══════════════════════════════════════
-(function buildLevel3() {
-  var g = levelGroups[3];
-
-  var ATOMS = [
-    { name:'Python', symbol:'Py', shells:[2,4], color:0x50dcc0, x:-20, y:8, z:0 },
-    { name:'TensorFlow', symbol:'Tf', shells:[2,6], color:0xff8800, x:-6, y:15, z:-8 },
-    { name:'LangChain', symbol:'Lc', shells:[2,4,2], color:0x44ff88, x:8, y:8, z:5 },
-    { name:'n8n', symbol:'N8', shells:[2,3], color:0xff4466, x:22, y:12, z:-5 },
-    { name:'GHL', symbol:'Gh', shells:[2,5,1], color:0x4488ff, x:-18, y:-10, z:3 },
-    { name:'Retell', symbol:'Rt', shells:[2,4,2], color:0xaa66ff, x:0, y:-5, z:0 },
-    { name:'OpenAI', symbol:'Oa', shells:[2,6,2], color:0x50dcc0, x:18, y:-12, z:-6 },
-    { name:'Anthropic', symbol:'An', shells:[2,5,3], color:0xc4a44a, x:0, y:5, z:10 },
+(function() {
+  const g = levelGroups[1];
+  const ORG = [
+    { id:'nucleus', label:'NUCLEUS', sub:'Education', x:0,y:0,z:0, r:6.5, color:0x4488ff, cap:false,
+      detail:{ title:'Education', subtitle:'NUCLEUS — GENETIC INFORMATION CENTER',
+        body:'<strong>B.S. Biotechnology Engineering</strong><br>Tec de Monterrey, 2017–2022<br><br><strong>M.S. Applied Artificial Intelligence</strong><br>Tec de Monterrey, 2022–2024<br><br><strong>"Leaders of Tomorrow"</strong> full scholarship<br><br><strong>Exchange:</strong> Colombia (2019) · Spain (2020)' }},
+    { id:'mito', label:'MITOCHONDRIA', sub:'Work & Energy', x:20,y:5,z:-8, r:4.5, color:0xff4466, cap:true,
+      detail:{ title:'Work & Energy', subtitle:'MITOCHONDRIA — POWERHOUSE',
+        body:'<strong>AI Consulting</strong><br>Enterprise AI implementation<br><br>· LLM integration & fine-tuning<br>· AI workflow automation<br>· Voice agent development (Retell AI)<br>· Full-stack AI products' }},
+    { id:'ribo', label:'RIBOSOMES', sub:'Skills', x:-17,y:-7,z:5, r:3.5, color:0x50dc78, cap:false,
+      detail:{ title:'Skills', subtitle:'RIBOSOMES — PROTEIN SYNTHESIS',
+        body:'<span class="tag">Python</span><span class="tag">ML/DL</span><span class="tag">NLP</span><span class="tag">LLMs</span><span class="tag">TensorFlow</span><span class="tag">LangChain</span><span class="tag">n8n</span><span class="tag">GHL</span><span class="tag">Retell AI</span><span class="tag">OpenAI</span><span class="tag">Anthropic</span><span class="tag">React</span><span class="tag">Node.js</span><span class="tag">Supabase</span><span class="tag">Docker</span><span class="tag">Vercel</span>' }},
+    { id:'er', label:'ENDOPLASMIC RETICULUM', sub:'Projects', x:-14,y:12,z:-10, r:5, color:0x50dc78, cap:false,
+      detail:{ title:'Projects', subtitle:'ER — SYNTHESIS NETWORK',
+        body:'<strong>Eigen Atlas SaaS</strong><br>AI knowledge management<br><br><strong>Voice Agent Factory</strong><br>Production voice AI (Retell)<br><br><strong>GHL Integrations</strong><br>GoHighLevel automation<br><br><strong>AI Workflows</strong><br>n8n + LLMs for business' }},
+    { id:'golgi', label:'GOLGI APPARATUS', sub:'Achievements', x:16,y:-10,z:6, r:4, color:0xc4a44a, cap:false,
+      detail:{ title:'Achievements', subtitle:'GOLGI — PACKAGING & DISTRIBUTION',
+        body:'<strong>"Leaders of Tomorrow"</strong> full scholarship<br><br><strong>International</strong> — 3 countries<br><br><strong>Chinese-Mexican Heritage</strong><br>Canton roots, bridging cultures<br><br><strong>Guadalajara, MX</strong><br>LatAm × Global AI' }},
   ];
 
-  var atomMeshes = [];
-  ATOMS.forEach(function(atom) {
-    // Nucleus
-    var nucGeo = new THREE.SphereGeometry(1.8, 12, 12);
-    var nucMat = new THREE.MeshBasicMaterial({
-      color: atom.color,
-      transparent: true, opacity: 0.7,
-    });
-    var nucMesh = new THREE.Mesh(nucGeo, nucMat);
-    nucMesh.position.set(atom.x, atom.y, atom.z);
-    nucMesh.userData = {
-      detail: { title: atom.name, subtitle: 'ELEMENT // TECHNOLOGY', body: atom.name + ' — Core technology in the stack.' },
-      atomData: atom,
-    };
-    g.add(nucMesh);
-    atomMeshes.push(nucMesh);
+  const organelleMeshes = [];
+  ORG.forEach(o => {
+    const geo = o.cap ? new THREE.CapsuleGeometry(o.r*0.55, o.r*1.8, 12, 20) : new THREE.IcosahedronGeometry(o.r, 4);
+    const mesh = new THREE.Mesh(geo, new THREE.MeshPhysicalMaterial({
+      color:o.color, emissive:o.color, emissiveIntensity:0.35, transparent:true, opacity:0.55, roughness:0.35, clearcoat:0.5
+    }));
+    mesh.position.set(o.x,o.y,o.z); mesh.userData = { detail: o.detail, id: o.id };
+    g.add(mesh); organelleMeshes.push(mesh);
 
-    // Symbol label
-    var symSp = createTextSprite(atom.symbol, { fontSize: 28, color: '#fff', fontWeight: '700' });
-    symSp.position.set(atom.x, atom.y, atom.z + 2);
-    symSp.scale.set(3, 1.5, 1);
-    g.add(symSp);
+    const ls = createTextSprite(o.label, { fontSize:20, color:'#'+o.color.toString(16).padStart(6,'0'), fontWeight:'600', opacity:0.8 });
+    ls.position.set(o.x, o.y-o.r-3, o.z); ls.scale.set(14,2.5,1); g.add(ls);
+    const sbs = createTextSprite(o.sub, { fontSize:14, color:'rgba(224,224,240,0.35)', opacity:0.6 });
+    sbs.position.set(o.x, o.y-o.r-5, o.z); sbs.scale.set(10,1.8,1); g.add(sbs);
 
-    // Name label
-    var nameSp = createTextSprite(atom.name, { fontSize: 14, color: '#' + atom.color.toString(16).padStart(6,'0') });
-    var maxShellR = (atom.shells.length + 1) * 3;
-    nameSp.position.set(atom.x, atom.y - maxShellR - 2, atom.z);
-    nameSp.scale.set(8, 1.2, 1);
-    g.add(nameSp);
-
-    // Electron shells — 3D orbits at different planes
-    atom.shells.forEach(function(electronCount, shellIdx) {
-      var shellR = (shellIdx + 1) * 3 + 1;
-      // Orbit ring
-      var ringGeo = new THREE.RingGeometry(shellR - 0.05, shellR + 0.05, 64);
-      var ringMat = new THREE.MeshBasicMaterial({ color: atom.color, transparent: true, opacity: 0.08, side: THREE.DoubleSide });
-      var ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.position.set(atom.x, atom.y, atom.z);
-      // Tilt each shell differently
-      ring.rotation.x = shellIdx * 0.5 + 0.3;
-      ring.rotation.y = shellIdx * 0.7;
-      g.add(ring);
-
-      // Electrons
-      for (var e = 0; e < electronCount; e++) {
-        var eGeo = new THREE.SphereGeometry(0.35, 8, 8);
-        var eMat = new THREE.MeshBasicMaterial({ color: atom.color, transparent: true, opacity: 0.8 });
-        var eMesh = new THREE.Mesh(eGeo, eMat);
-        eMesh.userData = {
-          atomPos: new THREE.Vector3(atom.x, atom.y, atom.z),
-          shellR: shellR, electronIdx: e, electronCount: electronCount,
-          shellIdx: shellIdx, speed: (0.3 + shellIdx * 0.15) * (shellIdx % 2 === 0 ? 1 : -1),
-          tiltX: shellIdx * 0.5 + 0.3, tiltY: shellIdx * 0.7,
-        };
-        g.add(eMesh);
-      }
-    });
-
-    // Glow
-    var glowTex = generateGlowTexture(atom.color);
-    var glowSp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, transparent: true, opacity: 0.1, blending: THREE.AdditiveBlending }));
-    glowSp.position.set(atom.x, atom.y, atom.z);
-    glowSp.scale.set(15, 15, 1);
-    g.add(glowSp);
+    const gs = new THREE.Sprite(new THREE.SpriteMaterial({ map:generateGlowTexture(o.color), transparent:true, opacity:0.15, blending:THREE.AdditiveBlending, depthWrite:false }));
+    gs.position.copy(mesh.position); gs.scale.set(o.r*5,o.r*5,1); g.add(gs);
   });
 
-  // Title
-  var titleSp = createTextSprite('ATOMIC DETAIL', { fontSize: 28, color: '#e0e0f0', fontWeight: '300' });
-  titleSp.position.set(0, 28, 0);
-  titleSp.scale.set(24, 3.5, 1);
-  g.add(titleSp);
-  var subSp = createTextSprite('TECHNOLOGY STACK // ELECTRON CONFIGURATION', { fontSize: 13, color: 'rgba(80,220,192,0.4)' });
-  subSp.position.set(0, 25, 0);
-  subSp.scale.set(30, 2, 1);
-  g.add(subSp);
+  // Boundary
+  g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(34,3), new THREE.MeshBasicMaterial({ color:0x50dcc0, transparent:true, opacity:0.02, wireframe:true })));
 
-  g.userData = { atomMeshes: atomMeshes };
+  // Particles
+  const pc2 = 200, pp2 = new Float32Array(pc2*3), pcc = new Float32Array(pc2*3);
+  for (let i=0;i<pc2;i++) { pp2[i*3]=rand(-40,40); pp2[i*3+1]=rand(-30,30); pp2[i*3+2]=rand(-30,30); const c=[[0.27,0.53,1],[1,0.27,0.4],[0.31,0.86,0.47]][Math.floor(Math.random()*3)]; pcc[i*3]=c[0]; pcc[i*3+1]=c[1]; pcc[i*3+2]=c[2]; }
+  const pg2 = new THREE.BufferGeometry(); pg2.setAttribute('position',new THREE.BufferAttribute(pp2,3)); pg2.setAttribute('color',new THREE.BufferAttribute(pcc,3));
+  g.add(new THREE.Points(pg2, new THREE.PointsMaterial({ size:0.8, map:particleTex, vertexColors:true, transparent:true, opacity:0.5, blending:THREE.AdditiveBlending, depthWrite:false, sizeAttenuation:true })));
+
+  g.userData = { organelleMeshes };
 })();
 
 // ═══════════════════════════════════════
-// LEVEL 4: QUANTUM (10000x)
+// LEVELS 2-4
 // ═══════════════════════════════════════
-(function buildLevel4() {
-  var g = levelGroups[4];
+function buildDeep(idx, label, nodes, pColor) {
+  const g = levelGroups[idx];
+  g.add(new THREE.Mesh(new THREE.IcosahedronGeometry(8,4), new THREE.MeshPhysicalMaterial({ color:pColor, emissive:pColor, emissiveIntensity:0.3, transparent:true, opacity:0.4, roughness:0.3, clearcoat:0.5 })));
+  const gs = new THREE.Sprite(new THREE.SpriteMaterial({ map:generateGlowTexture(pColor), transparent:true, opacity:0.2, blending:THREE.AdditiveBlending, depthWrite:false }));
+  gs.scale.set(40,40,1); g.add(gs);
+  const sp = createTextSprite(label, { fontSize:36, fontWeight:'300', opacity:0.8 });
+  sp.position.set(0,14,5); sp.scale.set(30,6,1); g.add(sp);
 
-  // Quantum particles
-  var qCount = 500;
-  var qGeo = new THREE.BufferGeometry();
-  var qPos = new Float32Array(qCount*3);
-  var qCol = new Float32Array(qCount*3);
-  var qVel = [];
-  for (var i = 0; i < qCount; i++) {
-    qPos[i*3] = rand(-60,60);
-    qPos[i*3+1] = rand(-40,40);
-    qPos[i*3+2] = rand(-50,50);
-    var h = rand(160, 210);
-    var r2 = Math.sin(h * 0.017) * 0.3;
-    qCol[i*3] = 0.1 + r2; qCol[i*3+1] = 0.7 + Math.random()*0.2; qCol[i*3+2] = 0.6 + Math.random()*0.3;
-    qVel.push({ vx: rand(-0.02,0.02), vy: rand(-0.02,0.02), vz: rand(-0.02,0.02), phase: rand(0,6.28), wf: rand(1,4) });
-  }
-  qGeo.setAttribute('position', new THREE.BufferAttribute(qPos, 3));
-  qGeo.setAttribute('color', new THREE.BufferAttribute(qCol, 3));
-  var qMat = new THREE.PointsMaterial({ size: 0.6, vertexColors: true, transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true });
-  var qPoints = new THREE.Points(qGeo, qMat);
-  g.add(qPoints);
-
-  // Wave function — sinusoidal ribbon
-  var wavePts = [];
-  for (var x = -50; x <= 50; x += 0.5) {
-    wavePts.push(new THREE.Vector3(x, Math.sin(x*0.1)*5, 0));
-  }
-  var waveMat = new THREE.LineBasicMaterial({ color: 0x50dcc0, transparent: true, opacity: 0.08 });
-  var waveLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(wavePts), waveMat);
-  g.add(waveLine);
-
-  // Quote
-  var quoteSp = createTextSprite('"If I\'m already existing, why not at the maximum?"', {
-    fontSize: 22, color: 'rgba(224,224,240,0.6)', fontWeight: '300', fontStyle: 'italic'
-  });
-  quoteSp.position.set(0, 0, 10);
-  quoteSp.scale.set(45, 4, 1);
-  g.add(quoteSp);
-
-  var attrSp = createTextSprite('— R. Zhou', { fontSize: 14, color: 'rgba(196,164,74,0.5)' });
-  attrSp.position.set(0, -3, 10);
-  attrSp.scale.set(10, 1.5, 1);
-  g.add(attrSp);
-
-  // Equations
-  var EQUATIONS = [
-    { text: 'Av = λv', label: 'Eigenvalue Equation', x: -20, y: 12, z: -5 },
-    { text: 'iℏ ∂Ψ/∂t = ĤΨ', label: 'Schrödinger Equation', x: 18, y: 10, z: -8 },
-    { text: 'H = -Σ p log p', label: 'Shannon Entropy', x: 0, y: -15, z: 5 },
-  ];
-  EQUATIONS.forEach(function(eq) {
-    var eqSp = createTextSprite(eq.text, { fontSize: 36, color: 'rgba(80,220,192,0.7)', fontWeight: '300' });
-    eqSp.position.set(eq.x, eq.y, eq.z);
-    eqSp.scale.set(20, 4, 1);
-    g.add(eqSp);
-    var lSp = createTextSprite(eq.label, { fontSize: 13, color: 'rgba(196,164,74,0.5)' });
-    lSp.position.set(eq.x, eq.y - 3, eq.z);
-    lSp.scale.set(12, 1.5, 1);
-    g.add(lSp);
+  nodes.forEach((d,i) => {
+    const angle = (i/nodes.length)*Math.PI*2, r = 18;
+    const nm = new THREE.Mesh(new THREE.SphereGeometry(2,16,16), new THREE.MeshPhysicalMaterial({ color:d.color, emissive:d.color, emissiveIntensity:0.4, transparent:true, opacity:0.6, roughness:0.3 }));
+    nm.position.set(Math.cos(angle)*r, Math.sin(angle)*r, 0); nm.userData = { detail:d.detail, id:d.id }; g.add(nm);
+    const ls = createTextSprite(d.label, { fontSize:16, color:'#'+d.color.toString(16).padStart(6,'0'), fontWeight:'500', opacity:0.7 });
+    ls.position.set(Math.cos(angle)*r, Math.sin(angle)*r-4, 0); ls.scale.set(10,2,1); g.add(ls);
   });
 
-  // Contact links
-  var CONTACTS = [
-    { text: 'raul.chio.leon@gmail.com', label: 'EMAIL', x: -25, y: -25, z: 5 },
-    { text: 'github.com/Theovia', label: 'GITHUB', x: -8, y: -25, z: 5 },
-    { text: 'linkedin.com/in/raulzhou', label: 'LINKEDIN', x: 9, y: -25, z: 5 },
-    { text: 'Guadalajara, MX', label: 'LOCATION', x: 25, y: -25, z: 5 },
-  ];
-  CONTACTS.forEach(function(c) {
-    var cSp = createTextSprite(c.text, { fontSize: 14, color: 'rgba(80,220,192,0.5)' });
-    cSp.position.set(c.x, c.y, c.z);
-    cSp.scale.set(14, 1.5, 1);
-    g.add(cSp);
-    var lSp = createTextSprite(c.label, { fontSize: 10, color: 'rgba(196,164,74,0.4)' });
-    lSp.position.set(c.x, c.y + 2, c.z);
-    lSp.scale.set(8, 1, 1);
-    g.add(lSp);
-  });
-
-  // Title
-  var titleSp2 = createTextSprite('QUANTUM LEVEL', { fontSize: 26, color: 'rgba(224,224,240,0.5)', fontWeight: '300' });
-  titleSp2.position.set(0, 28, 0);
-  titleSp2.scale.set(22, 3, 1);
-  g.add(titleSp2);
-  var subSp2 = createTextSprite('OBSERVE TO COLLAPSE // HOVER TO REVEAL', { fontSize: 12, color: 'rgba(170,102,255,0.4)' });
-  subSp2.position.set(0, 25, 0);
-  subSp2.scale.set(26, 1.8, 1);
-  g.add(subSp2);
-
-  g.userData = { qPoints: qPoints, qVel: qVel, waveLine: waveLine };
-})();
-
-// ═══════════════════════════════════════
-// TEXT SPRITE HELPER
-// ═══════════════════════════════════════
-function createTextSprite(text, opts) {
-  opts = opts || {};
-  var canvas2 = document.createElement('canvas');
-  var ctx2 = canvas2.getContext('2d');
-  var fontSize = opts.fontSize || 24;
-  var fontWeight = opts.fontWeight || '400';
-  var fontStyle = opts.fontStyle || 'normal';
-  canvas2.width = 1024; canvas2.height = 256;
-  ctx2.clearRect(0, 0, 1024, 256);
-  if (opts.shadowBlur) { ctx2.shadowColor = opts.shadowColor || '#000'; ctx2.shadowBlur = opts.shadowBlur; }
-  ctx2.font = fontStyle + ' ' + fontWeight + ' ' + fontSize + 'px "Helvetica Neue", Arial, sans-serif';
-  ctx2.textAlign = 'center';
-  ctx2.textBaseline = 'middle';
-  ctx2.fillStyle = opts.color || '#ffffff';
-  ctx2.fillText(text, 512, 128);
-  var tex = new THREE.CanvasTexture(canvas2);
-  tex.minFilter = THREE.LinearFilter;
-  var mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false });
-  return new THREE.Sprite(mat);
+  const pc3=150, pp3=new Float32Array(pc3*3);
+  for(let i=0;i<pc3;i++){pp3[i*3]=rand(-35,35);pp3[i*3+1]=rand(-25,25);pp3[i*3+2]=rand(-25,25);}
+  const pg3=new THREE.BufferGeometry(); pg3.setAttribute('position',new THREE.BufferAttribute(pp3,3));
+  g.add(new THREE.Points(pg3, new THREE.PointsMaterial({ size:0.6, color:pColor, map:particleTex, transparent:true, opacity:0.4, blending:THREE.AdditiveBlending, depthWrite:false, sizeAttenuation:true })));
 }
 
-// ═══════════════════════════════════════
-// GLOW TEXTURE GENERATOR
-// ═══════════════════════════════════════
-function generateGlowTexture(color) {
-  var size = 128;
-  var canvas2 = document.createElement('canvas');
-  canvas2.width = size; canvas2.height = size;
-  var ctx2 = canvas2.getContext('2d');
-  var r = (color >> 16 & 255), g2 = (color >> 8 & 255), b = (color & 255);
-  var grad = ctx2.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-  grad.addColorStop(0, 'rgba('+r+','+g2+','+b+',1)');
-  grad.addColorStop(0.3, 'rgba('+r+','+g2+','+b+',0.4)');
-  grad.addColorStop(0.7, 'rgba('+r+','+g2+','+b+',0.08)');
-  grad.addColorStop(1, 'rgba('+r+','+g2+','+b+',0)');
-  ctx2.fillStyle = grad;
-  ctx2.fillRect(0, 0, size, size);
-  var tex = new THREE.CanvasTexture(canvas2);
-  return tex;
-}
+buildDeep(2, 'MOLECULAR BLUEPRINT', [
+  {id:'dna',label:'DNA',color:0x4488ff,detail:{title:'Core Architecture',subtitle:'DNA — DOUBLE HELIX',body:'Biotechnology + AI — two strands intertwined.'}},
+  {id:'rna',label:'mRNA',color:0x50dc78,detail:{title:'Expression',subtitle:'mRNA — MESSENGER',body:'Translating vision into executable form.'}},
+  {id:'protein',label:'PROTEINS',color:0xc4a44a,detail:{title:'Output',subtitle:'PROTEINS — FUNCTIONAL UNITS',body:'Products shipped, clients served, problems solved.'}},
+], 0x4488ff);
+
+buildDeep(3, 'ATOMIC STRUCTURE', [
+  {id:'electron',label:'ELECTRONS',color:0x50dcc0,detail:{title:'Speed',subtitle:'ELECTRONS — ORBITAL',body:'Moving fast between biotech and AI, strategy and code.'}},
+  {id:'core',label:'NUCLEUS',color:0xff4466,detail:{title:'Core Drive',subtitle:'NUCLEUS — DENSE ENERGY',body:'Curiosity and ambition compressed into relentless output.'}},
+], 0x50dcc0);
+
+buildDeep(4, 'QUANTUM FIELD', [
+  {id:'wave',label:'WAVE FUNCTION',color:0x8866ff,detail:{title:'Potential',subtitle:'ψ — SUPERPOSITION',body:'All possibilities exist until observed. The future is unwritten.'}},
+  {id:'ent',label:'ENTANGLEMENT',color:0xff6688,detail:{title:'Connection',subtitle:'SPOOKY ACTION',body:'raul.chio.leon@gmail.com · github.com/Theovia · Guadalajara, MX'}},
+], 0x8866ff);
 
 // ═══════════════════════════════════════
-// UI UPDATES
+// INTERACTION
 // ═══════════════════════════════════════
-var magValue = document.getElementById('mag-value');
-var magBarFill = document.getElementById('mag-bar-fill');
-var scaleText = document.getElementById('scale-text');
-var navHint = document.getElementById('nav-hint');
-var transFlash = document.getElementById('transition-flash');
-var zoomDots = document.querySelectorAll('.zoom-dot');
+const cursorEl = document.getElementById('cursor');
+document.addEventListener('mousemove', e => {
+  mouseNX = (e.clientX/window.innerWidth)*2-1;
+  mouseNY = -(e.clientY/window.innerHeight)*2+1;
+  cursorEl.style.left = e.clientX+'px'; cursorEl.style.top = e.clientY+'px';
+});
+
+function transitionToLevel(n) {
+  if(n<0||n>4||n===currentLevel||isTransitioning)return;
+  isTransitioning=true; targetLevel=n;
+  const flash=document.getElementById('transition-flash'); flash.classList.add('flash'); setTimeout(()=>flash.classList.remove('flash'),200);
+  levelGroups[n].visible=true;
+  const startZ=camera.position.z, endZ=LEVEL_Z[n]+55, dur=1200, start=performance.now();
+  (function anim(now){
+    const t=Math.min((now-start)/dur,1), e=t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+    camera.position.z=lerp(startZ,endZ,e);
+    if(t<1)requestAnimationFrame(anim);
+    else{if(currentLevel!==n)levelGroups[currentLevel].visible=false;currentLevel=n;isTransitioning=false;updateUI();}
+  })(performance.now());
+  updateUI();
+}
 
 function updateUI() {
-  magValue.textContent = ZOOM_LABELS[currentLevel];
-  magBarFill.style.width = MAG_FILLS[currentLevel] + '%';
-  scaleText.textContent = SCALE_LABELS[currentLevel];
-  zoomDots.forEach(function(d, i) { d.classList.toggle('active', i === currentLevel); });
-  if (currentLevel === 0) navHint.textContent = isMobile ? 'SWIPE UP TO ZOOM IN' : 'SCROLL TO ENTER THE CELL';
-  else if (currentLevel === 4) navHint.textContent = isMobile ? 'SWIPE DOWN TO ZOOM OUT' : 'SCROLL TO ZOOM OUT';
-  else navHint.textContent = isMobile ? 'SWIPE TO CHANGE MAGNIFICATION' : 'SCROLL TO CHANGE MAGNIFICATION';
+  const l=isTransitioning?targetLevel:currentLevel;
+  document.getElementById('mag-value').textContent=ZOOM_LABELS[l];
+  document.getElementById('scale-text').textContent=SCALE_LABELS[l];
+  document.getElementById('mag-bar-fill').style.width=MAG_FILLS[l]+'%';
+  document.querySelectorAll('.zoom-dot').forEach((d,i)=>d.classList.toggle('active',i===l));
+  document.getElementById('nav-hint').textContent=l===0?'SCROLL TO ENTER THE CELL':l===4?'MAXIMUM MAGNIFICATION':'SCROLL TO ZOOM DEEPER';
 }
 
-function setZoomLevel(level) {
-  if (level < 0 || level > 4 || level === currentLevel || isTransitioning) return;
-  targetLevel = level;
-  isTransitioning = true;
-  zoomProgress = 0;
-  transFlash.classList.add('flash');
-  setTimeout(function() { transFlash.classList.remove('flash'); }, 200);
-  closeDetailPanel();
-  playClickSound();
-  updateHumPitch(level);
-  // Show target level group
-  levelGroups[targetLevel].visible = true;
-}
-
-// ═══════════════════════════════════════
-// INPUT HANDLERS
-// ═══════════════════════════════════════
-var cursorEl = document.getElementById('cursor');
-document.addEventListener('mousemove', function(e) {
-  mouseX = e.clientX; mouseY = e.clientY;
-  mouseNX = (e.clientX / window.innerWidth) * 2 - 1;
-  mouseNY = -(e.clientY / window.innerHeight) * 2 + 1;
-  cursorEl.style.left = e.clientX + 'px';
-  cursorEl.style.top = e.clientY + 'px';
+window.addEventListener('wheel',e=>{e.preventDefault();scrollAccum+=e.deltaY;if(Math.abs(scrollAccum)>SCROLL_THRESHOLD){transitionToLevel(currentLevel+(scrollAccum>0?1:-1));scrollAccum=0;}},{passive:false});
+let touchY=0;
+window.addEventListener('touchstart',e=>{touchY=e.touches[0].clientY;});
+window.addEventListener('touchend',e=>{const dy=touchY-e.changedTouches[0].clientY;if(Math.abs(dy)>50)transitionToLevel(currentLevel+(dy>0?1:-1));});
+window.addEventListener('keydown',e=>{
+  if(e.key==='ArrowDown'||e.key==='ArrowRight')transitionToLevel(currentLevel+1);
+  if(e.key==='ArrowUp'||e.key==='ArrowLeft')transitionToLevel(currentLevel-1);
+  if(e.key>='1'&&e.key<='5')transitionToLevel(parseInt(e.key)-1);
+  if(e.key==='Escape')closeDetail();
 });
-document.addEventListener('mouseenter', function() { cursorEl.classList.remove('hidden'); });
-document.addEventListener('mouseleave', function() { cursorEl.classList.add('hidden'); });
+document.querySelectorAll('.zoom-dot').forEach(d=>d.addEventListener('click',()=>transitionToLevel(parseInt(d.dataset.level))));
 
-window.addEventListener('wheel', function(e) {
-  e.preventDefault();
-  if (isTransitioning) return;
-  scrollAccum += e.deltaY;
-  if (Math.abs(scrollAccum) > SCROLL_THRESHOLD) {
-    if (scrollAccum > 0 && currentLevel < 4) setZoomLevel(currentLevel + 1);
-    else if (scrollAccum < 0 && currentLevel > 0) setZoomLevel(currentLevel - 1);
-    scrollAccum = 0;
-  }
-}, { passive: false });
+const detailPanel=document.getElementById('detail-panel');
+function openDetail(d){document.getElementById('detail-title').textContent=d.title;document.getElementById('detail-subtitle').textContent=d.subtitle;document.getElementById('detail-body').innerHTML=d.body;detailPanel.classList.add('open');}
+function closeDetail(){detailPanel.classList.remove('open');}
+document.getElementById('detail-panel-close').addEventListener('click',closeDetail);
 
-// Touch
-var touchStartY = 0, touchStartX = 0;
-window.addEventListener('touchstart', function(e) { touchStartY = e.touches[0].clientY; touchStartX = e.touches[0].clientX; }, { passive: true });
-window.addEventListener('touchend', function(e) {
-  var dy = touchStartY - e.changedTouches[0].clientY;
-  var dx = touchStartX - e.changedTouches[0].clientX;
-  if (Math.abs(dy) > 40 && Math.abs(dy) > Math.abs(dx)) {
-    if (dy > 0 && currentLevel < 4) setZoomLevel(currentLevel + 1);
-    else if (dy < 0 && currentLevel > 0) setZoomLevel(currentLevel - 1);
-  }
-}, { passive: true });
-
-// Keyboard
-window.addEventListener('keydown', function(e) {
-  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); if (currentLevel < 4) setZoomLevel(currentLevel + 1); }
-  else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); if (currentLevel > 0) setZoomLevel(currentLevel - 1); }
-  else if (e.key >= '1' && e.key <= '5') { setZoomLevel(parseInt(e.key) - 1); }
-  else if (e.key === 'Escape') { closeDetailPanel(); }
+const raycaster=new THREE.Raycaster(), pointer=new THREE.Vector2();
+renderer.domElement.addEventListener('click',e=>{
+  pointer.x=(e.clientX/window.innerWidth)*2-1; pointer.y=-(e.clientY/window.innerHeight)*2+1;
+  raycaster.setFromCamera(pointer,camera);
+  const meshes=levelGroups[currentLevel].children.filter(c=>c.isMesh&&c.userData.detail);
+  const hits=raycaster.intersectObjects(meshes);
+  if(hits.length>0)openDetail(hits[0].object.userData.detail);
 });
 
-zoomDots.forEach(function(d) { d.addEventListener('click', function() { setZoomLevel(parseInt(d.dataset.level)); }); });
+document.getElementById('illum-slider').addEventListener('input',e=>{
+  const f=parseFloat(e.target.value)/100;
+  keyLight.intensity=3*f; fillLight.intensity=1.5*f; bloomPass.strength=0.8*f;
+});
 
-// Illumination
-document.getElementById('illum-slider').addEventListener('input', function(e) {
-  illumination = parseInt(e.target.value);
+document.getElementById('screenshot-btn').addEventListener('click',()=>{
+  composer.render();
+  const a=document.createElement('a'); a.download='raul-zhou-specimen.png'; a.href=renderer.domElement.toDataURL('image/png'); a.click();
 });
 
 // ═══════════════════════════════════════
-// DETAIL PANEL
+// ANIMATION
 // ═══════════════════════════════════════
-var detailPanel = document.getElementById('detail-panel');
-var detailTitle = document.getElementById('detail-title');
-var detailSubtitle = document.getElementById('detail-subtitle');
-var detailBody = document.getElementById('detail-body');
-
-function openDetailPanel(data) {
-  detailTitle.textContent = data.title;
-  detailSubtitle.textContent = data.subtitle;
-  detailBody.innerHTML = data.body;
-  detailPanel.classList.add('open');
-}
-function closeDetailPanel() { detailPanel.classList.remove('open'); }
-document.getElementById('detail-panel-close').addEventListener('click', closeDetailPanel);
-
-// Click/tap for organelles and atoms
-var raycaster = new THREE.Raycaster();
-var mouseVec = new THREE.Vector2();
-
-renderer.domElement.addEventListener('click', function(e) {
-  mouseVec.x = (e.clientX / window.innerWidth) * 2 - 1;
-  mouseVec.y = -(e.clientY / window.innerHeight) * 2 + 1;
-  raycaster.setFromCamera(mouseVec, camera);
-
-  if (currentLevel === 1 && levelGroups[1].userData.organelleMeshes) {
-    var hits = raycaster.intersectObjects(levelGroups[1].userData.organelleMeshes);
-    if (hits.length > 0 && hits[0].object.userData.detail) openDetailPanel(hits[0].object.userData.detail);
-  }
-  if (currentLevel === 3 && levelGroups[3].userData.atomMeshes) {
-    var hits = raycaster.intersectObjects(levelGroups[3].userData.atomMeshes);
-    if (hits.length > 0 && hits[0].object.userData.detail) openDetailPanel(hits[0].object.userData.detail);
-  }
-});
-
-// ═══════════════════════════════════════
-// SOUND
-// ═══════════════════════════════════════
-var audioCtx = null, soundEnabled = false, humOsc = null, humGain = null;
-function initAudio() {
-  if (audioCtx) return;
-  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  humOsc = audioCtx.createOscillator(); humOsc.type = 'sine'; humOsc.frequency.value = 55;
-  humGain = audioCtx.createGain(); humGain.gain.value = 0;
-  var lfo = audioCtx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 0.3;
-  var lfoG = audioCtx.createGain(); lfoG.gain.value = 5;
-  lfo.connect(lfoG); lfoG.connect(humOsc.frequency);
-  humOsc.connect(humGain); humGain.connect(audioCtx.destination);
-  humOsc.start(); lfo.start();
-}
-function updateHumPitch(level) { if (!audioCtx||!soundEnabled) return; humOsc.frequency.setTargetAtTime([55,80,120,180,260][level], audioCtx.currentTime, 0.3); }
-function playClickSound() {
-  if (!audioCtx||!soundEnabled) return;
-  var o = audioCtx.createOscillator(), ga = audioCtx.createGain();
-  o.type='square'; o.frequency.value=800; ga.gain.value=0.03;
-  ga.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.08);
-  o.connect(ga); ga.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime+0.08);
-}
-var soundBtn = document.getElementById('sound-btn');
-soundBtn.addEventListener('click', function() {
-  initAudio(); soundEnabled = !soundEnabled;
-  if (soundEnabled) { humGain.gain.setTargetAtTime(0.015, audioCtx.currentTime, 0.3); soundBtn.textContent='🔊'; soundBtn.classList.remove('muted'); soundBtn.classList.add('active'); updateHumPitch(currentLevel); }
-  else { humGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.1); soundBtn.textContent='🔇'; soundBtn.classList.add('muted'); soundBtn.classList.remove('active'); }
-});
-
-// Screenshot
-document.getElementById('screenshot-btn').addEventListener('click', function() {
-  renderer.render(scene, camera);
-  var link = document.createElement('a');
-  link.download = 'raul-zhou-' + ZOOM_LABELS[currentLevel] + '.png';
-  link.href = renderer.domElement.toDataURL('image/png');
-  link.click();
-});
-
-// ═══════════════════════════════════════
-// PERFORMANCE DETECTION
-// ═══════════════════════════════════════
-var perfFrames = [], perfChecked = false;
-function checkPerf(dt) {
-  if (perfChecked) return;
-  perfFrames.push(dt);
-  if (perfFrames.length >= 10) {
-    var avg = perfFrames.reduce(function(a,b){return a+b;},0)/perfFrames.length;
-    if (avg > 0.025) { document.getElementById('eco-badge').classList.add('visible'); }
-    perfChecked = true;
-  }
-}
-
-// ═══════════════════════════════════════
-// RESIZE
-// ═══════════════════════════════════════
-window.addEventListener('resize', function() {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-// ═══════════════════════════════════════
-// ANIMATION LOOP
-// ═══════════════════════════════════════
-var TRANS_DURATION = 1.2;
-var lastTime = performance.now();
-var camTargetZ = LEVEL_Z[0] + 60;
-var camCurrentZ = camTargetZ;
-
-function animate(now) {
+function animate() {
   requestAnimationFrame(animate);
-  var dt = (now - lastTime) / 1000;
-  lastTime = now;
-  time += dt;
-  checkPerf(dt);
-
-  // Transition
-  if (isTransitioning) {
-    zoomProgress += dt / TRANS_DURATION;
-    if (zoomProgress >= 1) {
-      zoomProgress = 1;
-      currentLevel = targetLevel;
-      isTransitioning = false;
-      updateUI();
-      // Hide non-current levels
-      for (var i = 0; i < 5; i++) levelGroups[i].visible = (i === currentLevel);
-    }
-  }
-
-  // Camera Z
-  var tLevel = isTransitioning ? lerp(currentLevel, targetLevel, easeInOutCubic(zoomProgress)) : currentLevel;
-  var tZ = lerp(LEVEL_Z[Math.floor(tLevel)], LEVEL_Z[Math.min(4, Math.ceil(tLevel))], tLevel % 1);
-  camTargetZ = tZ + 60;
-  camCurrentZ = lerp(camCurrentZ, camTargetZ, 0.08);
-  camera.position.z = camCurrentZ;
-
-  // Mouse parallax
-  camera.position.x = lerp(camera.position.x, mouseNX * 3, 0.05);
-  camera.position.y = lerp(camera.position.y, mouseNY * 2, 0.05);
-  camera.lookAt(new THREE.Vector3(0, 0, camCurrentZ - 60));
-
-  // Level 0 animation — cell breathing
-  if (levelGroups[0].visible) {
-    var ud = levelGroups[0].userData;
-    var pulse = 1 + 0.02 * Math.sin(time * 0.8);
-    ud.cellMesh.scale.set(pulse, pulse, pulse);
-    ud.glowMesh.scale.set(pulse * 1.02, pulse * 1.02, pulse * 1.02);
-    ud.nucMesh.scale.set(1 + 0.03 * Math.sin(time * 1.2), 1 + 0.03 * Math.sin(time * 1.2), 1 + 0.03 * Math.sin(time * 1.2));
-    ud.cellMesh.rotation.y = time * 0.03;
-    ud.glowMesh.rotation.y = time * 0.03;
-    // Particles drift
-    var pPos = ud.particles.geometry.getAttribute('position');
-    for (var i = 0; i < pPos.count; i++) {
-      pPos.setY(i, pPos.getY(i) + Math.sin(time * 0.5 + i * 0.1) * 0.003);
-    }
-    pPos.needsUpdate = true;
-  }
-
-  // Level 3 — electron orbits
-  if (levelGroups[3].visible) {
-    levelGroups[3].children.forEach(function(child) {
-      if (child.userData && child.userData.shellR) {
-        var ud = child.userData;
-        var angle = (ud.electronIdx / ud.electronCount) * Math.PI * 2 + time * ud.speed;
-        var x = Math.cos(angle) * ud.shellR;
-        var y = Math.sin(angle) * ud.shellR;
-        // Apply tilt
-        var cosX = Math.cos(ud.tiltX), sinX = Math.sin(ud.tiltX);
-        var cosY = Math.cos(ud.tiltY), sinY = Math.sin(ud.tiltY);
-        var ry = y * cosX;
-        var rz = y * sinX;
-        var rx = x * cosY + rz * sinY;
-        rz = -x * sinY + rz * cosY;
-        child.position.set(ud.atomPos.x + rx, ud.atomPos.y + ry, ud.atomPos.z + rz);
-      }
+  time += 0.016;
+  const l0 = levelGroups[0].userData;
+  if (levelGroups[0].visible && l0.cellMesh) {
+    const b = 1+Math.sin(time*0.5)*0.008;
+    l0.cellMesh.scale.setScalar(b); l0.wireMesh.scale.setScalar(b*1.005);
+    const np = 1+Math.sin(time*0.8)*0.015;
+    l0.nucMesh.scale.setScalar(np);
+    l0.nucGlow.material.opacity = 0.4+Math.sin(time*0.6)*0.1;
+    l0.nucleolus.rotation.y = time*0.2;
+    l0.chromatinMeshes.forEach(cm=>{
+      const u=cm.userData, t2=time*u.speed+u.phase, r=u.baseR+Math.sin(t2)*0.3;
+      cm.position.x=Math.cos(u.a+t2*0.05)*Math.sqrt(1-u.b*u.b)*r;
+      cm.position.z=Math.sin(u.a+t2*0.05)*Math.sqrt(1-u.b*u.b)*r;
     });
+    l0.mitoMeshes.forEach((mm,i)=>{mm.rotation.x+=0.001;mm.rotation.z+=0.0005;mm.position.y+=Math.sin(time*0.3+i)*0.003;});
+    const pa=l0.particles.geometry.getAttribute('position');
+    for(let i=0;i<pa.count;i++){pa.setY(i,pa.getY(i)+Math.sin(time*0.2+i*0.1)*0.005);pa.setX(i,pa.getX(i)+Math.cos(time*0.15+i*0.07)*0.003);}
+    pa.needsUpdate=true;
   }
-
-  // Level 4 — quantum particle drift
-  if (levelGroups[4].visible) {
-    var qud = levelGroups[4].userData;
-    var qPos = qud.qPoints.geometry.getAttribute('position');
-    for (var i = 0; i < qPos.count; i++) {
-      var v = qud.qVel[i];
-      qPos.setX(i, qPos.getX(i) + v.vx + Math.sin(time * v.wf + v.phase) * 0.01);
-      qPos.setY(i, qPos.getY(i) + v.vy + Math.cos(time * v.wf + v.phase) * 0.01);
-      // Wrap
-      if (qPos.getX(i) > 60) qPos.setX(i, -60);
-      if (qPos.getX(i) < -60) qPos.setX(i, 60);
-      if (qPos.getY(i) > 40) qPos.setY(i, -40);
-      if (qPos.getY(i) < -40) qPos.setY(i, 40);
-    }
-    qPos.needsUpdate = true;
-
-    // Wave function animation
-    var wPos = qud.waveLine.geometry.getAttribute('position');
-    for (var i = 0; i < wPos.count; i++) {
-      var x = wPos.getX(i);
-      wPos.setY(i, Math.sin(x * 0.1 + time * 0.5) * 5 * Math.sin(x * 0.03 + time * 0.2));
-    }
-    wPos.needsUpdate = true;
+  if(!isTransitioning){
+    camera.position.x=lerp(camera.position.x,mouseNX*3,0.02);
+    camera.position.y=lerp(camera.position.y,mouseNY*2,0.02);
+    camera.lookAt(0,0,LEVEL_Z[currentLevel]);
   }
-
-  renderer.render(scene, camera);
+  const l1=levelGroups[1].userData;
+  if(levelGroups[1].visible&&l1.organelleMeshes){l1.organelleMeshes.forEach((m,i)=>{m.rotation.y+=0.003;m.position.y+=Math.sin(time*0.4+i*1.5)*0.005;});}
+  composer.render();
 }
+animate();
 
-updateUI();
-animate(performance.now());
-
-})();
+window.addEventListener('resize',()=>{
+  const w=window.innerWidth, h=window.innerHeight;
+  camera.aspect=w/h; camera.updateProjectionMatrix();
+  renderer.setSize(w,h); composer.setSize(w,h); bloomPass.resolution.set(w,h);
+});
 </script>
 </body>
 </html>
