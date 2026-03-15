@@ -1049,6 +1049,240 @@ function illumColor(r, g, b, a) {
 }
 
 // ═══════════════════════════════════════════════
+//  BIOLOGICAL DRAWING HELPERS
+// ═══════════════════════════════════════════════
+
+// Draw a DNA double helix segment
+function drawDNAHelix(cx, cy, length, radius, turns, phase, alpha, scale) {
+  scale = scale || 1;
+  var steps = Math.floor(turns * 40);
+  var basePairEvery = 4; // draw base pair every N steps
+  // Base pair colors: A-T = cyan/green, G-C = gold/red
+  var bpColors = [
+    [[0,212,170],[68,255,136]], // A-T
+    [[196,164,74],[255,68,102]]  // G-C
+  ];
+  
+  // Draw backbone strands
+  for (var strand = 0; strand < 2; strand++) {
+    ctx.beginPath();
+    var strandOffset = strand * Math.PI;
+    for (var i = 0; i <= steps; i++) {
+      var t = i / steps;
+      var angle = t * turns * Math.PI * 2 + phase + strandOffset;
+      var x = cx + Math.cos(angle) * radius * scale;
+      var y = cy - length/2 + t * length;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.strokeStyle = illumColor(0, 212, 170, alpha * 0.7);
+    ctx.lineWidth = 1.5 * scale;
+    ctx.stroke();
+    
+    // Sugar-phosphate backbone nodes
+    for (var i = 0; i <= steps; i += basePairEvery) {
+      var t = i / steps;
+      var angle = t * turns * Math.PI * 2 + phase + strandOffset;
+      var x = cx + Math.cos(angle) * radius * scale;
+      var y = cy - length/2 + t * length;
+      ctx.beginPath();
+      ctx.arc(x, y, 2 * scale, 0, Math.PI * 2);
+      ctx.fillStyle = illumColor(170, 102, 255, alpha * 0.5);
+      ctx.fill();
+    }
+  }
+  
+  // Draw base pairs (rungs)
+  for (var i = 0; i <= steps; i += basePairEvery) {
+    var t = i / steps;
+    var angle1 = t * turns * Math.PI * 2 + phase;
+    var angle2 = angle1 + Math.PI;
+    var x1 = cx + Math.cos(angle1) * radius * scale;
+    var y1 = cy - length/2 + t * length;
+    var x2 = cx + Math.cos(angle2) * radius * scale;
+    var y2 = y1;
+    
+    // Determine if this base pair is "in front" (visible)
+    var depth = Math.sin(angle1);
+    if (depth > -0.3) { // visible base pairs
+      var bpType = (i / basePairEvery) % 2;
+      var colors = bpColors[bpType];
+      var midX = (x1 + x2) / 2;
+      
+      // Left half
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(midX, y1);
+      ctx.strokeStyle = illumColor(colors[0][0], colors[0][1], colors[0][2], alpha * 0.5 * (0.5 + depth * 0.5));
+      ctx.lineWidth = 1.2 * scale;
+      ctx.stroke();
+      
+      // Right half
+      ctx.beginPath();
+      ctx.moveTo(midX, y2);
+      ctx.lineTo(x2, y2);
+      ctx.strokeStyle = illumColor(colors[1][0], colors[1][1], colors[1][2], alpha * 0.5 * (0.5 + depth * 0.5));
+      ctx.lineWidth = 1.2 * scale;
+      ctx.stroke();
+      
+      // Hydrogen bonds (dots in middle)
+      var numBonds = bpType === 0 ? 2 : 3; // A-T has 2, G-C has 3
+      for (var b = 0; b < numBonds; b++) {
+        var bx = midX + (b - (numBonds-1)/2) * 3 * scale;
+        ctx.beginPath();
+        ctx.arc(bx, y1, 0.8 * scale, 0, Math.PI * 2);
+        ctx.fillStyle = illumColor(232, 232, 240, alpha * 0.4 * (0.5 + depth * 0.5));
+        ctx.fill();
+      }
+    }
+  }
+}
+
+// Draw cytoskeleton microtubules
+function drawCytoskeleton(cx, cy, radius, count, alpha) {
+  for (var i = 0; i < count; i++) {
+    var angle = (i / count) * Math.PI * 2 + time * 0.02;
+    var len = radius * (0.5 + 0.4 * Math.sin(i * 2.7 + time * 0.1));
+    var endX = cx + Math.cos(angle) * len;
+    var endY = cy + Math.sin(angle) * len;
+    
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(angle) * radius * 0.15, cy + Math.sin(angle) * radius * 0.15);
+    // Slightly curved path
+    var cpX = cx + Math.cos(angle + 0.2) * len * 0.6;
+    var cpY = cy + Math.sin(angle + 0.2) * len * 0.6;
+    ctx.quadraticCurveTo(cpX, cpY, endX, endY);
+    ctx.strokeStyle = illumColor(0, 212, 170, alpha * (0.08 + 0.04 * Math.sin(time * 0.5 + i)));
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    // Tubulin subunits (small dots along filament)
+    for (var j = 0; j < 4; j++) {
+      var ft = (j + 1) / 5;
+      var fx = cx + Math.cos(angle) * radius * 0.15 * (1 - ft) + endX * ft;
+      var fy = cy + Math.sin(angle) * radius * 0.15 * (1 - ft) + endY * ft;
+      ctx.beginPath();
+      ctx.arc(fx, fy, 1, 0, Math.PI * 2);
+      ctx.fillStyle = illumColor(0, 212, 170, alpha * 0.1);
+      ctx.fill();
+    }
+  }
+}
+
+// Draw phospholipid bilayer texture on membrane
+function drawPhospholipidTexture(cx, cy, radius, alpha) {
+  var lipidCount = 48;
+  for (var i = 0; i < lipidCount; i++) {
+    var angle = (i / lipidCount) * Math.PI * 2;
+    var wobble = 1 + 0.04 * Math.sin(angle * 5 + time * 0.8);
+    var px = cx + Math.cos(angle) * radius * wobble;
+    var py = cy + Math.sin(angle) * radius * wobble;
+    
+    // Phospholipid head (circle)
+    var headSize = 2.5;
+    var normalX = Math.cos(angle);
+    var normalY = Math.sin(angle);
+    
+    // Outer head
+    ctx.beginPath();
+    ctx.arc(px + normalX * 3, py + normalY * 3, headSize, 0, Math.PI * 2);
+    ctx.fillStyle = illumColor(0, 212, 170, alpha * 0.3);
+    ctx.fill();
+    
+    // Inner head
+    ctx.beginPath();
+    ctx.arc(px - normalX * 3, py - normalY * 3, headSize, 0, Math.PI * 2);
+    ctx.fillStyle = illumColor(0, 212, 170, alpha * 0.3);
+    ctx.fill();
+    
+    // Tails (two wavy lines between heads)
+    for (var tail = -1; tail <= 1; tail += 2) {
+      ctx.beginPath();
+      ctx.moveTo(px + normalX * 1, py + normalY * 1);
+      var perpX = -normalY * tail * 1.5;
+      var perpY = normalX * tail * 1.5;
+      ctx.quadraticCurveTo(
+        px + perpX + Math.sin(time + i + tail) * 0.5, 
+        py + perpY + Math.cos(time + i + tail) * 0.5,
+        px - normalX * 1, py - normalY * 1
+      );
+      ctx.strokeStyle = illumColor(196, 164, 74, alpha * 0.15);
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
+  }
+}
+
+// Draw cristae (mitochondrial inner membrane folds)
+function drawCristae(cx, cy, rx, ry, rotation, alpha) {
+  var cristaCount = 7;
+  for (var i = 0; i < cristaCount; i++) {
+    var t = (i + 0.5) / cristaCount;
+    var localX = (t - 0.5) * rx * 2.2;
+    var baseY = ry * 0.5;
+    var foldDepth = ry * (0.3 + 0.15 * Math.sin(i * 1.3 + time * 0.3));
+    
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(rotation);
+    
+    ctx.beginPath();
+    ctx.moveTo(localX - 8, -baseY);
+    ctx.bezierCurveTo(
+      localX - 4, -baseY + foldDepth,
+      localX + 4, -baseY + foldDepth,
+      localX + 8, -baseY
+    );
+    ctx.strokeStyle = illumColor(255, 68, 102, alpha * 0.25);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    // Mirror on bottom
+    ctx.beginPath();
+    ctx.moveTo(localX - 8, baseY);
+    ctx.bezierCurveTo(
+      localX - 4, baseY - foldDepth,
+      localX + 4, baseY - foldDepth,
+      localX + 8, baseY
+    );
+    ctx.strokeStyle = illumColor(255, 68, 102, alpha * 0.2);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    
+    ctx.restore();
+  }
+}
+
+// Draw nuclear pores
+function drawNuclearPores(cx, cy, radius, count, alpha) {
+  for (var i = 0; i < count; i++) {
+    var angle = (i / count) * Math.PI * 2 + time * 0.03;
+    var px = cx + Math.cos(angle) * radius;
+    var py = cy + Math.sin(angle) * radius;
+    
+    // Pore complex (octagonal structure)
+    ctx.beginPath();
+    for (var j = 0; j < 8; j++) {
+      var pa = (j / 8) * Math.PI * 2;
+      var ppx = px + Math.cos(pa) * 4;
+      var ppy = py + Math.sin(pa) * 4;
+      if (j === 0) ctx.moveTo(ppx, ppy);
+      else ctx.lineTo(ppx, ppy);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = illumColor(0, 212, 170, alpha * 0.3);
+    ctx.lineWidth = 0.7;
+    ctx.stroke();
+    
+    // Central channel
+    ctx.beginPath();
+    ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = illumColor(0, 212, 170, alpha * 0.2);
+    ctx.fill();
+  }
+}
+
+// ═══════════════════════════════════════════════
 //  ENHANCED PARTICLE REACTIVITY (#5)
 // ═══════════════════════════════════════════════
 function applyMouseForce(px, py, pvx, pvy) {
@@ -1150,6 +1384,12 @@ function drawLevel0(alpha) {
   ctx.lineWidth = 8;
   ctx.stroke();
 
+  // Cytoskeleton filaments radiating through the cell
+  drawCytoskeleton(cx, cy, r, 20, alpha);
+
+  // Phospholipid bilayer texture on cell membrane
+  drawPhospholipidTexture(cx, cy, r, alpha);
+
   var nR = 0.045 * minDim * pulse;
   var nucGrad = ctx.createRadialGradient(cx + 5, cy - 5, 0, cx, cy, nR);
   nucGrad.addColorStop(0, illumColor(40, 90, 85, 0.6));
@@ -1159,19 +1399,37 @@ function drawLevel0(alpha) {
   ctx.arc(cx, cy, nR, 0, Math.PI * 2);
   ctx.fillStyle = nucGrad;
   ctx.fill();
+  
+  // Nuclear pores on nuclear envelope
+  drawNuclearPores(cx, cy, nR, 8, alpha);
+  
   ctx.strokeStyle = illumColor(0, 212, 170, 0.4);
   ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(cx, cy, nR, 0, Math.PI * 2);
   ctx.stroke();
 
-  for (var i = 0; i < 12; i++) {
-    var ang = (i / 12) * Math.PI * 2 + time * 0.1;
-    var dr = nR * (0.3 + 0.4 * Math.sin(i * 1.7 + time * 0.2));
-    ctx.beginPath();
-    ctx.arc(cx + Math.cos(ang) * dr, cy + Math.sin(ang) * dr, 2, 0, Math.PI * 2);
-    ctx.fillStyle = illumColor(0, 212, 170, 0.3);
-    ctx.fill();
-  }
+  // DNA double helix inside nucleus (condensed chromatin)
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, nR - 2, 0, Math.PI * 2);
+  ctx.clip();
+  drawDNAHelix(cx, cy, nR * 1.6, nR * 0.4, 3, time * 0.3, alpha * 0.8, 0.7);
+  // Second smaller helix offset
+  drawDNAHelix(cx - nR * 0.3, cy + nR * 0.1, nR * 1.2, nR * 0.25, 2, time * 0.2 + 1, alpha * 0.4, 0.5);
+  ctx.restore();
 
+  // Nucleolus (dense body inside nucleus)
+  var nuclR = nR * 0.25;
+  var nuclGrad = ctx.createRadialGradient(cx + nR*0.15, cy - nR*0.1, 0, cx + nR*0.15, cy - nR*0.1, nuclR);
+  nuclGrad.addColorStop(0, illumColor(60, 120, 110, 0.5));
+  nuclGrad.addColorStop(1, illumColor(30, 70, 65, 0.2));
+  ctx.beginPath();
+  ctx.arc(cx + nR*0.15, cy - nR*0.1, nuclR, 0, Math.PI * 2);
+  ctx.fillStyle = nuclGrad;
+  ctx.fill();
+
+  // Organelles in cytoplasm (mitochondria-like, ER-like)
   for (var i = 0; i < 6; i++) {
     var ang = (i / 6) * Math.PI * 2 + time * 0.05 + 0.5;
     var ox = cx + Math.cos(ang) * r * 0.55;
@@ -1183,6 +1441,17 @@ function drawLevel0(alpha) {
     ctx.strokeStyle = illumColor(0, 212, 170, 0.25);
     ctx.lineWidth = 0.8;
     ctx.stroke();
+    // Mini cristae inside each organelle
+    for (var c = -1; c <= 1; c++) {
+      ctx.beginPath();
+      var mcx = ox + Math.cos(ang) * c * 4;
+      var mcy = oy + Math.sin(ang) * c * 4;
+      ctx.moveTo(mcx - 3, mcy - 2);
+      ctx.bezierCurveTo(mcx - 1, mcy + 2, mcx + 1, mcy + 2, mcx + 3, mcy - 2);
+      ctx.strokeStyle = illumColor(255, 100, 130, 0.15);
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    }
   }
 
   ctx.textAlign = 'center';
@@ -1326,9 +1595,135 @@ function drawLevel1(alpha) {
     ctx.fillStyle = bodyGrad; ctx.fill();
     ctx.strokeStyle = illumColor(cr,cg,cb, isHov?0.8:0.4); ctx.lineWidth = isHov?2:1; ctx.stroke();
 
-    if (org.id === 'ribosome') { for (var ri=0;ri<8;ri++){var ra=(ri/8)*Math.PI*2+time*0.2;var rd=drawR*0.6;ctx.beginPath();ctx.arc(ox+Math.cos(ra)*rd,oy+Math.sin(ra)*rd,4,0,Math.PI*2);ctx.fillStyle=illumColor(cr,cg,cb,0.5);ctx.fill();} }
-    if (org.id === 'golgi') { for(var j=-2;j<=2;j++){ctx.beginPath();var cy2=oy+j*drawR*0.25;ctx.moveTo(ox-drawR*0.9,cy2);ctx.bezierCurveTo(ox-drawR*0.3,cy2+Math.sin(time+j)*5,ox+drawR*0.3,cy2-Math.sin(time+j)*5,ox+drawR*0.9,cy2);ctx.strokeStyle=illumColor(cr,cg,cb,0.2);ctx.lineWidth=1;ctx.stroke();} }
-    if (org.id === 'mitochondria') { for(var ci=0;ci<5;ci++){var cxp=ox+(ci-2)*drawR*0.5;ctx.beginPath();ctx.moveTo(cxp,oy-drawR*0.4);ctx.bezierCurveTo(cxp+8,oy,cxp-8,oy,cxp,oy+drawR*0.4);ctx.strokeStyle=illumColor(cr,cg,cb,0.2);ctx.lineWidth=1;ctx.stroke();} }
+    // Enhanced organelle internals
+    if (org.id === 'nucleus') {
+      // Chromatin fibers (DNA condensed)
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(ox, oy, drawR * 0.95, 0, Math.PI * 2);
+      ctx.clip();
+      drawDNAHelix(ox, oy, drawR * 1.8, drawR * 0.5, 4, time * 0.2, isHov ? 0.7 : 0.4, 0.8);
+      drawDNAHelix(ox - drawR * 0.3, oy + drawR * 0.15, drawR * 1.4, drawR * 0.3, 3, time * 0.15 + 2, isHov ? 0.5 : 0.25, 0.6);
+      ctx.restore();
+      // Nuclear pores
+      drawNuclearPores(ox, oy, drawR, 12, isHov ? 0.7 : 0.4);
+      // Nucleolus
+      var nuclR2 = drawR * 0.22;
+      ctx.beginPath();
+      ctx.arc(ox + drawR * 0.2, oy - drawR * 0.15, nuclR2, 0, Math.PI * 2);
+      var nlGrad = ctx.createRadialGradient(ox + drawR*0.2, oy - drawR*0.15, 0, ox + drawR*0.2, oy - drawR*0.15, nuclR2);
+      nlGrad.addColorStop(0, illumColor(cr, cg, cb, 0.6));
+      nlGrad.addColorStop(1, illumColor(cr, cg, cb, 0.15));
+      ctx.fillStyle = nlGrad;
+      ctx.fill();
+    }
+    if (org.id === 'ribosome') {
+      // Ribosome subunits (large + small subunit pairs)
+      for (var ri = 0; ri < 10; ri++) {
+        var ra = (ri / 10) * Math.PI * 2 + time * 0.2;
+        var rd = drawR * (0.3 + 0.35 * ((ri % 3) / 3));
+        var rbx = ox + Math.cos(ra) * rd;
+        var rby = oy + Math.sin(ra) * rd;
+        // Large subunit
+        ctx.beginPath();
+        ctx.arc(rbx, rby, 5, 0, Math.PI * 2);
+        ctx.fillStyle = illumColor(cr, cg, cb, 0.5);
+        ctx.fill();
+        // Small subunit (offset)
+        ctx.beginPath();
+        ctx.arc(rbx + 3, rby - 2, 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = illumColor(cr, cg, cb, 0.35);
+        ctx.fill();
+        // mRNA thread connecting ribosomes
+        if (ri < 9) {
+          var nextA = ((ri+1) / 10) * Math.PI * 2 + time * 0.2;
+          var nextD = drawR * (0.3 + 0.35 * (((ri+1) % 3) / 3));
+          ctx.beginPath();
+          ctx.moveTo(rbx, rby);
+          ctx.lineTo(ox + Math.cos(nextA) * nextD, oy + Math.sin(nextA) * nextD);
+          ctx.strokeStyle = illumColor(cr, cg, cb, 0.12);
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    if (org.id === 'golgi') {
+      // Cisternae stacks with proper curvature
+      for (var j = -3; j <= 3; j++) {
+        var cy2 = oy + j * drawR * 0.18;
+        var cWidth = drawR * (1.1 - Math.abs(j) * 0.08);
+        ctx.beginPath();
+        ctx.moveTo(ox - cWidth, cy2);
+        ctx.bezierCurveTo(
+          ox - cWidth * 0.3, cy2 + Math.sin(time + j) * 4,
+          ox + cWidth * 0.3, cy2 - Math.sin(time + j) * 4,
+          ox + cWidth, cy2
+        );
+        ctx.strokeStyle = illumColor(cr, cg, cb, 0.25 - Math.abs(j) * 0.02);
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+      // Vesicles budding off edges
+      for (var v = 0; v < 5; v++) {
+        var vAngle = (v / 5) * Math.PI * 0.8 + Math.PI * 0.6 + time * 0.1;
+        var vDist = drawR * (1.2 + v * 0.15 + Math.sin(time * 0.5 + v) * 0.1);
+        var vx = ox + Math.cos(vAngle) * vDist;
+        var vy = oy + Math.sin(vAngle) * vDist * 0.5;
+        ctx.beginPath();
+        ctx.arc(vx, vy, 4 - v * 0.3, 0, Math.PI * 2);
+        ctx.fillStyle = illumColor(cr, cg, cb, 0.3 - v * 0.04);
+        ctx.fill();
+        ctx.strokeStyle = illumColor(cr, cg, cb, 0.2);
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+    if (org.id === 'mitochondria') {
+      // Proper cristae folds (inner membrane)
+      drawCristae(ox, oy, drawR * 1.5, drawR * 0.7, 0.3 + Math.sin(time * 0.3) * 0.1, isHov ? 0.8 : 0.5);
+      // Matrix granules
+      for (var mg = 0; mg < 6; mg++) {
+        var mga = (mg / 6) * Math.PI * 2 + time * 0.15;
+        var mgr = drawR * 0.3;
+        ctx.beginPath();
+        ctx.arc(ox + Math.cos(mga) * mgr, oy + Math.sin(mga) * mgr * 0.4, 2, 0, Math.PI * 2);
+        ctx.fillStyle = illumColor(cr, cg, cb, 0.3);
+        ctx.fill();
+      }
+      // Inner membrane outline
+      ctx.beginPath();
+      ctx.ellipse(ox, oy, drawR * 1.3, drawR * 0.55, 0.3 + Math.sin(time * 0.3) * 0.1, 0, Math.PI * 2);
+      ctx.strokeStyle = illumColor(cr, cg, cb, 0.15);
+      ctx.lineWidth = 0.8;
+      ctx.stroke();
+    }
+    if (org.id === 'er') {
+      // Rough ER: membrane-bound ribosomes
+      for (var ri = 0; ri < 20; ri++) {
+        var erAngle = (ri / 20) * Math.PI * 2;
+        var erR = drawR * (0.85 + 0.1 * Math.sin(erAngle * 6 + time));
+        var erx = ox + Math.cos(erAngle) * erR;
+        var ery = oy + Math.sin(erAngle) * erR * 0.8;
+        ctx.beginPath();
+        ctx.arc(erx, ery, 2, 0, Math.PI * 2);
+        ctx.fillStyle = illumColor(68, 136, 255, 0.4);
+        ctx.fill();
+      }
+      // Internal cisternae channels
+      for (var ch = 0; ch < 4; ch++) {
+        var chy = oy + (ch - 1.5) * drawR * 0.35;
+        ctx.beginPath();
+        ctx.moveTo(ox - drawR * 0.7, chy);
+        for (var cp = 0; cp < 8; cp++) {
+          var cpx = ox - drawR * 0.7 + (cp / 7) * drawR * 1.4;
+          var cpy = chy + Math.sin(cp * 1.5 + time * 0.5 + ch) * 5;
+          ctx.lineTo(cpx, cpy);
+        }
+        ctx.strokeStyle = illumColor(cr, cg, cb, 0.15);
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+    }
 
     var labelAlpha = isHov ? 1 : 0.6;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -1367,55 +1762,164 @@ function drawLevel2(alpha) {
   var minDim = Math.min(W, H);
   ctx.fillStyle = LIGHT_BG ? 'rgb(248,245,238)' : illumColor(6, 8, 16, 1); ctx.fillRect(0, 0, W, H);
 
-  ctx.strokeStyle = illumColor(0, 212, 170, 0.03); ctx.lineWidth = 0.5;
-  for (var x=0;x<W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-  for (var y=0;y<H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // Subtle nucleotide grid background
+  ctx.font = '400 8px "JetBrains Mono", monospace';
+  ctx.textAlign = 'center';
+  var bases = ['A','T','G','C'];
+  for (var gx = 0; gx < W; gx += 55) {
+    for (var gy = 0; gy < H; gy += 55) {
+      var bi = Math.floor((gx * 7 + gy * 13) % 4);
+      var baseAlpha = 0.03 + 0.02 * Math.sin(time * 0.3 + gx * 0.01 + gy * 0.01);
+      var bColors = [[0,212,170],[196,164,74],[68,136,255],[255,68,102]];
+      ctx.fillStyle = illumColor(bColors[bi][0], bColors[bi][1], bColors[bi][2], baseAlpha);
+      ctx.fillText(bases[bi], gx, gy);
+    }
+  }
 
   ctx.textAlign='center'; ctx.textBaseline='middle';
   ctx.font='600 '+clamp(minDim*0.025,14,24)+'px "Space Grotesk", sans-serif';
-  ctx.fillStyle=illumColor(232,232,240,0.8); ctx.fillText('MOLECULAR TIMELINE',CX,H*0.08);
+  ctx.fillStyle=illumColor(232,232,240,0.8); ctx.fillText('GENOMIC TIMELINE',CX,H*0.06);
   ctx.font='400 '+clamp(minDim*0.013,9,13)+'px "JetBrains Mono", monospace';
-  ctx.fillStyle=illumColor(0,212,170,0.5); ctx.fillText('PROTEIN FOLDING  //  CAREER SEQUENCE',CX,H*0.08+24);
+  ctx.fillStyle=illumColor(0,212,170,0.5); ctx.fillText('DNA DOUBLE HELIX  //  CAREER ENCODED IN BASE PAIRS',CX,H*0.06+22);
 
-  var chainLen=TIMELINE_EVENTS.length, startX=W*0.08, endX=W*0.92, midY=H*0.5, amplitude=H*0.12, points=[];
-  timelineHovered=-1;
-  for(var i=0;i<chainLen;i++){var t=i/(chainLen-1);var x=lerp(startX,endX,t);var fold=Math.sin(t*Math.PI*2.5+time*0.15)*amplitude*(0.5+0.5*t);var y=midY+fold;points.push({x:x,y:y});if(dist(mouseX,mouseY,x,y)<35)timelineHovered=i;}
+  var chainLen = TIMELINE_EVENTS.length;
+  var helixCenterX = CX;
+  var helixTop = H * 0.14;
+  var helixBottom = H * 0.78;
+  var helixHeight = helixBottom - helixTop;
+  var helixRadius = minDim * 0.12;
+  var helixTurns = 4;
+  var helixSteps = 200;
 
-  ctx.beginPath();ctx.moveTo(points[0].x,points[0].y);
-  for(var i=1;i<points.length;i++){var prev=points[i-1],curr=points[i];ctx.quadraticCurveTo(prev.x,prev.y,(prev.x+curr.x)/2,(prev.y+curr.y)/2);}
-  ctx.lineTo(points[points.length-1].x,points[points.length-1].y);
-  ctx.strokeStyle=illumColor(0,212,170,0.2);ctx.lineWidth=3;ctx.stroke();
-
-  for(var i=0;i<chainLen;i++){
-    var ev=TIMELINE_EVENTS[i],px=points[i].x,py=points[i].y;
-    var cr=ev.color[0],cg=ev.color[1],cb=ev.color[2];
-    var isHov=timelineHovered===i, beadR=isHov?22:16;
-    var bob=Math.sin(time*0.5+i*0.8)*3;
-
-    var glow=ctx.createRadialGradient(px,py+bob,0,px,py+bob,beadR*3);
-    glow.addColorStop(0,illumColor(cr,cg,cb,isHov?0.3:0.1));glow.addColorStop(1,illumColor(cr,cg,cb,0));
-    ctx.beginPath();ctx.arc(px,py+bob,beadR*3,0,Math.PI*2);ctx.fillStyle=glow;ctx.fill();
-
-    var beadGrad=ctx.createRadialGradient(px-3,py+bob-3,0,px,py+bob,beadR);
-    beadGrad.addColorStop(0,illumColor(cr,cg,cb,0.9));beadGrad.addColorStop(0.7,illumColor(cr,cg,cb,0.5));beadGrad.addColorStop(1,illumColor(cr,cg,cb,0.2));
-    ctx.beginPath();ctx.arc(px,py+bob,beadR,0,Math.PI*2);ctx.fillStyle=beadGrad;ctx.fill();
-    ctx.strokeStyle=illumColor(cr,cg,cb,0.7);ctx.lineWidth=1;ctx.stroke();
-
-    ctx.textAlign='center';ctx.font='600 10px "JetBrains Mono", monospace';
-    ctx.fillStyle=illumColor(232,232,240,0.9);
-    var yearStr=ev.year===Math.floor(ev.year)?ev.year.toString():'';
-    if(yearStr)ctx.fillText(yearStr,px,py+bob+1);
-
-    var descAlpha=isHov?1:0.55, descY=py+bob+beadR+18;
-    ctx.font=(isHov?'500 13':'500 11')+'px "Space Grotesk", sans-serif';
-    ctx.fillStyle=illumColor(232,232,240,descAlpha);ctx.fillText(ev.text,px,descY);
-    ctx.font=(isHov?'400 11':'400 9')+'px "Inter", sans-serif';
-    ctx.fillStyle=illumColor(cr,cg,cb,descAlpha*0.7);ctx.fillText(ev.sub,px,descY+16);
-
-    if(isHov){for(var j=0;j<3;j++){var angle=(j/3)*Math.PI*2+time;var sLen=beadR*2.5;var sx=px+Math.cos(angle)*sLen;var sy=py+bob+Math.sin(angle)*sLen;ctx.beginPath();ctx.setLineDash([3,3]);ctx.moveTo(px,py+bob);ctx.lineTo(sx,sy);ctx.strokeStyle=illumColor(cr,cg,cb,0.3);ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);ctx.beginPath();ctx.arc(sx,sy,4,0,Math.PI*2);ctx.fillStyle=illumColor(cr,cg,cb,0.4);ctx.fill();}}
+  var strand1Points = [], strand2Points = [];
+  for (var i = 0; i <= helixSteps; i++) {
+    var t = i / helixSteps;
+    var y = helixTop + t * helixHeight;
+    var angle = t * helixTurns * Math.PI * 2 + time * 0.3;
+    var x1 = helixCenterX + Math.cos(angle) * helixRadius;
+    var x2 = helixCenterX + Math.cos(angle + Math.PI) * helixRadius;
+    strand1Points.push({x: x1, y: y, angle: angle, depth: Math.sin(angle)});
+    strand2Points.push({x: x2, y: y, angle: angle + Math.PI, depth: Math.sin(angle + Math.PI)});
   }
+
+  // Base pairs (rungs)
+  var basePairInterval = Math.floor(helixSteps / 40);
+  for (var i = 0; i < helixSteps; i += basePairInterval) {
+    var s1 = strand1Points[i], s2 = strand2Points[i];
+    var depth = Math.abs(s1.depth);
+    if (depth > 0.2) {
+      var bpType = (i / basePairInterval) % 4;
+      var bpColors = [[0,212,170],[196,164,74],[68,136,255],[255,68,102]];
+      var complementColors = [1,0,3,2];
+      var midX = (s1.x + s2.x) / 2;
+      ctx.beginPath(); ctx.moveTo(s1.x, s1.y); ctx.lineTo(midX, s1.y);
+      var bc = bpColors[bpType];
+      ctx.strokeStyle = illumColor(bc[0], bc[1], bc[2], 0.35 * depth);
+      ctx.lineWidth = 2; ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(midX, s1.y); ctx.lineTo(s2.x, s2.y);
+      var cc = bpColors[complementColors[bpType]];
+      ctx.strokeStyle = illumColor(cc[0], cc[1], cc[2], 0.35 * depth);
+      ctx.lineWidth = 2; ctx.stroke();
+      var numH = (bpType === 0 || bpType === 1) ? 2 : 3;
+      for (var h = 0; h < numH; h++) {
+        var ht = 0.4 + (h / (numH - 1 || 1)) * 0.2;
+        var hx = s1.x * (1-ht) + s2.x * ht;
+        ctx.beginPath(); ctx.arc(hx, s1.y, 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = illumColor(232, 232, 240, 0.3 * depth); ctx.fill();
+      }
+    }
+  }
+
+  // Backbone strands
+  for (var pass = 0; pass < 2; pass++) {
+    var points = pass === 0 ? strand2Points : strand1Points;
+    ctx.beginPath();
+    for (var i = 0; i < points.length; i++) {
+      if (i === 0) ctx.moveTo(points[i].x, points[i].y);
+      else ctx.lineTo(points[i].x, points[i].y);
+    }
+    var strandDepthAlpha = pass === 0 ? 0.3 : 0.6;
+    ctx.strokeStyle = illumColor(0, 212, 170, strandDepthAlpha);
+    ctx.lineWidth = pass === 0 ? 2 : 2.5; ctx.stroke();
+    for (var i = 0; i < points.length; i += Math.floor(helixSteps / 30)) {
+      ctx.beginPath(); ctx.arc(points[i].x, points[i].y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = illumColor(170, 102, 255, strandDepthAlpha * 0.6); ctx.fill();
+    }
+  }
+
+  // Timeline events as genes
+  timelineHovered = -1;
+  for (var i = 0; i < chainLen; i++) {
+    var ev = TIMELINE_EVENTS[i];
+    var t2 = (i + 0.5) / chainLen;
+    var strandIdx = Math.min(Math.floor(t2 * helixSteps), strand1Points.length - 1);
+    var s1 = strand1Points[strandIdx];
+    var side = (i % 2 === 0) ? 1 : -1;
+    var labelX = helixCenterX + side * (helixRadius + minDim * 0.08);
+    var labelY = s1.y;
+    var cr2 = ev.color[0], cg2 = ev.color[1], cb2 = ev.color[2];
+    var d = dist(mouseX, mouseY, labelX, labelY);
+    var isHov = d < 60;
+    if (isHov) timelineHovered = i;
+
+    ctx.beginPath(); ctx.setLineDash([2, 4]);
+    ctx.moveTo(s1.x, s1.y); ctx.lineTo(labelX, labelY);
+    ctx.strokeStyle = illumColor(cr2, cg2, cb2, isHov ? 0.6 : 0.15);
+    ctx.lineWidth = 1; ctx.stroke(); ctx.setLineDash([]);
+
+    ctx.beginPath(); ctx.arc(s1.x, s1.y, isHov ? 8 : 5, 0, Math.PI * 2);
+    var geneGrad = ctx.createRadialGradient(s1.x, s1.y, 0, s1.x, s1.y, isHov ? 8 : 5);
+    geneGrad.addColorStop(0, illumColor(cr2, cg2, cb2, 0.9));
+    geneGrad.addColorStop(1, illumColor(cr2, cg2, cb2, 0.3));
+    ctx.fillStyle = geneGrad; ctx.fill();
+
+    if (isHov) {
+      var glowG = ctx.createRadialGradient(s1.x, s1.y, 0, s1.x, s1.y, 30);
+      glowG.addColorStop(0, illumColor(cr2, cg2, cb2, 0.3));
+      glowG.addColorStop(1, illumColor(cr2, cg2, cb2, 0));
+      ctx.beginPath(); ctx.arc(s1.x, s1.y, 30, 0, Math.PI * 2);
+      ctx.fillStyle = glowG; ctx.fill();
+    }
+
+    ctx.textAlign = side > 0 ? 'left' : 'right'; ctx.textBaseline = 'middle';
+    var yearStr = ev.year === Math.floor(ev.year) ? ev.year.toString() : '';
+    if (yearStr) {
+      ctx.font = '600 ' + (isHov ? '13' : '10') + 'px "JetBrains Mono", monospace';
+      ctx.fillStyle = illumColor(cr2, cg2, cb2, isHov ? 0.9 : 0.5);
+      ctx.fillText(yearStr, labelX, labelY - 14);
+    }
+    ctx.font = (isHov ? '500 13' : '400 11') + 'px "Space Grotesk", sans-serif';
+    ctx.fillStyle = illumColor(232, 232, 240, isHov ? 1 : 0.6);
+    ctx.fillText(ev.text, labelX, labelY + 2);
+    ctx.font = (isHov ? '400 11' : '400 9') + 'px "Inter", sans-serif';
+    ctx.fillStyle = illumColor(cr2, cg2, cb2, isHov ? 0.7 : 0.35);
+    ctx.fillText(ev.sub, labelX, labelY + 18);
+  }
+
+  // Base pair legend
+  ctx.textAlign = 'center';
+  var legendY = H * 0.88;
+  var legendItems = [{base:'A',comp:'T',bonds:2,c:[0,212,170],cc:[196,164,74]},{base:'G',comp:'C',bonds:3,c:[68,136,255],cc:[255,68,102]}];
+  for (var li = 0; li < legendItems.length; li++) {
+    var lx = CX + (li - 0.5) * 120;
+    var item = legendItems[li];
+    ctx.font = '600 12px "JetBrains Mono", monospace';
+    ctx.fillStyle = illumColor(item.c[0], item.c[1], item.c[2], 0.6);
+    ctx.fillText(item.base, lx - 20, legendY);
+    for (var bd = 0; bd < item.bonds; bd++) {
+      ctx.beginPath(); ctx.arc(lx - 8 + bd * 8, legendY, 1.5, 0, Math.PI * 2);
+      ctx.fillStyle = illumColor(232, 232, 240, 0.3); ctx.fill();
+    }
+    ctx.fillStyle = illumColor(item.cc[0], item.cc[1], item.cc[2], 0.6);
+    ctx.fillText(item.comp, lx + 20, legendY);
+  }
+  ctx.font = '400 8px "JetBrains Mono", monospace';
+  ctx.fillStyle = illumColor(232, 232, 240, 0.2);
+  ctx.fillText('HYDROGEN BONDS', CX, legendY + 14);
+
   ctx.globalAlpha=1;
 }
+
 
 
 // ═══════════════════════════════════════════════
@@ -1448,6 +1952,36 @@ function drawLevel3(alpha) {
   ctx.fillStyle=illumColor(232,232,240,0.7);ctx.fillText('ATOMIC DETAIL',CX,H*0.06);
   ctx.font='400 '+clamp(minDim*0.012,8,12)+'px "JetBrains Mono", monospace';
   ctx.fillStyle=illumColor(0,212,170,0.4);ctx.fillText('TECHNOLOGY STACK  //  ELECTRON CONFIGURATION',CX,H*0.06+20);
+
+  // Molecular bonds between related atoms
+  var BONDS = [
+    [0,1], [0,2], [0,3], [0,4], // Python connects to all frameworks
+    [2,7], [6,7], // LangChain-Anthropic, OpenAI-Anthropic
+    [5,6], // Retell-OpenAI
+    [3,4], // n8n-GHL
+    [1,6], // TensorFlow-OpenAI
+  ];
+  for (var bi = 0; bi < BONDS.length; bi++) {
+    var a1 = ATOMS[BONDS[bi][0]], a2 = ATOMS[BONDS[bi][1]];
+    var bx1 = a1.x*W, by1 = a1.y*H, bx2 = a2.x*W, by2 = a2.y*H;
+    var bondDist = dist(bx1, by1, bx2, by2);
+    // Covalent bond visualization
+    ctx.beginPath();
+    ctx.moveTo(bx1, by1); ctx.lineTo(bx2, by2);
+    ctx.strokeStyle = illumColor(232, 232, 240, 0.04 + 0.02 * Math.sin(time * 0.5 + bi));
+    ctx.lineWidth = 1; ctx.stroke();
+    // Shared electron pair traveling along bond
+    var electronT = (Math.sin(time * 0.8 + bi * 1.3) + 1) / 2;
+    var elX = lerp(bx1, bx2, electronT);
+    var elY = lerp(by1, by2, electronT);
+    ctx.beginPath(); ctx.arc(elX, elY, 2.5, 0, Math.PI * 2);
+    var elGlow = ctx.createRadialGradient(elX, elY, 0, elX, elY, 8);
+    elGlow.addColorStop(0, illumColor(232, 232, 240, 0.4));
+    elGlow.addColorStop(1, illumColor(232, 232, 240, 0));
+    ctx.fillStyle = elGlow; ctx.fill();
+    ctx.beginPath(); ctx.arc(elX, elY, 1.5, 0, Math.PI * 2);
+    ctx.fillStyle = illumColor(232, 232, 240, 0.5); ctx.fill();
+  }
 
   hoveredAtom = null;
   for (var ai=0;ai<ATOMS.length;ai++) {
@@ -1563,13 +2097,61 @@ function drawLevel4(alpha) {
     }
   }
 
-  // Wave function
+  // Wave function (Ψ)
   ctx.beginPath(); ctx.strokeStyle = illumColor(0, 212, 170, 0.08); ctx.lineWidth = 1;
   for (var x = 0; x < W; x += 2) {
     var y = CY + Math.sin(x * 0.02 + time * 0.5) * 30 * Math.sin(x * 0.005 + time * 0.2);
     if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
   }
   ctx.stroke();
+
+  // Electron orbital shapes (s, p, d orbitals as probability clouds)
+  // s-orbital (sphere) top left
+  var orbX = W * 0.15, orbY = H * 0.2;
+  for (var oi = 0; oi < 60; oi++) {
+    var oAngle = rand(0, Math.PI * 2);
+    var oR = rand(0, 35) * Math.pow(rand(0,1), 0.5); // uniform disk
+    var opx = orbX + Math.cos(oAngle) * oR;
+    var opy = orbY + Math.sin(oAngle) * oR;
+    var oDist = oR / 35;
+    ctx.beginPath(); ctx.arc(opx, opy, 1, 0, Math.PI * 2);
+    ctx.fillStyle = illumColor(0, 212, 170, 0.15 * (1 - oDist));
+    ctx.fill();
+  }
+  ctx.font = '400 8px "JetBrains Mono", monospace';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = illumColor(0, 212, 170, 0.15);
+  ctx.fillText('1s', orbX, orbY + 45);
+
+  // p-orbital (dumbbell) top right
+  var pOrbX = W * 0.85, pOrbY = H * 0.18;
+  for (var oi = 0; oi < 80; oi++) {
+    var lobe = oi < 40 ? -1 : 1;
+    var oAngle = rand(0, Math.PI * 2);
+    var oR = rand(0, 28) * Math.pow(rand(0,1), 0.5);
+    var opx = pOrbX + Math.cos(oAngle) * oR * 0.5;
+    var opy = pOrbY + lobe * 30 + Math.sin(oAngle) * oR * 0.7;
+    ctx.beginPath(); ctx.arc(opx, opy, 1, 0, Math.PI * 2);
+    ctx.fillStyle = illumColor(170, 102, 255, 0.12 * (1 - oR/28));
+    ctx.fill();
+  }
+  ctx.fillStyle = illumColor(170, 102, 255, 0.15);
+  ctx.fillText('2p', pOrbX, pOrbY + 70);
+
+  // d-orbital (cloverleaf) bottom area
+  var dOrbX = W * 0.12, dOrbY = H * 0.55;
+  for (var oi = 0; oi < 100; oi++) {
+    var lobeAngle = Math.floor(rand(0, 4)) * Math.PI / 2 + Math.PI / 4;
+    var oR = rand(5, 25) * Math.pow(rand(0,1), 0.5);
+    var spread = rand(-0.3, 0.3);
+    var opx = dOrbX + Math.cos(lobeAngle + spread) * oR;
+    var opy = dOrbY + Math.sin(lobeAngle + spread) * oR;
+    ctx.beginPath(); ctx.arc(opx, opy, 0.8, 0, Math.PI * 2);
+    ctx.fillStyle = illumColor(196, 164, 74, 0.1 * (1 - oR/25));
+    ctx.fill();
+  }
+  ctx.fillStyle = illumColor(196, 164, 74, 0.15);
+  ctx.fillText('3d', dOrbX, dOrbY + 35);
 
   // Equations
   for (var i = 0; i < EQUATIONS.length; i++) {
