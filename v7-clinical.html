@@ -140,17 +140,6 @@ const backLight = new THREE.PointLight(0xff4466, 0.8, 250); backLight.position.s
 const topLight = new THREE.PointLight(0x50dc78, 0.6, 250); topLight.position.set(0, 40, 20); scene.add(topLight);
 const rimTopLight = new THREE.PointLight(0xffffff, 0.5, 300); rimTopLight.position.set(-30, 30, -40); scene.add(rimTopLight);
 
-// Procedural environment map for realistic PBR materials
-const pmremGen = new THREE.PMREMGenerator(renderer);
-const envScene = new THREE.Scene();
-envScene.background = new THREE.Color(0x080c14);
-const envLight1 = new THREE.PointLight(0x50dcc0, 8, 100); envLight1.position.set(10, 10, 10); envScene.add(envLight1);
-const envLight2 = new THREE.PointLight(0x4488ff, 5, 100); envLight2.position.set(-10, 5, -10); envScene.add(envLight2);
-const envLight3 = new THREE.PointLight(0xff4466, 3, 100); envLight3.position.set(0, -10, 5); envScene.add(envLight3);
-envScene.add(new THREE.AmbientLight(0x101828, 1.0));
-const envRT = pmremGen.fromScene(envScene, 0.04);
-scene.environment = envRT.texture;
-
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
 const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 0.8, 0.4, 0.2);
@@ -219,10 +208,9 @@ for (let i = 0; i < 5; i++) { const g = new THREE.Group(); g.position.z = LEVEL_
   cellGeo.computeVertexNormals();
 
   const cellMesh = new THREE.Mesh(cellGeo, new THREE.MeshPhysicalMaterial({
-    color: 0x2a8868, emissive: 0x0a2a1a, emissiveIntensity: 0.15,
-    transparent: true, opacity: 0.22, transmission: 0.6,
-    roughness: 0.2, clearcoat: 1.0, clearcoatRoughness: 0.1, ior: 1.33,
-    thickness: 3.0, side: THREE.DoubleSide, envMapIntensity: 0.3
+    color: 0x1a5848, emissive: 0x30a080, emissiveIntensity: 0.3,
+    transparent: true, opacity: 0.15,
+    roughness: 0.3, side: THREE.DoubleSide
   }));
   g.add(cellMesh);
 
@@ -247,8 +235,8 @@ for (let i = 0; i < 5; i++) { const g = new THREE.Group(); g.position.z = LEVEL_
   }
   nucGeo.computeVertexNormals();
   const nucMesh = new THREE.Mesh(nucGeo, new THREE.MeshPhysicalMaterial({
-    color: 0x4488ff, emissive: 0x2255cc, emissiveIntensity: 0.6,
-    transparent: true, opacity: 0.8, roughness: 0.5, clearcoat: 0.6, side: THREE.DoubleSide
+    color: 0x2244aa, emissive: 0x4488ff, emissiveIntensity: 1.2,
+    transparent: true, opacity: 0.75, roughness: 0.6, side: THREE.DoubleSide
   }));
   g.add(nucMesh);
 
@@ -258,7 +246,7 @@ for (let i = 0; i < 5; i++) { const g = new THREE.Group(); g.position.z = LEVEL_
 
   // Nucleolus
   const nucleolus = new THREE.Mesh(new THREE.SphereGeometry(1.8,24,24), new THREE.MeshPhysicalMaterial({
-    color: 0x6699ff, emissive: 0x3366cc, emissiveIntensity: 0.7, transparent: true, opacity: 0.9, roughness: 0.3, clearcoat: 0.6
+    color: 0x3355aa, emissive: 0x6699ff, emissiveIntensity: 1.5, transparent: true, opacity: 0.9, roughness: 0.4
   }));
   nucleolus.position.set(0.5, 0.8, -0.3); g.add(nucleolus);
 
@@ -285,8 +273,8 @@ for (let i = 0; i < 5; i++) { const g = new THREE.Group(); g.position.z = LEVEL_
   ];
   mitoData.forEach(md => {
     const mm = new THREE.Mesh(new THREE.CapsuleGeometry(1,2,12,16), new THREE.MeshPhysicalMaterial({
-      color: 0xff4466, emissive: 0xcc2244, emissiveIntensity: 0.7,
-      transparent: true, opacity: 0.7, roughness: 0.3, clearcoat: 0.5
+      color: 0xaa2233, emissive: 0xff4466, emissiveIntensity: 1.2,
+      transparent: true, opacity: 0.7, roughness: 0.4
     }));
     mm.position.set(...md.pos); mm.rotation.set(...md.rot); mm.scale.set(...md.s);
     g.add(mm); mitoMeshes.push(mm);
