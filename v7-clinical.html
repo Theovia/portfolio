@@ -336,6 +336,13 @@ function noise3(x, y, z) {
   return Math.sin(x*1.1+z*0.7)*0.5 + Math.sin(y*1.3-x*0.5)*0.3 + Math.sin(z*0.9+y*0.8)*0.2;
 }
 
+// DEBUG TEST — bright cube to verify rendering
+var testGeo = new THREE.BoxGeometry(5, 5, 5);
+var testMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+var testCube = new THREE.Mesh(testGeo, testMat);
+testCube.position.set(0, 0, 0);
+scene.add(testCube);
+
 // ═══════════════════════════════════════
 // LEVEL GROUPS
 // ═══════════════════════════════════════
