@@ -137,7 +137,8 @@ scene.add(new THREE.AmbientLight(0x101828, 0.8));
 const keyLight = new THREE.PointLight(0x50dcc0, 3.0, 400); keyLight.position.set(15, 25, 60); scene.add(keyLight);
 const fillLight = new THREE.PointLight(0x4488ff, 1.5, 350); fillLight.position.set(-25, -15, 50); scene.add(fillLight);
 const backLight = new THREE.PointLight(0xff4466, 0.8, 250); backLight.position.set(0, -20, -40); scene.add(backLight);
-scene.add(new THREE.PointLight(0x50dc78, 0.4, 200).position.set(0, 40, 20) && new THREE.PointLight(0x50dc78, 0.4, 200));
+const topLight = new THREE.PointLight(0x50dc78, 0.6, 250); topLight.position.set(0, 40, 20); scene.add(topLight);
+const rimTopLight = new THREE.PointLight(0xffffff, 0.5, 300); rimTopLight.position.set(-30, 30, -40); scene.add(rimTopLight);
 
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
@@ -207,18 +208,20 @@ for (let i = 0; i < 5; i++) { const g = new THREE.Group(); g.position.z = LEVEL_
   cellGeo.computeVertexNormals();
 
   const cellMesh = new THREE.Mesh(cellGeo, new THREE.MeshPhysicalMaterial({
-    color: 0x1a6858, transparent: true, opacity: 0.12, transmission: 0.85,
-    roughness: 0.15, clearcoat: 1.0, clearcoatRoughness: 0.1, ior: 1.33,
-    thickness: 2.0, side: THREE.DoubleSide, envMapIntensity: 0.3
+    color: 0x2a8868, emissive: 0x0a2a1a, emissiveIntensity: 0.15,
+    transparent: true, opacity: 0.22, transmission: 0.6,
+    roughness: 0.2, clearcoat: 1.0, clearcoatRoughness: 0.1, ior: 1.33,
+    thickness: 3.0, side: THREE.DoubleSide, envMapIntensity: 0.3
   }));
   g.add(cellMesh);
 
   // Very subtle wireframe
-  const wireMesh = new THREE.Mesh(cellGeo.clone(), new THREE.MeshBasicMaterial({ color: 0x50dcc0, transparent: true, opacity: 0.03, wireframe: true }));
+  const wireMesh = new THREE.Mesh(cellGeo.clone(), new THREE.MeshBasicMaterial({ color: 0x50dcc0, transparent: true, opacity: 0.06, wireframe: true }));
   wireMesh.scale.setScalar(1.005); g.add(wireMesh);
 
   // Rim glow
-  g.add(new THREE.Mesh(cellGeo.clone(), new THREE.MeshBasicMaterial({ color: 0x50dcc0, transparent: true, opacity: 0.06, side: THREE.BackSide })).scale.setScalar(1.03) || g.children[g.children.length-1]);
+  const rimMeshInner = new THREE.Mesh(cellGeo.clone(), new THREE.MeshBasicMaterial({ color: 0x50dcc0, transparent: true, opacity: 0.08, side: THREE.BackSide }));
+  rimMeshInner.scale.setScalar(1.03); g.add(rimMeshInner);
   const rimMesh = new THREE.Mesh(cellGeo.clone(), new THREE.MeshBasicMaterial({ color: 0x50dcc0, transparent: true, opacity: 0.06, side: THREE.BackSide }));
   rimMesh.scale.setScalar(1.03); g.add(rimMesh);
 
@@ -233,18 +236,18 @@ for (let i = 0; i < 5; i++) { const g = new THREE.Group(); g.position.z = LEVEL_
   }
   nucGeo.computeVertexNormals();
   const nucMesh = new THREE.Mesh(nucGeo, new THREE.MeshPhysicalMaterial({
-    color: 0x4488ff, emissive: 0x1133aa, emissiveIntensity: 0.6,
-    transparent: true, opacity: 0.7, roughness: 0.3, clearcoat: 0.5, transmission: 0.3, side: THREE.DoubleSide
+    color: 0x3366cc, emissive: 0x112266, emissiveIntensity: 0.35,
+    transparent: true, opacity: 0.75, roughness: 0.4, clearcoat: 0.8, transmission: 0.1, side: THREE.DoubleSide
   }));
   g.add(nucMesh);
 
   // Nucleus glow sprite
-  const nucGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: generateGlowTexture(0x4488ff), transparent: true, opacity: 0.5, blending: THREE.AdditiveBlending, depthWrite: false }));
-  nucGlow.scale.set(24,24,1); g.add(nucGlow);
+  const nucGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: generateGlowTexture(0x4488ff), transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false }));
+  nucGlow.scale.set(16,16,1); g.add(nucGlow);
 
   // Nucleolus
   const nucleolus = new THREE.Mesh(new THREE.SphereGeometry(1.8,24,24), new THREE.MeshPhysicalMaterial({
-    color: 0x6699ff, emissive: 0x3366cc, emissiveIntensity: 0.8, transparent: true, opacity: 0.8, roughness: 0.2
+    color: 0x5588ee, emissive: 0x223388, emissiveIntensity: 0.5, transparent: true, opacity: 0.85, roughness: 0.3, clearcoat: 0.6
   }));
   nucleolus.position.set(0.5, 0.8, -0.3); g.add(nucleolus);
 
