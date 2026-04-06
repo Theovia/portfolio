@@ -1,0 +1,36 @@
+{
+  "name": "portfolio-rebuild",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Theovia/portfolio.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Theovia/portfolio/issues"
+  },
+  "homepage": "https://github.com/Theovia/portfolio#readme",
+  "devDependencies": {
+    "@types/node": "^25.5.2",
+    "@types/three": "^0.183.1",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.3",
+    "vite-plugin-glsl": "^1.6.0"
+  },
+  "dependencies": {
+    "gsap": "^3.14.2",
+    "howler": "^2.2.4",
+    "lenis": "^1.3.21",
+    "postprocessing": "^6.39.0",
+    "three": "^0.183.2"
+  }
+}
