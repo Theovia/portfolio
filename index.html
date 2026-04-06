@@ -53,11 +53,27 @@
       <button class="toolbar-btn" id="screenshot-btn" title="Screenshot">&#x1f4f7;</button>
     </div>
 
+    <div id="channel-bar">
+      <span class="channel-label">CHANNELS</span>
+      <button class="channel-btn active" id="ch-dapi" title="DAPI (405nm) — DNA/Nuclei" data-channel="dapi">
+        <span class="ch-dot dapi"></span>DAPI
+      </button>
+      <button class="channel-btn active" id="ch-gfp" title="GFP (488nm) — Proteins" data-channel="gfp">
+        <span class="ch-dot gfp"></span>GFP
+      </button>
+      <button class="channel-btn active" id="ch-tritc" title="TRITC (561nm) — Membranes" data-channel="tritc">
+        <span class="ch-dot tritc"></span>TRITC
+      </button>
+      <button class="channel-btn" id="ch-bf" title="Brightfield — Transmitted Light" data-channel="bf">
+        <span class="ch-dot bf"></span>BF
+      </button>
+    </div>
+
     <div id="quality-badge"></div>
 
     <div id="mag-display">
-      <span class="mag-label">MAGNIFICATION</span>
-      <span id="mag-value">1x</span>
+      <span class="mag-label">OBJECTIVE</span>
+      <span id="mag-value">4x</span>
       <div id="mag-bar"><div id="mag-bar-fill"></div></div>
     </div>
 
@@ -69,7 +85,8 @@
     <div id="specimen-label">
       SPECIMEN: R. ZHOU<br>
       <em>Homo sapiens artificialis</em><br>
-      <span class="slide-info">SLIDE 001 &mdash; 2026</span>
+      <span class="slide-info">STAINING: Anti-GFP (488nm) / DAPI / Phalloidin-TRITC</span><br>
+      <span class="slide-info">SLIDE 001 &mdash; PREPARED 2026</span>
     </div>
 
     <div id="zoom-steps"></div>

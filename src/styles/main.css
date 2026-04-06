@@ -113,6 +113,45 @@ html, body {
 .toolbar-btn.active { border-color: var(--gold); }
 .toolbar-btn.muted { opacity: 0.4; }
 
+/* ── Channel Bar (Fluorescence) ───────────── */
+#channel-bar {
+  position: absolute; top: 24px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; gap: 6px; align-items: center;
+  z-index: 80;
+}
+.channel-label {
+  font-family: var(--font-mono); font-size: 8px;
+  color: var(--gold-dim); letter-spacing: 0.15em;
+  margin-right: 4px;
+}
+.channel-btn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 3px 8px; border-radius: 3px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(6,6,16,0.7);
+  font-family: var(--font-mono); font-size: 9px;
+  color: rgba(255,255,255,0.3); cursor: pointer;
+  transition: all 0.3s; backdrop-filter: blur(8px);
+  letter-spacing: 0.06em;
+}
+.channel-btn.active { color: rgba(255,255,255,0.9); }
+.channel-btn.active[data-channel="dapi"] { border-color: rgba(100,130,255,0.6); }
+.channel-btn.active[data-channel="gfp"] { border-color: rgba(80,255,120,0.6); }
+.channel-btn.active[data-channel="tritc"] { border-color: rgba(255,80,80,0.6); }
+.channel-btn.active[data-channel="bf"] { border-color: rgba(200,200,200,0.4); }
+.channel-btn:hover { background: rgba(255,255,255,0.05); }
+.ch-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  display: inline-block; opacity: 0.3;
+  transition: opacity 0.3s;
+}
+.channel-btn.active .ch-dot { opacity: 1; }
+.ch-dot.dapi { background: #6488ff; box-shadow: 0 0 4px #6488ff; }
+.ch-dot.gfp { background: #50ff78; box-shadow: 0 0 4px #50ff78; }
+.ch-dot.tritc { background: #ff5050; box-shadow: 0 0 4px #ff5050; }
+.ch-dot.bf { background: #c8c8c8; }
+
 /* ── Quality Badge ────────────────────────── */
 #quality-badge {
   position: absolute; top: 24px; left: 50%;

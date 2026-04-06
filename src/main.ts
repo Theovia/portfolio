@@ -621,6 +621,19 @@ if (themeBtn) {
 document.documentElement.style.transition = 'background 0.5s ease, color 0.5s ease'
 document.body.style.transition = 'background 0.5s ease, color 0.5s ease'
 
+// ── Fluorescence channel toggles ───────────────────────────────
+
+const channelBtns = document.querySelectorAll('.channel-btn')
+channelBtns.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const channel = (btn as HTMLElement).dataset.channel as keyof typeof state.channels
+    if (channel && channel in state.channels) {
+      state.channels[channel] = !state.channels[channel]
+      btn.classList.toggle('active', state.channels[channel])
+    }
+  })
+})
+
 // ── Sound toggle ────────────────────────────────────────────────
 
 const soundBtn = document.getElementById('sound-btn')
@@ -711,20 +724,60 @@ function render(timestamp: number): void {
     // ── Steady state: draw current level at full opacity ──────
     levelDrawers[state.currentLevel](ctx, 1.0)
   } else {
-    // ── Transitioning: crossfade between current and target ──
+    // ── Transitioning: microscope zoom effect ───────────────
+    // Simulates adjusting the microscope objective:
+    // - Outgoing level scales up (zooming in) or down (zooming out) and blurs
+    // - Incoming level emerges from blur into focus
     const rawProgress = state.transitionProgress
     const easedProgress = easeInOutCubic(rawProgress)
+    const zoomingIn = targetLevel > state.currentLevel
 
-    // Draw outgoing level, fading out
-    const outAlpha = 1 - easedProgress
-    if (outAlpha > 0.01) {
+    // Phase 1 (0-0.5): Outgoing level scales and fades
+    // Phase 2 (0.3-1.0): Incoming level scales from small/large and sharpens
+    // Overlap zone (0.3-0.5) creates the "through the lens" feel
+
+    // ── Draw outgoing level with scale ──
+    if (easedProgress < 0.65) {
+      const outProgress = easedProgress / 0.65 // 0→1 within this phase
+      const outAlpha = 1 - outProgress
+      const outScale = zoomingIn
+        ? 1 + outProgress * 1.8  // Zooming in: outgoing gets bigger (we're diving into it)
+        : 1 - outProgress * 0.5  // Zooming out: outgoing shrinks
+
+      ctx.save()
+      ctx.translate(state.cx, state.cy)
+      ctx.scale(outScale, outScale)
+      ctx.translate(-state.cx, -state.cy)
+
+      // Simulate blur by drawing with reduced opacity and slight offset copies
+      if (outProgress > 0.3) {
+        const blurAmount = (outProgress - 0.3) / 0.7
+        ctx.globalAlpha = outAlpha * 0.3
+        const offset = blurAmount * 4
+        ctx.translate(offset, 0); levelDrawers[state.currentLevel](ctx, outAlpha * 0.3); ctx.translate(-offset, 0)
+        ctx.translate(-offset, 0); levelDrawers[state.currentLevel](ctx, outAlpha * 0.3); ctx.translate(offset, 0)
+        ctx.translate(0, offset); levelDrawers[state.currentLevel](ctx, outAlpha * 0.3); ctx.translate(0, -offset)
+        ctx.globalAlpha = 1
+      }
+
       levelDrawers[state.currentLevel](ctx, outAlpha)
+      ctx.restore()
     }
 
-    // Draw incoming level, fading in
-    const inAlpha = easedProgress
-    if (inAlpha > 0.01) {
+    // ── Draw incoming level with scale ──
+    if (easedProgress > 0.25) {
+      const inProgress = (easedProgress - 0.25) / 0.75 // 0→1 within this phase
+      const inAlpha = Math.min(1, inProgress * 1.3)
+      const inScale = zoomingIn
+        ? 0.3 + inProgress * 0.7  // Zooming in: starts small, grows to 1x
+        : 1.5 - inProgress * 0.5  // Zooming out: starts big, shrinks to 1x
+
+      ctx.save()
+      ctx.translate(state.cx, state.cy)
+      ctx.scale(inScale, inScale)
+      ctx.translate(-state.cx, -state.cy)
       levelDrawers[targetLevel](ctx, inAlpha)
+      ctx.restore()
     }
   }
 }

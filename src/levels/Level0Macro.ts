@@ -11,8 +11,23 @@
 import { state } from '../engine/state'
 import { lerp, clamp, rand, fbm, applyMouseForce } from '../utils/math'
 
+// ── Fluorescence channel type ────────────────────────────────────────
+// Each biological structure belongs to a fluorescence channel:
+//   'dapi'  → DNA, nuclei (blue emission ~461nm)
+//   'gfp'   → proteins, cytoskeleton (green emission ~509nm)
+//   'tritc' → membranes, mitochondria (red emission ~573nm)
+//   'bf'    → brightfield (all structures, grayscale)
+//   null    → always visible (text, UI elements)
+type FluoChannel = 'dapi' | 'gfp' | 'tritc' | 'bf' | null
+
+function channelAlpha(channel: FluoChannel): number {
+  if (channel === null) return 1
+  if (state.channels.bf) return 0.6 // brightfield shows everything dimly
+  return state.channels[channel] ? 1 : 0.04 // nearly invisible when channel off
+}
+
 // ── Illumination-aware color helper ──────────────────────────────────
-function illumColor(r: number, g: number, b: number, a: number): string {
+function illumColor(r: number, g: number, b: number, a: number, channel: FluoChannel = null): string {
   let cr = r, cg = g, cb = b, ca = a
   if (state.lightMode) {
     const brightness = (cr + cg + cb) / 3
@@ -27,6 +42,8 @@ function illumColor(r: number, g: number, b: number, a: number): string {
   }
   let f = state.illumination / 100
   if (state.lightMode) f = Math.max(f, 0.7)
+  // Apply fluorescence channel visibility
+  ca *= channelAlpha(channel)
   return `rgba(${Math.round(cr * f)},${Math.round(cg * f)},${Math.round(cb * f)},${ca})`
 }
 
@@ -474,6 +491,76 @@ export function drawLevel0(ctx: CanvasRenderingContext2D, alpha: number): void {
   ctx.fillStyle = illumColor(0, 212, 170, 0.8)
   ctx.letterSpacing = '0.08em'
   ctx.fillText('One engineer. Production systems. AI-native.', CX, CY - minDim * 0.265)
+
+  // ── Fluorescence channel overlays ──────────────────────────────────
+  // Real fluorescence microscopy: each channel adds a colored glow
+  // over the structures it marks. DAPI=nuclei, GFP=cytoskeleton, TRITC=membranes.
+  ctx.globalCompositeOperation = 'screen' // additive blending (like real fluorescence)
+
+  const breathe = 0.7 + 0.3 * Math.sin(t * 0.4)
+
+  // DAPI channel — blue glow over nucleus
+  if (state.channels.dapi) {
+    const dapiGrad = ctx.createRadialGradient(CX, CY, nR * 0.2, CX, CY, nR * 1.4)
+    dapiGrad.addColorStop(0, `rgba(100,130,255,${0.18 * breathe * alpha})`)
+    dapiGrad.addColorStop(0.5, `rgba(80,110,255,${0.08 * alpha})`)
+    dapiGrad.addColorStop(1, 'rgba(80,110,255,0)')
+    ctx.beginPath()
+    ctx.arc(CX, CY, nR * 1.4, 0, Math.PI * 2)
+    ctx.fillStyle = dapiGrad
+    ctx.fill()
+  }
+
+  // GFP channel — green glow along cytoskeleton filaments
+  if (state.channels.gfp) {
+    for (let i = 0; i < 16; i++) {
+      const angle = (i / 16) * Math.PI * 2 + t * 0.02
+      const len = r * (0.4 + 0.3 * Math.sin(i * 2.7 + t * 0.1))
+      const fx = CX + Math.cos(angle) * len
+      const fy = CY + Math.sin(angle) * len
+      const gfpGrad = ctx.createRadialGradient(fx, fy, 0, fx, fy, 8)
+      gfpGrad.addColorStop(0, `rgba(80,255,120,${0.15 * alpha})`)
+      gfpGrad.addColorStop(1, 'rgba(80,255,120,0)')
+      ctx.beginPath()
+      ctx.arc(fx, fy, 8, 0, Math.PI * 2)
+      ctx.fillStyle = gfpGrad
+      ctx.fill()
+    }
+  }
+
+  // TRITC channel — red glow on cell membrane
+  if (state.channels.tritc) {
+    ctx.beginPath()
+    for (let i = 0; i <= segments; i++) {
+      const angle = (i / segments) * Math.PI * 2
+      const deform = membraneDeform(angle, t)
+      const px = CX + Math.cos(angle) * r * deform
+      const py = CY + Math.sin(angle) * r * deform
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py)
+    }
+    ctx.closePath()
+    ctx.strokeStyle = `rgba(255,80,80,${0.25 * breathe * alpha})`
+    ctx.lineWidth = 6
+    ctx.stroke()
+    ctx.strokeStyle = `rgba(255,60,60,${0.1 * alpha})`
+    ctx.lineWidth = 14
+    ctx.stroke()
+    // Red glow on small organelles (mitochondria)
+    for (let i = 0; i < 6; i++) {
+      const ang = (i / 6) * Math.PI * 2 + t * 0.05 + 0.5
+      const ox = CX + Math.cos(ang) * r * 0.55
+      const oy = CY + Math.sin(ang) * r * 0.55
+      const mitGrad = ctx.createRadialGradient(ox, oy, 0, ox, oy, 16)
+      mitGrad.addColorStop(0, `rgba(255,80,80,${0.12 * alpha})`)
+      mitGrad.addColorStop(1, 'rgba(255,80,80,0)')
+      ctx.beginPath()
+      ctx.arc(ox, oy, 16, 0, Math.PI * 2)
+      ctx.fillStyle = mitGrad
+      ctx.fill()
+    }
+  }
+
+  ctx.globalCompositeOperation = 'source-over' // reset blending
 
   ctx.globalAlpha = 1
 }

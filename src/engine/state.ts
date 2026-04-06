@@ -18,6 +18,13 @@ export interface AppState {
   lightMode: boolean
   qualityTier: 'high' | 'medium' | 'low'
   detailPanelOpen: boolean
+  // Fluorescence channels (real microscopy: DAPI=DNA, GFP=proteins, TRITC=membranes)
+  channels: {
+    dapi: boolean   // 405nm excitation, blue emission — marks DNA/nuclei
+    gfp: boolean    // 488nm excitation, green emission — marks proteins/cytoskeleton
+    tritc: boolean  // 561nm excitation, red emission — marks membranes/mitochondria
+    bf: boolean     // Brightfield (transmitted light, grayscale)
+  }
 }
 
 export const state: AppState = {
@@ -38,10 +45,17 @@ export const state: AppState = {
   lightMode: false,
   qualityTier: 'high',
   detailPanelOpen: false,
+  channels: {
+    dapi: true,    // blue — DNA/nuclei ON by default
+    gfp: true,     // green — proteins ON by default
+    tritc: true,   // red — membranes ON by default
+    bf: false,     // brightfield OFF by default
+  },
 }
 
-export const ZOOM_LABELS = ['1x', '10x', '100x', '1000x', '10000x']
-export const SCALE_LABELS = ['500 \u00b5m', '50 \u00b5m', '5 \u00b5m', '500 nm', '50 nm']
+// Real microscope objective magnifications
+export const ZOOM_LABELS = ['4x', '10x', '40x', '100x', '100x oil']
+export const SCALE_LABELS = ['500 \u00b5m', '100 \u00b5m', '25 \u00b5m', '2 \u00b5m', '200 nm']
 export const MAG_FILLS = [5, 25, 50, 75, 100]
 
 // Transition durations decrease as you go deeper (accelerating rhythm)
