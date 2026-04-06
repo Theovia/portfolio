@@ -562,5 +562,14 @@ export function drawLevel0(ctx: CanvasRenderingContext2D, alpha: number): void {
 
   ctx.globalCompositeOperation = 'source-over' // reset blending
 
+  // Central Dogma indicator
+  ctx.save()
+  ctx.textAlign = 'right'
+  ctx.textBaseline = 'middle'
+  ctx.font = '400 9px "JetBrains Mono", monospace'
+  ctx.fillStyle = illumColor(196, 164, 74, 0.3)
+  ctx.fillText('◈ DNA — THE BLUEPRINT', W * 0.97, H * 0.92)
+  ctx.restore()
+
   ctx.globalAlpha = 1
 }

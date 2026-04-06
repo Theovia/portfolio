@@ -674,5 +674,14 @@ export function drawLevel1(ctx: CanvasRenderingContext2D, alpha: number): void {
     ctx.fillText(sublabel, ox, labelY + lines.length * 15 + 4)
   }
 
+  // Central Dogma indicator
+  ctx.save()
+  ctx.textAlign = 'right'
+  ctx.textBaseline = 'middle'
+  ctx.font = '400 9px "JetBrains Mono", monospace'
+  ctx.fillStyle = illumColor(196, 164, 74, 0.3)
+  ctx.fillText('◈ TRANSCRIPTION — SYSTEMS EXPRESSED', W * 0.97, H * 0.92)
+  ctx.restore()
+
   ctx.globalAlpha = 1
 }

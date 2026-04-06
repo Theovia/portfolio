@@ -150,13 +150,15 @@ export const PROJECTS: Project[] = [
         { label: 'DECISIONS', value: '210+' },
         { label: 'TEAM SIZE', value: '1' },
         { label: 'SYSTEMS SHIPPED', value: '4' },
-        { label: 'METHODOLOGY', value: 'AI-native' },
+        { label: 'CATALYTIC EFFICIENCY', value: 'Vmax/Km' },
       ],
       description:
         'Not a project \u2014 the approach. AI-assisted development where Claude is a thinking partner, ' +
         'not a code generator. Every architectural choice documented in numbered decisions (D001-D210+) ' +
         'with problem statement, analysis, solution, and verification. Adversarial QA testing with ' +
-        'P0/P1/P2 classification. One engineer producing output equivalent to a 4-6 person team.',
+        'P0/P1/P2 classification. One engineer producing output equivalent to a 4-6 person team. ' +
+        'Like enzyme kinetics: AI acts as a catalyst \u2014 it doesn\u2019t change what\u2019s possible, ' +
+        'but it dramatically increases the rate at which one engineer reaches Vmax.',
       stack: [
         'Claude Code', 'Decision Logs', 'Adversarial QA',
         'OpenClaw', 'Git', 'Continuous Documentation',

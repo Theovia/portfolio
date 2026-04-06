@@ -705,6 +705,15 @@ export function drawLevel4(ctx: CanvasRenderingContext2D, alpha: number): void {
   // ── Header ─────────────────────────────────────────────────────────
   drawHeader(ctx, W, H, CX, minDim)
 
+  // Central Dogma indicator
+  ctx.save()
+  ctx.textAlign = 'right'
+  ctx.textBaseline = 'middle'
+  ctx.font = '400 9px "JetBrains Mono", monospace'
+  ctx.fillStyle = illumColor(196, 164, 74, 0.3)
+  ctx.fillText('◈ PHENOTYPE — OBSERVABLE FUNCTION', W * 0.97, H * 0.92)
+  ctx.restore()
+
   ctx.restore()
 }
 

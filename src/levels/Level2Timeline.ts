@@ -138,6 +138,15 @@ export function drawLevel2(ctx: CanvasRenderingContext2D, alpha: number): void {
   // ── Base pair legend ────────────────────────────────────────────
   drawLegend(ctx, CX, H, minDim)
 
+  // Central Dogma indicator
+  ctx.save()
+  ctx.textAlign = 'right'
+  ctx.textBaseline = 'middle'
+  ctx.font = '400 9px "JetBrains Mono", monospace'
+  ctx.fillStyle = illumColor(196, 164, 74, 0.3)
+  ctx.fillText('◈ mRNA — EXPERIENCE ENCODED', W * 0.97, H * 0.92)
+  ctx.restore()
+
   ctx.restore()
 }
 
